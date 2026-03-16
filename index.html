@@ -363,10 +363,82 @@
     padding: 6px 14px; cursor: pointer;
     transition: all 0.2s;
   }
-  .btn-detail:hover {
+  /* Form gửi thông tin */
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin: 44px 0 0;
+    box-shadow: 0 4px 24px rgba(181,101,29,0.06);
+  }
+
+  .form-section h2 {
+    font-size: 20px; font-weight: 700;
+    color: #1a3a5c; margin-bottom: 6px;
+  }
+
+  .form-section p {
+    font-size: 14px; color: var(--text-3); margin-bottom: 20px;
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 14px; font-weight: 600;
+    color: var(--text-2); margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
     background: var(--bg2);
-    color: var(--terra);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14.5px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
     border-color: var(--terra);
+    background: var(--surface);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: var(--text-3); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+  .form-submit {
+    width: 100%;
+    background: var(--terra);
+    border: none; border-radius: 50px;
+    color: #fff;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px; font-weight: 700;
+    padding: 14px;
+    cursor: pointer; margin-top: 8px;
+    transition: background 0.2s, transform 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .form-submit:hover { background: var(--terra-dk); transform: scale(1.02); }
+  .form-submit:active { transform: scale(0.98); }
+
+  .form-note {
+    font-size: 12px; color: var(--text-3);
+    text-align: center; margin-top: 10px;
   }
 </style>
 </head>
@@ -481,7 +553,98 @@
     </div>
   </div>
 
-  <div class="contact-block">
+  <div class="form-section">
+    <h2>📋 Gửi thông tin để luận giải</h2>
+    <p>Gửi thông tin để được nhận sự hỗ trợ tư vấn chi tiết — bấm Gửi sẽ chuyển thẳng sang Zalo của Ngọc kèm nội dung của bạn</p>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>1. Họ tên / Nickname</label>
+        <input type="text" id="f_hoten" placeholder="Nguyễn Văn A hoặc nickname">
+      </div>
+      <div class="form-group">
+        <label>2. Giới tính</label>
+        <select id="f_gioitinh">
+          <option value="">-- Chọn --</option>
+          <option>Nam</option>
+          <option>Nữ</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ngày tháng năm sinh (dương lịch)</label>
+        <input type="text" id="f_ngaysinh" placeholder="VD: 15/08/1990">
+      </div>
+      <div class="form-group">
+        <label>Giờ sinh (nếu biết)</label>
+        <input type="text" id="f_giosinh" placeholder="VD: 7h30 sáng">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>3. Tình trạng hôn nhân hiện tại</label>
+      <select id="f_honnhan">
+        <option value="">-- Chọn --</option>
+        <option>Độc thân</option>
+        <option>Đang tìm hiểu</option>
+        <option>Đang có người yêu</option>
+        <option>Đã kết hôn</option>
+        <option>Đã ly hôn</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>4. Công việc hiện tại</option></label>
+      <select id="f_congviec">
+        <option value="">-- Chọn --</option>
+        <option>Làm công / nhân viên</option>
+        <option>Kinh doanh / buôn bán</option>
+        <option>Tự do / freelance</option>
+        <option>Quản lý / lãnh đạo</option>
+        <option>Nghề chuyên môn (bác sĩ, luật sư...)</option>
+        <option>Đang tìm việc</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>5. Vấn đề muốn hỏi rõ nhất</label>
+      <textarea id="f_vande" placeholder="VD: Tôi đang phân vân chuyển công ty, năm nay tài chính có khởi sắc không..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>6. Mốc thời gian muốn xem</label>
+      <select id="f_mocxem">
+        <option value="">-- Chọn --</option>
+        <option>1 năm tới</option>
+        <option>10 năm (đại vận)</option>
+        <option>Trọn đời</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>7. Gói bạn quan tâm</label>
+      <select id="f_goi">
+        <option value="">-- Chọn gói --</option>
+        <option>Gói 01 – Tử Vi Trọn Đời Tổng Quan (999.000đ)</option>
+        <option>Gói 02 – Tử Vi Vận Hạn Trong 1 Năm (500.000đ)</option>
+        <option>Gói 03 – Giải Đáp Vấn Đề Cụ Thể (200.000–350.000đ)</option>
+        <option>Gói Bản Mệnh – Phân Tích Chuyên Sâu (499.000đ)</option>
+        <option>Gói Tình Duyên Trọn Đời (299.000đ)</option>
+        <option>Gói Sức Khỏe (349.000đ)</option>
+        <option>Chưa biết – nhờ Ngọc tư vấn</option>
+      </select>
+    </div>
+
+    <button
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.985-1.406A9.954 9.954 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+      Gửi thông tin qua Zalo
+    </button>
+    <p class="form-note">Sau khi bấm, Zalo sẽ mở ra với nội dung đã điền sẵn · Ngọc phản hồi sớm nhất có thể</p>
+  </div>
+
+</div>
     <h2 class="contact-title">Đặt lịch tư vấn – Tử Vi Mộc Lang</h2>
     <p class="contact-sub">Vui lòng cho biết ngày tháng năm sinh khi nhắn · Phản hồi sớm nhất có thể</p>
     <a href="https://zalo.me/0909794441" class="contact-btn" target="_blank">
@@ -517,7 +680,36 @@
 </div>
 
 <script>
-function openModal(img) {
+function guiZalo() {
+  const hoten     = document.getElementById('f_hoten').value.trim();
+  const gioitinh  = document.getElementById('f_gioitinh').value;
+  const ngaysinh  = document.getElementById('f_ngaysinh').value.trim();
+  const giosinh   = document.getElementById('f_giosinh').value.trim();
+  const honnhan   = document.getElementById('f_honnhan').value;
+  const congviec  = document.getElementById('f_congviec').value;
+  const vande     = document.getElementById('f_vande').value.trim();
+  const mocxem    = document.getElementById('f_mocxem').value;
+  const goi       = document.getElementById('f_goi').value || 'Chưa chọn';
+
+  if (!hoten || !ngaysinh || !honnhan || !congviec || !vande || !mocxem) {
+    alert('Vui lòng điền đầy đủ thông tin trước khi gửi nhé!');
+    return;
+  }
+
+  const noidung = `Xin chào Ngọc! Em muốn đặt lịch xem tử vi, đây là thông tin của em:
+
+1. Họ tên: ${hoten}
+2. Ngày sinh: ${ngaysinh}${giosinh ? ' | Giờ sinh: ' + giosinh : ''} | Giới tính: ${gioitinh || 'Chưa chọn'}
+3. Hôn nhân: ${honnhan}
+4. Công việc: ${congviec}
+5. Vấn đề muốn hỏi: ${vande}
+6. Mốc thời gian: ${mocxem}
+7. Gói quan tâm: ${goi}`;
+
+  const encoded = encodeURIComponent(noidung);
+  window.open('https://zalo.me/0909794441?msg=' + encoded, '_blank');
+}
+</script>
   document.getElementById('modalImg').src = img;
   document.getElementById('modalOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
