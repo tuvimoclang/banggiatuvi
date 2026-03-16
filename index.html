@@ -710,16 +710,10 @@ async function guiZalo() {
   btn.disabled = true;
   btn.textContent = 'Đang gửi...';
 
-  const token = '8788566070:AAHqD9V1Nfbj4R3v3mlUFU9XtAGzIW2dGhU';
-  const chatId = '6424509010';
-  const url = 'https://api.telegram.org/bot' + token + '/sendMessage';
+  const appsUrl = 'https://script.google.com/macros/s/AKfycbzOf_2MRwFcfmvOWZaPfCzyMKjpdIvzIshltOmnjpKf5T0DNmpYpPZJ-5iaIjrVD1Ca/exec';
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({chat_id: chatId, text: noidung})
-    });
+    const res = await fetch(appsUrl + '?text=' + encodeURIComponent(noidung));
     const data = await res.json();
     if (data.ok) {
       btn.textContent = '✅ Đã gửi thành công!';
@@ -731,11 +725,9 @@ async function guiZalo() {
       throw new Error('fail');
     }
   } catch(e) {
-    // Fallback: mở Telegram app
-    window.open('https://t.me/Nhanthongtin_tuvi', '_blank');
     btn.disabled = false;
     btn.textContent = 'Gửi thông tin';
-    alert('Vui lòng nhắn tin trực tiếp cho bot Telegram: @Nhanthongtin_tuvi');
+    alert('Có lỗi, vui lòng thử lại!');
   }
 }
 </script>
