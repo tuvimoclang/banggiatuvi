@@ -680,34 +680,63 @@
 </div>
 
 <script>
-function guiZalo() {
-  const hoten     = document.getElementById('f_hoten').value.trim();
-  const gioitinh  = document.getElementById('f_gioitinh').value;
-  const ngaysinh  = document.getElementById('f_ngaysinh').value.trim();
-  const giosinh   = document.getElementById('f_giosinh').value.trim();
-  const honnhan   = document.getElementById('f_honnhan').value;
-  const congviec  = document.getElementById('f_congviec').value;
-  const vande     = document.getElementById('f_vande').value.trim();
-  const mocxem    = document.getElementById('f_mocxem').value;
-  const goi       = document.getElementById('f_goi').value || 'Chưa chọn';
+async function guiZalo() {
+  const hoten    = document.getElementById('f_hoten').value.trim();
+  const gioitinh = document.getElementById('f_gioitinh').value;
+  const ngaysinh = document.getElementById('f_ngaysinh').value.trim();
+  const giosinh  = document.getElementById('f_giosinh').value.trim();
+  const honnhan  = document.getElementById('f_honnhan').value;
+  const congviec = document.getElementById('f_congviec').value;
+  const vande    = document.getElementById('f_vande').value.trim();
+  const mocxem   = document.getElementById('f_mocxem').value;
+  const goi      = document.getElementById('f_goi').value || 'Chưa chọn';
 
   if (!hoten || !ngaysinh || !honnhan || !congviec || !vande || !mocxem) {
     alert('Vui lòng điền đầy đủ thông tin trước khi gửi nhé!');
     return;
   }
 
-  const noidung = `Xin chào Ngọc! Em muốn đặt lịch xem tử vi, đây là thông tin của em:
+  const noidung = `🔮 KHÁCH MỚI - TỬ VI MỘC LANG
 
 1. Họ tên: ${hoten}
-2. Ngày sinh: ${ngaysinh}${giosinh ? ' | Giờ sinh: ' + giosinh : ''} | Giới tính: ${gioitinh || 'Chưa chọn'}
+2. Ngày sinh: ${ngaysinh}${giosinh ? ' | Giờ: ' + giosinh : ''} | Giới tính: ${gioitinh || 'Chưa chọn'}
 3. Hôn nhân: ${honnhan}
 4. Công việc: ${congviec}
-5. Vấn đề muốn hỏi: ${vande}
-6. Mốc thời gian: ${mocxem}
+5. Vấn đề: ${vande}
+6. Mốc xem: ${mocxem}
 7. Gói quan tâm: ${goi}`;
 
-  const encoded = encodeURIComponent(noidung);
-  window.open('https://zalo.me/0909794441?msg=' + encoded, '_blank');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Đang gửi...';
+
+  const token = '8788566070:AAHqD9V1Nfbj4R3v3mlUFU9XtAGzIW2dGhU';
+  const chatId = '6424509010';
+  const url = 'https://api.telegram.org/bot' + token + '/sendMessage';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chat_id: chatId, text: noidung})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      btn.textContent = '✅ Đã gửi thành công!';
+      btn.style.background = '#2d8a4e';
+      ['f_hoten','f_ngaysinh','f_giosinh','f_vande'].forEach(id => document.getElementById(id).value = '');
+      ['f_gioitinh','f_honnhan','f_congviec','f_mocxem','f_goi'].forEach(id => document.getElementById(id).value = '');
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'Gửi thông tin'; btn.style.background = ''; }, 4000);
+    } else {
+      throw new Error('fail');
+    }
+  } catch(e) {
+    // Fallback: mở Telegram app
+    window.open('https://t.me/Nhanthongtin_tuvi', '_blank');
+    btn.disabled = false;
+    btn.textContent = 'Gửi thông tin';
+    alert('Vui lòng nhắn tin trực tiếp cho bot Telegram: @Nhanthongtin_tuvi');
+  }
 }
 </script>
   document.getElementById('modalImg').src = img;
