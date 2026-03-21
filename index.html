@@ -606,8 +606,21 @@
     </div>
 
     <div class="form-group">
-      <label>Số điện thoại / Zalo</label>
-      <input type="text" id="f_phone" placeholder="VD: 0909794441">
+      <label>Xu hướng tính dục</label>
+      <select id="f_xhuong">
+        <option value="">-- Chọn --</option>
+        <option>Dị tính (thích người khác giới)</option>
+        <option>Đồng tính nam (Gay)</option>
+        <option>Đồng tính nữ (Lesbian)</option>
+        <option>Song tính (Bisexual)</option>
+        <option>Vô tính (Asexual)</option>
+        <option>Không muốn tiết lộ</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Số điện thoại Zalo</label>
+      <input type="text" id="f_phone" placeholder="VD: 0909 794 441">
     </div>
 
     <div class="form-row">
@@ -643,7 +656,13 @@
         <option>Quản lý / lãnh đạo</option>
         <option>Nghề chuyên môn (bác sĩ, luật sư...)</option>
         <option>Đang tìm việc</option>
+        <option>Đang muốn chuyển việc</option>
       </select>
+    </div>
+
+    <div class="form-group">
+      <label>Chuyên môn trong công việc</label>
+      <input type="text" id="f_chuyenmon" placeholder="VD: Kế toán, Lập trình, Bán hàng, Giáo viên...">
     </div>
 
     <div class="form-group">
@@ -662,17 +681,16 @@
     </div>
 
     <div class="form-group">
-      <label>7. Gói bạn quan tâm</label>
-      <select id="f_goi">
-        <option value="">-- Chọn gói --</option>
-        <option>Gói 01 – Tử Vi Trọn Đời Tổng Quan (999.000đ)</option>
-        <option>Gói 02 – Tử Vi Vận Hạn Trong 1 Năm (500.000đ)</option>
-        <option>Gói 03 – Giải Đáp Vấn Đề Cụ Thể (200.000–350.000đ)</option>
-        <option>Gói Bản Mệnh – Phân Tích Chuyên Sâu (499.000đ)</option>
-        <option>Gói Tình Duyên Trọn Đời (299.000đ)</option>
-        <option>Gói Sức Khỏe (349.000đ)</option>
-        <option>Chưa biết – nhờ Ngọc tư vấn</option>
-      </select>
+      <label>7. Gói bạn quan tâm <span style="font-weight:400;font-size:12px;color:var(--text-3)">(có thể chọn nhiều)</span></label>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói 01 – Tử Vi Trọn Đời Tổng Quan (999.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói 01 – Tử Vi Trọn Đời Tổng Quan (999.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói 02 – Tử Vi Vận Hạn Trong 1 Năm (500.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói 02 – Tử Vi Vận Hạn Trong 1 Năm (500.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói 03 – Giải Đáp Vấn Đề Cụ Thể (200.000–350.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói 03 – Giải Đáp Vấn Đề Cụ Thể (200.000–350.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói Bản Mệnh – Phân Tích Chuyên Sâu (499.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói Bản Mệnh – Phân Tích Chuyên Sâu (499.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói Tình Duyên Trọn Đời (299.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói Tình Duyên Trọn Đời (299.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Gói Sức Khỏe (349.000đ)" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Gói Sức Khỏe (349.000đ)</label>
+        <label style="display:flex;align-items:flex-start;gap:10px;font-weight:400;font-size:14.5px;color:var(--text-2);cursor:pointer;line-height:1.5;"><input type="checkbox" value="Chưa biết – nhờ Ngọc tư vấn" class="goi-check" style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#B5651D;cursor:pointer;appearance:checkbox;-webkit-appearance:checkbox;"> Chưa biết – nhờ Ngọc tư vấn</label>
+      </div>
     </div>
 
     <button class="form-submit" id="submitBtn" onclick="guiZalo()">
@@ -732,7 +750,9 @@ async function guiZalo() {
   const congviec = document.getElementById('f_congviec').value;
   const vande    = document.getElementById('f_vande').value.trim();
   const mocxem   = document.getElementById('f_mocxem').value;
-  const goi      = document.getElementById('f_goi').value || 'Chưa chọn';
+  const goiChecked = Array.from(document.querySelectorAll('.goi-check:checked')).map(c => c.value);
+  const goi = goiChecked.length > 0 ? goiChecked.join(', ') : 'Chưa chọn';
+  const chuyenmon = document.getElementById('f_chuyenmon').value.trim();
   const phone    = document.getElementById('f_phone').value.trim();
 
   if (!hoten || !phone || phone === 'Chưa cung cấp' || !ngaysinh || !honnhan || !congviec || !vande || !mocxem) {
@@ -744,12 +764,13 @@ async function guiZalo() {
 
 1. Họ tên: ${hoten}
 📱 Zalo/SĐT: ${phone || 'Chưa cung cấp'}
-2. Ngày sinh: ${ngaysinh}${giosinh ? ' | Giờ: ' + giosinh : ''} | Giới tính: ${gioitinh || 'Chưa chọn'}
-3. Hôn nhân: ${honnhan}
-4. Công việc: ${congviec}
-5. Vấn đề: ${vande}
-6. Mốc xem: ${mocxem}
-7. Gói quan tâm: ${goi}`;
+2. Xu hướng tính dục: ${document.getElementById('f_xhuong').value || 'Không tiết lộ'}
+3. Ngày sinh: ${ngaysinh}${giosinh ? ' | Giờ: ' + giosinh : ''} | Giới tính: ${gioitinh || 'Chưa chọn'}
+4. Hôn nhân: ${honnhan}
+5. Công việc: ${congviec}${chuyenmon ? ' | Chuyên môn: ' + chuyenmon : ''}
+6. Vấn đề: ${vande}
+7. Mốc xem: ${mocxem}
+8. Gói quan tâm: ${goi}`;
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -763,8 +784,9 @@ async function guiZalo() {
     if (data.ok) {
       btn.textContent = '✅ Đã gửi thành công!';
       btn.style.background = '#2d8a4e';
-      ['f_hoten','f_ngaysinh','f_giosinh','f_vande','f_phone'].forEach(id => document.getElementById(id).value = '');
-      ['f_gioitinh','f_honnhan','f_congviec','f_mocxem','f_goi'].forEach(id => document.getElementById(id).value = '');
+      ['f_hoten','f_ngaysinh','f_giosinh','f_vande','f_phone','f_chuyenmon'].forEach(id => document.getElementById(id).value = '');
+      ['f_gioitinh','f_honnhan','f_congviec','f_mocxem'].forEach(id => document.getElementById(id).value = '');
+      document.querySelectorAll('.goi-check').forEach(c => c.checked = false);
       setTimeout(() => { btn.disabled = false; btn.textContent = 'Gửi thông tin'; btn.style.background = ''; }, 4000);
     } else {
       throw new Error('fail');
