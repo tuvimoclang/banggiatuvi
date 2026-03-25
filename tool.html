@@ -51,6 +51,9 @@
 // ============================================================
 const SUPABASE_URL = 'https://zqsddznsbhhekoilbtbh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxc2Rkem5zYmhoZWtvaWxidGJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0Mjg0MTQsImV4cCI6MjA5MDAwNDQxNH0.gXljzRdCJHRuzxD2Jp6pb3VCK4sYriL5NCbqvffgDdU';
+
+// ⚙️ Backend URL - Render deployment
+const API_URL = 'https://tuvimoclang.onrender.com';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -116,6 +119,8 @@ function updateUI() {
   const btnAuth = document.getElementById('btnAuth');
   const btnLogout = document.getElementById('btnLogout');
   const userInfo = document.getElementById('userInfo');
+  const resultDiv = document.getElementById('result');
+  const premiumBar = document.getElementById('premiumBar');
 
   if (currentUser) {
     if (btnAuth) btnAuth.style.display = 'none';
@@ -123,33 +128,69 @@ function updateUI() {
     if (userInfo) {
       userInfo.style.display = 'inline-flex';
       userInfo.innerHTML = isPremium
-        ? `👑 ${currentUser.email.split('@')[0]}`
+        ? `👑 ${currentUser.email.split('@')[0]} <span style="font-size:.7rem;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:4px;padding:1px 5px;margin-left:4px">Premium</span>`
         : `👤 ${currentUser.email.split('@')[0]}`;
     }
+    if (premiumBar) premiumBar.style.display = isPremium ? 'none' : 'flex';
   } else {
     if (btnAuth) btnAuth.style.display = 'inline-flex';
     if (btnLogout) btnLogout.style.display = 'none';
     if (userInfo) userInfo.style.display = 'none';
+    if (resultDiv) resultDiv.style.display = 'none';
+    if (premiumBar) premiumBar.style.display = 'none';
   }
 
-  // Ẩn/hiện premium buttons
   PREMIUM_FEATURES.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (isPremium) {
-      el.classList.remove('locked');
-      el.title = '';
-    } else {
-      el.classList.add('locked');
-      el.title = '🔒 Tính năng Premium';
-    }
+    if (isPremium) { el.classList.remove('locked'); el.title = ''; }
+    else { el.classList.add('locked'); el.title = '🔒 Tính năng Premium'; }
   });
 }
 
-function checkPremium(fn) {
+function checkPremium() {
   if (!currentUser) { showAuthModal('login'); return false; }
   if (!isPremium) { showUpgradeModal(); return false; }
   return true;
+}
+
+// ============================================================
+// ACTIVATION CODE
+// ============================================================
+function showActivationModal() {
+  if (!currentUser) { showAuthModal('login'); return; }
+  document.getElementById('activationModal').style.display = 'flex';
+  document.getElementById('activationCode').value = '';
+  document.getElementById('activationMsg').textContent = '';
+}
+function hideActivationModal() {
+  document.getElementById('activationModal').style.display = 'none';
+}
+async function submitActivationCode() {
+  const code = document.getElementById('activationCode').value.trim().toUpperCase();
+  const msg = document.getElementById('activationMsg');
+  if (!code) { msg.style.color='#f87171'; msg.textContent='Vui lòng nhập mã kích hoạt'; return; }
+  const btn = document.getElementById('activationBtn');
+  btn.disabled = true;
+  msg.style.color='#c9a84c'; msg.textContent='⏳ Đang kiểm tra mã...';
+  try {
+    const { data, error } = await sb.rpc('use_activation_code', {
+      p_code: code, p_user_id: currentUser.id
+    });
+    if (error) throw error;
+    if (data.success) {
+      const until = new Date(data.premium_until);
+      const planNames = {'1month':'1 tháng','3month':'3 tháng','6month':'6 tháng'};
+      msg.style.color='#52b788';
+      msg.textContent=`✅ Kích hoạt thành công! Gói ${planNames[data.plan]||data.plan} — hết hạn ${until.toLocaleDateString('vi-VN')}`;
+      isPremium = true; updateUI();
+      setTimeout(hideActivationModal, 2500);
+    } else {
+      msg.style.color='#f87171'; msg.textContent='❌ '+(data.error||'Mã không hợp lệ');
+    }
+  } catch(e) {
+    msg.style.color='#f87171'; msg.textContent='❌ Có lỗi xảy ra, thử lại sau';
+  } finally { btn.disabled=false; }
 }
 
 // ============================================================
@@ -218,6 +259,13 @@ function showUpgradeModal() {
 
 function hideUpgradeModal() {
   document.getElementById('upgradeModal').style.display = 'none';
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('#upgradeModal [onclick*="selectPlan"]').forEach(e => {
+    e.style.borderColor = '#c9a84c44';
+  });
+  el.style.borderColor = '#f0c040';
 }
 
 window.addEventListener('DOMContentLoaded', initAuth);
@@ -2405,7 +2453,15 @@ body:not(.light-mode) #traTuongPanel .tt-item{color:#3a2000}
       <div style="font-size:.75rem;color:var(--text3);margin-top:4px">Mặc định: năm hiện tại. Đổi để xem hạn năm khác.</div>
     </div>
   </div>
-  <button class="btn-submit" onclick="lapLaSo()">⭐ LẬP LÁ SỐ</button>
+  <button class="btn-submit" onclick="if(!currentUser){showAuthModal('login');return;}lapLaSo()">⭐ LẬP LÁ SỐ</button>
+</div>
+<!-- Thanh kích hoạt premium (hiện khi đăng nhập nhưng chưa premium) -->
+<div id="premiumBar" style="display:none;align-items:center;justify-content:center;gap:12px;padding:12px 20px;background:linear-gradient(90deg,#1a0d00,#2a1800);border:1px solid #c9a84c66;border-radius:10px;margin:12px 0;flex-wrap:wrap">
+  <span style="font-size:.95rem;color:#f0c040;font-weight:700">🔒 Mở khóa đầy đủ tính năng Tử Vi Mộc Lang</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="showActivationModal()" style="padding:8px 18px;background:#c9a84c;border:none;border-radius:6px;color:#000;font-weight:900;cursor:pointer;font-size:.9rem">🔑 Nhập mã kích hoạt</button>
+    <button onclick="showUpgradeModal()" style="padding:8px 18px;background:transparent;border:1px solid #c9a84c;border-radius:6px;color:#c9a84c;font-weight:700;cursor:pointer;font-size:.9rem">💳 Mua gói</button>
+  </div>
 </div>
 <div id="loader"><div class="spinner"></div>Đang tính toán...</div>
 <div id="errorBox" class="error-box" style="display:none"></div>
@@ -4196,7 +4252,7 @@ async function lapLaSo(){
   const ns=`${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
   const btn=document.querySelector('.btn-submit');btn.disabled=true;
   document.getElementById('loader').style.display='block';document.getElementById('result').style.display='none';document.getElementById('errorBox').style.display='none';
-  try{const res=await fetch('http://localhost:5000/api/lap-laso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hoTen:document.getElementById('hoTen').value,gioiTinh:document.getElementById('gioiTinh').value,lichLoai:document.getElementById('lichLoai').value,ngaySinh:ns,gioSinh:document.getElementById('gioSinh').value,muiGio:parseFloat(document.getElementById('muiGio').value),thanhPho:curCity?.n||'',quocGia:document.getElementById('quocGia').value,thangNhuan:document.getElementById('lichLoai').value==='am'&&document.getElementById('thangNhuan').checked})});
+  try{const res=await fetch(`${API_URL}/api/lap-laso`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hoTen:document.getElementById('hoTen').value,gioiTinh:document.getElementById('gioiTinh').value,lichLoai:document.getElementById('lichLoai').value,ngaySinh:ns,gioSinh:document.getElementById('gioSinh').value,muiGio:parseFloat(document.getElementById('muiGio').value),thanhPho:curCity?.n||'',quocGia:document.getElementById('quocGia').value,thangNhuan:document.getElementById('lichLoai').value==='am'&&document.getElementById('thangNhuan').checked})});
   const data=await res.json();document.getElementById('loader').style.display='none';btn.disabled=false;
   if(data.status!=='success'){document.getElementById('errorBox').textContent='⚠️ '+data.message;document.getElementById('errorBox').style.display='block';return;}
   render(data);}catch(e){document.getElementById('loader').style.display='none';btn.disabled=false;document.getElementById('errorBox').textContent='❌ Không kết nối server. Hãy chạy: python app.py';document.getElementById('errorBox').style.display='block';}
@@ -9905,22 +9961,71 @@ function doTraTuong(){
   </div>
 </div>
 
+<!-- ── Modal Kích hoạt mã ── -->
+<div id="activationModal" class="modal-overlay" onclick="if(event.target===this)hideActivationModal()">
+  <div class="modal-box" style="position:relative;max-width:400px">
+    <button class="modal-close" onclick="hideActivationModal()">✕</button>
+    <div class="modal-title">🔑 Nhập Mã Kích Hoạt</div>
+    <div style="font-size:.85rem;color:var(--text3,#888);text-align:center;margin-bottom:16px">
+      Nhập mã sau khi chuyển khoản để mở khóa tính năng Premium
+    </div>
+    <div class="auth-field">
+      <label>Mã kích hoạt</label>
+      <input type="text" id="activationCode" placeholder="VD: TUVI-1M-0001" 
+        style="text-transform:uppercase;letter-spacing:1px;font-weight:700;font-size:1rem"
+        onkeydown="if(event.key==='Enter')submitActivationCode()">
+    </div>
+    <button class="auth-submit" id="activationBtn" onclick="submitActivationCode()">✅ Kích hoạt ngay</button>
+    <div id="activationMsg" style="min-height:20px;font-size:.88rem;text-align:center;margin-top:10px"></div>
+    <div style="margin-top:16px;padding:12px;background:#0d0900;border-radius:8px;font-size:.82rem;color:var(--text3,#888)">
+      💬 Chưa có mã? Nhắn Zalo <a href="https://zalo.me/0909794441" target="_blank" style="color:#c9a84c">0909794441</a> để nhận mã sau khi chuyển khoản
+    </div>
+  </div>
+</div>
+
 <!-- ── Modal Nâng cấp Premium ── -->
 <div id="upgradeModal" class="modal-overlay" onclick="if(event.target===this)hideUpgradeModal()">
-  <div class="upgrade-box">
+  <div class="upgrade-box" style="position:relative;max-width:440px">
+    <button class="modal-close" onclick="hideUpgradeModal()">✕</button>
     <div class="upgrade-icon">👑</div>
-    <div class="upgrade-title">Tính năng Premium</div>
+    <div class="upgrade-title">Tử Vi Mộc Lang Premium</div>
     <div class="upgrade-desc">
-      Mở khóa toàn bộ công cụ luận giải:<br>
       ✅ Nhập Quái & An Thiên Can<br>
       ✅ Lập Cực — Thể Dụng<br>
       ✅ Tra Tượng 672 Phi Hóa<br>
       ✅ Luận Giải AI tự động<br>
       ✅ Lưu & quản lý lá số
     </div>
-    <div class="upgrade-price">299.000đ</div>
-    <div class="upgrade-period">/ tháng · Hủy bất kỳ lúc nào</div>
-    <a class="upgrade-btn" href="https://zalo.me/0909794441" target="_blank">💬 Liên hệ Zalo để đăng ký</a>
+    <!-- Bảng giá -->
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c44;border-radius:10px;text-align:center;cursor:pointer" onclick="selectPlan(this,'1month')">
+        <div style="font-size:.8rem;color:#888;margin-bottom:4px">1 THÁNG</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">299k</div>
+      </div>
+      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c;border-radius:10px;text-align:center;cursor:pointer;position:relative" onclick="selectPlan(this,'3month')">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#c9a84c;color:#000;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:10px">PHỔ BIẾN</div>
+        <div style="font-size:.8rem;color:#888;margin-bottom:4px">3 THÁNG</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">799k</div>
+        <div style="font-size:.72rem;color:#52b788">~266k/tháng</div>
+      </div>
+      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c44;border-radius:10px;text-align:center;cursor:pointer" onclick="selectPlan(this,'6month')">
+        <div style="font-size:.8rem;color:#888;margin-bottom:4px">6 THÁNG</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">1,499k</div>
+        <div style="font-size:.72rem;color:#52b788">~250k/tháng</div>
+      </div>
+    </div>
+    <!-- Thanh toán -->
+    <div style="background:#0d0900;border-radius:8px;padding:14px;margin-bottom:14px;font-size:.88rem;color:var(--text2,#b8a88a);line-height:1.8">
+      <b style="color:#f0c040">Chuyển khoản:</b><br>
+      🏦 Vietcombank · STK: <b style="color:#f0c040">1234567890</b><br>
+      👤 NGUYEN VAN A<br>
+      📝 Nội dung: <b style="color:#f0c040">[email] premium [gói]</b>
+    </div>
+    <a class="upgrade-btn" href="https://zalo.me/0909794441" target="_blank">💬 Nhắn Zalo nhận mã ngay</a>
+    <div style="margin-top:10px;font-size:.8rem;color:#888">
+      Sau khi chuyển khoản → nhận mã qua Zalo → 
+      <span style="color:#c9a84c;cursor:pointer" onclick="hideUpgradeModal();showActivationModal()">nhập mã tại đây</span>
+    </div>
     <span class="upgrade-cancel" onclick="hideUpgradeModal()">Để sau</span>
   </div>
 </div>
