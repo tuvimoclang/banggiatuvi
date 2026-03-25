@@ -4420,6 +4420,8 @@ function render(d){
 
   h+=`</div></div></div></div>`;
   const el=document.getElementById('result');el.innerHTML=h;el.style.display='block';
+  // Cập nhật lại trạng thái premium sau khi render
+  updateUI();
 
   cachedCungData=d;theCungIdx=null;skActive=false;const oldC=document.getElementById('drawCanvas');if(oldC)oldC.remove();skCanvas=null;skHistory=[];skDrawing=false;
   selectedCungForLuan=-1;
