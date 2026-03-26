@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🔑 Tử Vi Mộc Lang — Quản Lý Mã</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --gold:#b8860b;
+  --gold2:#8b6914;
+  --bg:#faf7f0;
+  --bg2:#ffffff;
+  --bg3:#fef9ec;
+  --bg4:#fdf3d0;
+  --text:#2c1f00;
+  --text2:#5a3e00;
+  --text3:#a07830;
+  --red:#dc2626;
+  --green:#15803d;
+  --purple:#7c3aed;
+}
+
+body{
+  background:#faf7f0;
+  color:var(--text);
+  font-family:'Be Vietnam Pro',sans-serif;
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 10%, #fdf3d0 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 90%, #fef9ec 0%, transparent 50%);
+}
+
+header{
+  border-bottom:1.5px solid #e8d49a;
+  padding:20px 32px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:linear-gradient(90deg,#fdf3d0,#faf7f0);
+  box-shadow:0 2px 8px #c9a84c18;
+}
+header h1{
+  font-family:'Playfair Display',serif;
+  font-size:1.3rem;
+  font-weight:900;
+  color:#7a4f00;
+  letter-spacing:2px;
+}
+header p{font-size:.82rem;color:#a07830;font-style:italic;margin-top:2px}
+.hdr-icon{font-size:2rem}
+
+.main{max-width:1000px;margin:0 auto;padding:28px 20px;display:grid;gap:20px}
+
+/* ── Cards ── */
+.card{
+  background:#ffffff;
+  border:1px solid #e8d49a;
+  border-radius:12px;
+  padding:24px 28px;
+  box-shadow:0 2px 8px #c9a84c0d;
+}
+.card-title{
+  font-family:'Playfair Display',serif;
+  font-size:1rem;
+  font-weight:700;
+  color:var(--gold);
+  letter-spacing:1px;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* ── Form ── */
+.form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+.form-group label{font-size:.78rem;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.form-group select,
+.form-group input{
+  padding:9px 12px;
+  background:#faf7f0;
+  border:1px solid #c9a84c33;
+  border-radius:6px;
+  color:var(--text);
+  font-size:.95rem;
+  font-family:'Be Vietnam Pro',sans-serif;
+  outline:none;
+  width:100%;
+}
+.form-group select:focus,
+.form-group input:focus{border-color:var(--gold)}
+
+.btn{
+  padding:10px 22px;
+  border:none;
+  border-radius:7px;
+  font-family:'Playfair Display',serif;
+  font-weight:700;
+  font-size:.88rem;
+  letter-spacing:.5px;
+  cursor:pointer;
+  transition:.15s;
+  white-space:nowrap;
+}
+.btn-gold{background:linear-gradient(90deg,#c9a84c,#e0bc60);color:#3a2000;font-weight:800;box-shadow:0 2px 8px #c9a84c33}
+.btn-gold:hover{background:linear-gradient(90deg,#b8973d,#c9a84c)}
+.btn-outline{background:transparent;border:1.5px solid #c9a84c;color:#7a4f00}
+.btn-outline:hover{background:#fef9ec}
+.btn-red{background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5}
+.btn-red:hover{background:#fee2e2}
+.btn-green{background:#f0fdf4;color:#15803d;border:1.5px solid #86efac}
+.btn-green:hover{background:#dcfce7}
+.btn-sm{padding:6px 14px;font-size:.78rem}
+
+/* ── Generated code display ── */
+.code-output{
+  background:linear-gradient(135deg,#fef9ec,#fdf3d0);
+  border:2px solid #d4a843;
+  border-radius:8px;
+  padding:16px 20px;
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;
+  font-weight:700;
+  color:#7a4f00;
+  letter-spacing:2px;
+  text-align:center;
+  margin:14px 0 10px;
+  cursor:pointer;
+  position:relative;
+  transition:.15s;
+  box-shadow:0 2px 8px #c9a84c22;
+}
+.code-output:hover{background:linear-gradient(135deg,#fdf3d0,#f5e8a0);transform:translateY(-1px)}
+.copy-hint{font-size:.75rem;color:#a07830;text-align:center;font-style:italic;margin-bottom:14px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+thead th{
+  font-family:'Playfair Display',serif;
+  font-size:.72rem;
+  font-weight:700;
+  color:#a07830;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:8px 10px;
+  border-bottom:2px solid #e8d49a;
+  text-align:left;
+  white-space:nowrap;
+  background:#fef9ec;
+}
+tbody tr{border-bottom:1px solid #f0e8c8;transition:.1s}
+tbody tr:hover{background:#fef9ec}
+tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
+.code-cell{
+  font-family:'Playfair Display',serif;
+  font-weight:700;
+  color:#b8860b;
+  letter-spacing:1px;
+  cursor:pointer;
+  font-size:.9rem;
+}
+.code-cell:hover{color:#7a4f00}
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:20px;
+  font-size:.72rem;
+  font-weight:700;
+  font-family:'Playfair Display',serif;
+  letter-spacing:.5px;
+}
+.badge-active{background:#f0fdf4;color:#15803d;border:1px solid #86efac}
+.badge-used{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
+.badge-expired{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5}
+
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.stat-box{
+  background:#ffffff;
+  border:1.5px solid #e8d49a;
+  border-radius:8px;
+  padding:14px 16px;
+  text-align:center;
+  box-shadow:0 2px 6px #c9a84c0d;
+}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#7a4f00}
+.stat-label{font-size:.72rem;color:#a07830;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Secret key setup ── */
+.key-setup{
+  background:linear-gradient(135deg,#1a0d00,#120e00);
+  border:1.5px solid var(--gold);
+  border-radius:12px;
+  padding:28px;
+  text-align:center;
+}
+.key-setup h2{font-family:'Playfair Display',serif;color:var(--gold2);font-size:1.1rem;margin-bottom:10px}
+.key-setup p{color:var(--text2);font-size:.9rem;line-height:1.7;margin-bottom:18px}
+.key-input-row{display:flex;gap:10px;max-width:500px;margin:0 auto}
+.key-input-row input{flex:1}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:#ffffff;
+  border:1.5px solid #d4a843;
+  border-radius:8px;
+  padding:12px 20px;
+  font-family:'Playfair Display',serif;
+  font-size:.85rem;
+  color:#7a4f00;
+  z-index:9999;
+  opacity:0;
+  transform:translateY(10px);
+  transition:.3s;
+  pointer-events:none;
+  box-shadow:0 4px 20px #c9a84c33;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── Password screen ── */
+#lockScreen{
+  position:fixed;inset:0;
+  background:#faf7f0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-image:radial-gradient(ellipse 70% 50% at 50% 50%,#fdf3d0,transparent);
+}
+.lock-box{
+  background:var(--bg2);
+  border:2px solid var(--gold);
+  border-radius:16px;
+  padding:40px 48px;
+  text-align:center;
+  max-width:380px;
+  width:90%;
+  box-shadow:0 20px 60px #00000088;
+}
+.lock-icon{font-size:3rem;margin-bottom:12px}
+.lock-box h2{font-family:'Playfair Display',serif;color:var(--gold2);font-size:1.3rem;margin-bottom:6px}
+.lock-box p{color:var(--text3);font-size:.85rem;margin-bottom:22px;font-style:italic}
+.lock-input{
+  width:100%;
+  padding:12px 16px;
+  background:var(--bg);
+  border:1px solid var(--gold);
+  border-radius:8px;
+  color:var(--text);
+  font-size:1rem;
+  font-family:'Be Vietnam Pro',sans-serif;
+  outline:none;
+  margin-bottom:12px;
+  text-align:center;
+  letter-spacing:2px;
+}
+.lock-err{color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:8px}
+.lock-hint{color:var(--text3);font-size:.75rem;margin-top:10px;font-style:italic}
+
+/* ── Verify panel ── */
+.verify-result{
+  margin-top:14px;
+  padding:14px 18px;
+  border-radius:8px;
+  font-size:.9rem;
+  display:none;
+}
+.verify-ok{background:#f0fdf4;border:1.5px solid #86efac;color:#15803d}
+.verify-fail{background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626}
+
+.filter-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.filter-row input{max-width:220px;flex:1}
+.filter-row select{background:#faf7f0;border:1.5px solid #d4a843;color:#2c1f00;border-radius:6px;padding:8px 10px}
+
+.empty-state{text-align:center;padding:30px;color:#a07830;font-style:italic}
+</style>
+</head>
+<body>
+
+<!-- ── Lock screen ── -->
+<div id="lockScreen">
+  <div class="lock-box">
+    <div class="lock-icon">☯</div>
+    <h2>Tử Vi Mộc Lang</h2>
+    <p>Trang quản trị — Nhập mật khẩu để tiếp tục</p>
+    <input class="lock-input" type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlock()">
+    <div class="lock-err" id="lockErr"></div>
+    <button class="btn btn-gold" style="width:100%" onclick="unlock()">Mở khóa</button>
+    <div class="lock-hint">Lần đầu dùng: mật khẩu mặc định là <b>admin123</b><br>Đổi ngay sau khi đăng nhập</div>
+  </div>
+</div>
+
+<!-- ── Main app ── -->
+<div id="app" style="display:none">
+<header>
+  <div class="hdr-icon">☯</div>
+  <div>
+    <h1>TỬ VI MỘC LANG — QUẢN LÝ MÃ</h1>
+    <p>Tạo & quản lý mã kích hoạt Premium</p>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <button class="btn btn-outline btn-sm" onclick="showChangePass()">🔐 Đổi mật khẩu</button>
+    <button class="btn btn-red btn-sm" onclick="location.reload()">Đăng xuất</button>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Stats -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Tổng mã</div></div>
+    <div class="stat-box"><div class="stat-num" id="statActive" style="color:#52b788">0</div><div class="stat-label">Chưa dùng</div></div>
+    <div class="stat-box"><div class="stat-num" id="statUsed" style="color:#818cf8">0</div><div class="stat-label">Đã kích hoạt</div></div>
+    <div class="stat-box"><div class="stat-num" id="statExpired" style="color:#f87171">0</div><div class="stat-label">Hết hạn</div></div>
+  </div>
+
+  <!-- Tạo mã -->
+  <div class="card">
+    <div class="card-title">✦ Tạo Mã Kích Hoạt Mới</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Gói</label>
+        <select id="genPlan">
+          <option value="trial1d">🧪 Dùng thử 1 Ngày</option>
+          <option value="trial3d">🧪 Dùng thử 3 Ngày</option>
+          <option value="trial7d">🧪 Dùng thử 7 Ngày</option>
+          <option value="1month">1 Tháng</option>
+          <option value="3month" selected>3 Tháng</option>
+          <option value="6month">6 Tháng</option>
+          <option value="1year">1 Năm</option>
+          <option value="lifetime">Vĩnh viễn</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ghi chú (tên KH)</label>
+        <input type="text" id="genNote" placeholder="Nguyễn Văn A / Zalo 09xx">
+      </div>
+      <div class="form-group" style="flex:0">
+        <label>Số lượng</label>
+        <input type="number" id="genQty" value="1" min="1" max="50" style="width:80px">
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn btn-gold" onclick="generateCodes()">✦ Tạo Mã</button>
+      </div>
+    </div>
+
+    <div id="genOutput" style="display:none">
+      <div id="codeOutputList"></div>
+      <div class="copy-hint">👆 Bấm vào mã để copy · Gửi nguyên văn cho khách</div>
+      <button class="btn btn-outline btn-sm" onclick="copyAllCodes()">📋 Copy tất cả</button>
+    </div>
+  </div>
+
+  <!-- Xác minh mã -->
+  <div class="card">
+    <div class="card-title">🔍 Kiểm Tra / Xác Minh Mã</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nhập mã cần kiểm tra</label>
+        <input type="text" id="verifyInput" placeholder="TUVI-3M-ABC123" style="text-transform:uppercase;letter-spacing:1px;font-weight:700" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')verifyCode()">
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn btn-outline" onclick="verifyCode()">Kiểm tra</button>
+      </div>
+    </div>
+    <div class="verify-result" id="verifyResult"></div>
+  </div>
+
+  <!-- Danh sách mã -->
+  <div class="card">
+    <div class="card-title">📋 Danh Sách Mã</div>
+    <div class="filter-row">
+      <input type="text" id="filterInput" placeholder="Tìm mã, ghi chú..." oninput="renderTable()">
+      <select id="filterStatus" onchange="renderTable()" style="max-width:140px">
+        <option value="all">Tất cả</option>
+        <option value="active">Chưa dùng</option>
+        <option value="used">Đã kích hoạt</option>
+        <option value="expired">Hết hạn</option>
+      </select>
+      <button class="btn btn-red btn-sm" onclick="clearAllUsed()" style="margin-left:auto">🗑 Xoá mã đã dùng</button>
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Xuất CSV</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Mã Kích Hoạt</th>
+            <th>Gói</th>
+            <th>Ghi chú</th>
+            <th>Tạo lúc</th>
+            <th>Trạng thái</th>
+            <th>Kích hoạt lúc</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="codeTable"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none">Chưa có mã nào. Tạo mã ở trên để bắt đầu.</div>
+    </div>
+  </div>
+
+
+</div>
+</div>
+
+<!-- Modal đổi mật khẩu -->
+<div id="changePassModal" onclick="if(event.target===this)this.style.display='none'"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border:2px solid #d4a843;border-radius:14px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 12px 40px #c9a84c22;position:relative">
+    <button onclick="document.getElementById('changePassModal').style.display='none'"
+      style="position:absolute;top:12px;right:14px;background:#fef9ec;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;color:#a07830;font-weight:700">✕</button>
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#7a4f00;margin-bottom:20px">🔐 Đổi Mật Khẩu Admin</div>
+    <div style="margin-bottom:13px">
+      <label style="display:block;font-size:.78rem;color:#a07830;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Mật khẩu mới</label>
+      <input type="password" id="newPass1" placeholder="Tối thiểu 6 ký tự" onkeydown="if(event.key==='Enter')document.getElementById('newPass2').focus()"
+        style="width:100%;padding:10px 13px;background:#faf7f0;border:1.5px solid #d4a843;border-radius:7px;color:#2c1f00;font-size:.95rem;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:.78rem;color:#a07830;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Xác nhận mật khẩu</label>
+      <input type="password" id="newPass2" placeholder="Nhập lại mật khẩu mới" onkeydown="if(event.key==='Enter')changePass()"
+        style="width:100%;padding:10px 13px;background:#faf7f0;border:1.5px solid #d4a843;border-radius:7px;color:#2c1f00;font-size:.95rem;outline:none;box-sizing:border-box">
+    </div>
+    <div id="passMsg" style="min-height:20px;font-size:.85rem;margin-bottom:10px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gold" onclick="changePass()" style="flex:1;padding:11px">💾 Lưu</button>
+      <button class="btn btn-outline" onclick="document.getElementById('changePassModal').style.display='none'" style="padding:11px 20px">Huỷ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const STORAGE_KEY  = 'tuvi_admin_codes';
+const PASS_KEY     = 'tuvi_admin_pass';
+const DEFAULT_PASS = 'admin123';
+
+// Khóa bí mật để tạo mã — THAY ĐỔI chuỗi này cho tool.html của bạn
+// (phải khớp với SECRET_KEY bên tool.html)
+const SECRET_KEY = 'TUVIMOCLANG2025';
+
+// Thời hạn theo gói
+const PLAN_DAYS = {
+  'trial1d': 1,
+  'trial3d': 3,
+  'trial7d': 7,
+  '1month': 30,
+  '3month': 90,
+  '6month': 180,
+  '1year':  365,
+  'lifetime': 36500
+};
+const PLAN_LABEL = {
+  'trial1d':'🧪 Dùng thử 1 Ngày','trial3d':'🧪 Dùng thử 3 Ngày','trial7d':'🧪 Dùng thử 7 Ngày',
+  '1month':'1 Tháng','3month':'3 Tháng','6month':'6 Tháng',
+  '1year':'1 Năm','lifetime':'Vĩnh viễn'
+};
+
+// ============================================================
+// LOCK SCREEN
+// ============================================================
+function unlock() {
+  const pass = document.getElementById('adminPass').value;
+  const stored = localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
+  if (pass === stored) {
+    document.getElementById('lockScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderStats();
+    renderTable();
+  } else {
+    const err = document.getElementById('lockErr');
+    err.textContent = '❌ Mật khẩu không đúng';
+    setTimeout(() => err.textContent = '', 2000);
+  }
+}
+document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
+
+function showChangePass() {
+  document.getElementById('newPass1').value = '';
+  document.getElementById('newPass2').value = '';
+  document.getElementById('passMsg').textContent = '';
+  document.getElementById('changePassModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('newPass1').focus(), 50);
+}
+function changePass() {
+  const p1 = document.getElementById('newPass1').value;
+  const p2 = document.getElementById('newPass2').value;
+  const msg = document.getElementById('passMsg');
+  if (!p1 || p1.length < 6) { msg.style.color='#dc2626'; msg.textContent='Tối thiểu 6 ký tự'; return; }
+  if (p1 !== p2) { msg.style.color='#dc2626'; msg.textContent='Mật khẩu không khớp'; return; }
+  localStorage.setItem(PASS_KEY, p1);
+  msg.style.color='#15803d'; msg.textContent='✅ Đã lưu mật khẩu mới!';
+  document.getElementById('newPass1').value = '';
+  document.getElementById('newPass2').value = '';
+  setTimeout(() => { document.getElementById('changePassModal').style.display='none'; }, 1500);
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+function loadCodes() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+}
+function saveCodes(codes) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+}
+
+// ============================================================
+// MÃ GENERATION — dùng hash đơn giản + timestamp
+// ============================================================
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
+}
+
+// Tạo mã — format TUVI-{PLAN}-{TS}-{CHECKSUM}
+// Hoàn toàn tương thích với verifyCodeOffline() trong tool.html
+function generateCode(plan) {
+  const ts = Date.now().toString(36).toUpperCase();
+  const planShort = {
+    'trial1d':'T1','trial3d':'T3','trial7d':'T7',
+    '1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF'
+  }[plan];
+  const checksum = simpleHash(SECRET_KEY + '|' + plan + '|' + ts);
+  return `TUVI-${planShort}-${ts}-${checksum}`;
+}
+
+// Verify lại mã (dùng khi xác minh trong admin)
+function verifyCodeFormat(code) {
+  const parts = (code||'').split('-');
+  if (parts.length < 4 || parts[0] !== 'TUVI') return null;
+  const planMap = {
+    'T1':'trial1d','T3':'trial3d','T7':'trial7d',
+    '1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'
+  };
+  const plan = planMap[parts[1]];
+  if (!plan) return null;
+  const expected = simpleHash(SECRET_KEY + '|' + plan + '|' + parts[2]);
+  return parts[3] === expected ? plan : null;
+}
+
+function generateCodes() {
+  const plan = document.getElementById('genPlan').value;
+  const note = document.getElementById('genNote').value.trim();
+  const qty  = parseInt(document.getElementById('genQty').value) || 1;
+  const codes = loadCodes();
+  const newCodes = [];
+
+  for (let i = 0; i < Math.min(qty, 50); i++) {
+    // Nhỏ delay để timestamp khác nhau
+    const code = generateCode(plan);
+    const entry = {
+      id: code,
+      plan,
+      note,
+      status: 'active',
+      createdAt: Date.now() + i,
+      usedAt: null,
+      usedBy: null
+    };
+    codes.push(entry);
+    newCodes.push(entry);
+    // Thêm delay nhỏ bằng cách sửa timestamp
+    if (i < qty - 1) {
+      // Đảm bảo mã khác nhau — thêm counter vào hash
+      setTimeout(()=>{}, 1);
+    }
+  }
+
+  // Đảm bảo mã unique nếu tạo nhiều cùng lúc
+  const seen = new Set();
+  for (let i = 0; i < newCodes.length; i++) {
+    let c = newCodes[i];
+    let attempt = 0;
+    while (seen.has(c.id)) {
+      attempt++;
+      const ts = (Date.now() + i * 7 + attempt).toString(36).toUpperCase();
+      const planShort = { 'trial1d':'T1','trial3d':'T3','trial7d':'T7','1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF' }[c.plan];
+      const checksum = simpleHash(SECRET_KEY + '|' + c.plan + '|' + ts + attempt);
+      c.id = `TUVI-${planShort}-${ts}-${checksum}`;
+    }
+    seen.add(c.id);
+  }
+
+  saveCodes(codes);
+  renderStats();
+  renderTable();
+
+  // Hiện kết quả
+  const outEl = document.getElementById('codeOutputList');
+  outEl.innerHTML = newCodes.map(c =>
+    `<div class="code-output" onclick="copyCode('${c.id}')" title="Bấm để copy">${c.id}</div>`
+  ).join('');
+  document.getElementById('genOutput').style.display = 'block';
+
+  // Lưu last generated để copy all
+  window._lastGenerated = newCodes.map(c => c.id);
+
+  showToast(`✅ Đã tạo ${newCodes.length} mã`);
+}
+
+// ============================================================
+// VERIFY
+// ============================================================
+function verifyCode() {
+  const input = document.getElementById('verifyInput').value.trim().toUpperCase();
+  const res = document.getElementById('verifyResult');
+  res.style.display = 'block';
+
+  const codes = loadCodes();
+  const found = codes.find(c => c.id === input);
+
+  if (!found) {
+    res.className = 'verify-result verify-fail';
+    res.innerHTML = `❌ Mã <b>${input}</b> không tồn tại trong hệ thống`;
+    return;
+  }
+
+  const statusText = { active:'Chưa sử dụng', used:'Đã kích hoạt', expired:'Hết hạn' }[found.status];
+  const createdStr = new Date(found.createdAt).toLocaleString('vi-VN');
+  const usedStr = found.usedAt ? new Date(found.usedAt).toLocaleString('vi-VN') : '—';
+
+  if (found.status === 'active') {
+    res.className = 'verify-result verify-ok';
+    res.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          ✅ Mã hợp lệ · Gói: <b>${PLAN_LABEL[found.plan]}</b> · Trạng thái: <b>Chưa sử dụng</b><br>
+          <span style="font-size:.8rem;opacity:.8">Tạo lúc: ${createdStr} · Ghi chú: ${found.note||'—'}</span>
+        </div>
+        <button class="btn btn-green btn-sm" style="white-space:nowrap" onclick="markAsUsed('${found.id}')">
+          ✅ Đánh dấu đã kích hoạt
+        </button>
+      </div>`;
+  } else if (found.status === 'used') {
+    res.className = 'verify-result verify-fail';
+    res.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          ⚠️ Mã <b>Đã kích hoạt</b> · Gói: <b>${PLAN_LABEL[found.plan]}</b><br>
+          <span style="font-size:.8rem;opacity:.8">Tạo: ${createdStr} · Kích hoạt lúc: <b>${usedStr}</b></span>
+        </div>
+        <button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="resetToActive('${found.id}')">
+          ↩ Hoàn tác (đặt lại chưa dùng)
+        </button>
+      </div>`;
+  } else {
+    res.className = 'verify-result verify-fail';
+    res.innerHTML = `⚠️ Mã <b>Hết hạn / Đã huỷ</b> · Gói: <b>${PLAN_LABEL[found.plan]}</b><br>
+      <span style="font-size:.8rem;opacity:.8">Tạo: ${createdStr} · Kích hoạt: ${usedStr}</span>`;
+  }
+}
+
+function markAsUsed(id) {
+  const codes = loadCodes();
+  const c = codes.find(x => x.id === id);
+  if (!c) return;
+  c.status = 'used';
+  c.usedAt = Date.now();
+  saveCodes(codes);
+  renderStats();
+  renderTable();
+  showToast(`✅ Đã đánh dấu kích hoạt: ${id}`);
+  // Cập nhật lại phần verify result
+  verifyCode();
+}
+
+function resetToActive(id) {
+  if (!confirm('Đặt lại mã về trạng thái chưa dùng?')) return;
+  const codes = loadCodes();
+  const c = codes.find(x => x.id === id);
+  if (!c) return;
+  c.status = 'active';
+  c.usedAt = null;
+  saveCodes(codes);
+  renderStats();
+  renderTable();
+  showToast(`↩ Đã đặt lại mã: ${id}`);
+  verifyCode();
+}
+
+// ============================================================
+// TABLE
+// ============================================================
+function renderTable() {
+  const codes = loadCodes();
+  const filter = document.getElementById('filterInput').value.toLowerCase();
+  const statusFilter = document.getElementById('filterStatus').value;
+
+  let filtered = codes.filter(c => {
+    const matchText = !filter ||
+      c.id.toLowerCase().includes(filter) ||
+      (c.note||'').toLowerCase().includes(filter);
+    const matchStatus = statusFilter === 'all' || c.status === statusFilter;
+    return matchText && matchStatus;
+  }).sort((a,b) => b.createdAt - a.createdAt);
+
+  const tbody = document.getElementById('codeTable');
+  const empty = document.getElementById('emptyState');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const badgeClass = { active:'badge-active', used:'badge-used', expired:'badge-expired' };
+  const badgeText  = { active:'Chưa dùng', used:'Đã dùng', expired:'Hết hạn' };
+
+  tbody.innerHTML = filtered.map(c => `
+    <tr>
+      <td class="code-cell" onclick="copyCode('${c.id}')" title="Bấm để copy">${c.id}</td>
+      <td>${PLAN_LABEL[c.plan]||c.plan}</td>
+      <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.note||''}">${c.note||'—'}</td>
+      <td style="white-space:nowrap;font-size:.82rem">${new Date(c.createdAt).toLocaleDateString('vi-VN')}</td>
+      <td><span class="badge ${badgeClass[c.status]}">${badgeText[c.status]}</span></td>
+      <td style="font-size:.82rem;white-space:nowrap">${c.usedAt ? new Date(c.usedAt).toLocaleString('vi-VN') : '—'}</td>
+      <td style="white-space:nowrap">
+        ${c.status === 'active' ? `
+          <button class="btn btn-green btn-sm" onclick="markAsUsedFromTable('${c.id}')" title="Đánh dấu đã kích hoạt">✅ Dùng</button>
+          <button class="btn btn-red btn-sm" onclick="revokeCode('${c.id}')" style="margin-left:4px">Huỷ</button>
+        ` : ''}
+        ${c.status === 'used' ? `
+          <button class="btn btn-outline btn-sm" onclick="resetToActiveFromTable('${c.id}')" title="Hoàn tác">↩</button>
+        ` : ''}
+        <button class="btn btn-outline btn-sm" style="margin-left:4px" onclick="deleteCode('${c.id}')">Xoá</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderStats() {
+  const codes = loadCodes();
+  document.getElementById('statTotal').textContent   = codes.length;
+  document.getElementById('statActive').textContent  = codes.filter(c=>c.status==='active').length;
+  document.getElementById('statUsed').textContent    = codes.filter(c=>c.status==='used').length;
+  document.getElementById('statExpired').textContent = codes.filter(c=>c.status==='expired').length;
+}
+
+function markAsUsedFromTable(id) {
+  const codes = loadCodes();
+  const c = codes.find(x => x.id === id);
+  if (!c) return;
+  c.status = 'used';
+  c.usedAt = Date.now();
+  saveCodes(codes);
+  renderStats();
+  renderTable();
+  showToast(`✅ Đã đánh dấu kích hoạt: ${id}`);
+}
+
+function resetToActiveFromTable(id) {
+  if (!confirm('Đặt lại mã về trạng thái chưa dùng?')) return;
+  const codes = loadCodes();
+  const c = codes.find(x => x.id === id);
+  if (!c) return;
+  c.status = 'active';
+  c.usedAt = null;
+  saveCodes(codes);
+  renderStats();
+  renderTable();
+  showToast(`↩ Đã đặt lại mã: ${id}`);
+}
+
+function revokeCode(id) {
+  if (!confirm(`Huỷ mã ${id}?`)) return;
+  const codes = loadCodes();
+  const c = codes.find(x=>x.id===id);
+  if (c) { c.status = 'expired'; saveCodes(codes); renderStats(); renderTable(); showToast('Đã huỷ mã'); }
+}
+
+function deleteCode(id) {
+  if (!confirm(`Xoá mã ${id}? Không thể khôi phục.`)) return;
+  const codes = loadCodes().filter(c=>c.id!==id);
+  saveCodes(codes); renderStats(); renderTable(); showToast('Đã xoá');
+}
+
+function clearAllUsed() {
+  if (!confirm('Xoá tất cả mã đã dùng?')) return;
+  const codes = loadCodes().filter(c=>c.status!=='used');
+  saveCodes(codes); renderStats(); renderTable(); showToast('Đã xoá mã đã dùng');
+}
+
+// ============================================================
+// COPY & EXPORT
+// ============================================================
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast(`📋 Đã copy: ${code}`));
+}
+
+function copyAllCodes() {
+  const codes = (window._lastGenerated || []).join('\n');
+  navigator.clipboard.writeText(codes).then(() => showToast('📋 Đã copy tất cả mã'));
+}
+
+function exportCSV() {
+  const codes = loadCodes();
+  const rows = [['Mã','Gói','Ghi chú','Ngày tạo','Trạng thái','Ngày kích hoạt']];
+  codes.forEach(c => rows.push([
+    c.id,
+    PLAN_LABEL[c.plan]||c.plan,
+    c.note||'',
+    new Date(c.createdAt).toLocaleDateString('vi-VN'),
+    c.status,
+    c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : ''
+  ]));
+  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tuvi-codes-${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
+  a.click();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let _toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// EXPOSE: hàm để tool.html gọi validate mã
+// Tool.html sẽ dùng cùng SECRET_KEY và logic verify dưới đây
+// ============================================================
+/*
+  HƯỚNG DẪN TÍCH HỢP VÀO tool.html
+  ==================================
+  Thay hàm submitInlineCode trong tool.html bằng logic này:
+
+  const SECRET_KEY = 'TUVIMOCLANG2025'; // Phải giống với admin-codegen.html
+
+  function simpleHash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
+  }
+
+  function verifyAndActivate(code) {
+    // Tìm trong localStorage (nếu dùng chung máy - demo)
+    // Thực tế: gọi API hoặc dùng payload tự verify
+    // Cách đơn giản: mã tự chứa thông tin hợp lệ
+
+    // Parse code: TUVI-{PLAN}-{TS}-{CHECKSUM}
+    const parts = code.split('-');
+    if (parts.length < 4 || parts[0] !== 'TUVI') return null;
+
+    const planShort = parts[1];
+    const ts = parts[2];
+    const checksum = parts[3];
+
+    const planMap = {'1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'};
+    const plan = planMap[planShort];
+    if (!plan) return null;
+
+    const payload = SECRET_KEY + '|' + plan + '|' + ts;
+    const expected = simpleHash(payload);
+    if (checksum !== expected) return null;
+
+    return plan;
+  }
+*/
+
+// Init
+renderStats();
+renderTable();
+</script>
+</body>
+</html>
