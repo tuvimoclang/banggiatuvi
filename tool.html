@@ -4610,10 +4610,12 @@ async function lapLaSo(){
   const ns=`${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
   const btn=document.querySelector('.btn-submit');btn.disabled=true;
   document.getElementById('loader').style.display='block';document.getElementById('result').style.display='none';document.getElementById('errorBox').style.display='none';
-  // Tự động detect URL server: nếu chạy local dùng localhost, còn lại dùng cùng origin
-  const API_URL = window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
+  // ⚙️ URL server Python — đổi thành URL Render của bạn sau khi deploy
+  // Ví dụ: 'https://tuvimoclang.onrender.com'
+  const RENDER_URL = 'https://tuvimoclang.onrender.com';
+  const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
-    : window.location.origin;
+    : RENDER_URL;
   try{const res=await fetch(`${API_URL}/api/lap-laso`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hoTen:document.getElementById('hoTen').value,gioiTinh:document.getElementById('gioiTinh').value,lichLoai:document.getElementById('lichLoai').value,ngaySinh:ns,gioSinh:document.getElementById('gioSinh').value,muiGio:parseFloat(document.getElementById('muiGio').value),thanhPho:curCity?.n||'',quocGia:document.getElementById('quocGia').value,thangNhuan:document.getElementById('lichLoai').value==='am'&&document.getElementById('thangNhuan').checked})});
   const data=await res.json();document.getElementById('loader').style.display='none';btn.disabled=false;
   if(data.status!=='success'){document.getElementById('errorBox').textContent='⚠️ '+data.message;document.getElementById('errorBox').style.display='block';return;}
