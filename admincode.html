@@ -338,12 +338,16 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
         </select>
       </div>
       <div class="form-group">
+        <label>Email khách hàng <span style="color:#dc2626">*</span></label>
+        <input type="email" id="genEmail" placeholder="khachhang@email.com" style="font-size:.9rem">
+      </div>
+      <div class="form-group">
         <label>Ghi chú (tên KH)</label>
         <input type="text" id="genNote" placeholder="Nguyễn Văn A / Zalo 09xx">
       </div>
       <div class="form-group" style="flex:0">
         <label>Số lượng</label>
-        <input type="number" id="genQty" value="1" min="1" max="50" style="width:80px">
+        <input type="number" id="genQty" value="1" min="1" max="1" style="width:80px" title="Mỗi email chỉ tạo 1 mã">
       </div>
       <div style="display:flex;align-items:flex-end">
         <button class="btn btn-gold" onclick="generateCodes()">✦ Tạo Mã</button>
@@ -364,6 +368,10 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
       <div class="form-group">
         <label>Nhập mã cần kiểm tra</label>
         <input type="text" id="verifyInput" placeholder="TUVI-3M-ABC123" style="text-transform:uppercase;letter-spacing:1px;font-weight:700" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')verifyCode()">
+      </div>
+      <div class="form-group">
+        <label>Email kiểm tra (tuỳ chọn)</label>
+        <input type="email" id="verifyEmail" placeholder="email@domain.com" onkeydown="if(event.key==='Enter')verifyCode()">
       </div>
       <div style="display:flex;align-items:flex-end">
         <button class="btn btn-outline" onclick="verifyCode()">Kiểm tra</button>
@@ -392,8 +400,10 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
           <tr>
             <th>Mã Kích Hoạt</th>
             <th>Gói</th>
+            <th>Email KH</th>
             <th>Ghi chú</th>
             <th>Tạo lúc</th>
+            <th>Hết hạn</th>
             <th>Trạng thái</th>
             <th>Kích hoạt lúc</th>
             <th></th>
@@ -439,27 +449,18 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
 
 <script>
 // ============================================================
-// CONFIG
+// CONFIG — CHỈ CẦN THAY APPS_SCRIPT_URL
 // ============================================================
-const STORAGE_KEY  = 'tuvi_admin_codes';
 const PASS_KEY     = 'tuvi_admin_pass';
 const DEFAULT_PASS = 'admin123';
 
-// Khóa bí mật để tạo mã — THAY ĐỔI chuỗi này cho tool.html của bạn
-// (phải khớp với SECRET_KEY bên tool.html)
-const SECRET_KEY = 'TUVIMOCLANG2025';
+// ⚠️ SAU KHI DEPLOY Apps Script, dán URL vào đây:
+// script.google.com → Deploy → New deployment → Web App
+// Execute as: Me | Who has access: Anyone → Copy URL
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRaBKh2Vw2WrGeU1SPPXocGlKEJmdRqhnxPVVKMsjc8WPl5quPyX-vbl2nNrXnIu4M8Q/exec';
 
-// Thời hạn theo gói
-const PLAN_DAYS = {
-  'trial1d': 1,
-  'trial3d': 3,
-  'trial7d': 7,
-  '1month': 30,
-  '3month': 90,
-  '6month': 180,
-  '1year':  365,
-  'lifetime': 36500
-};
+const SECRET_KEY = 'TUVIMOCLANG2025'; // Phải giống Code.gs và tool.html
+
 const PLAN_LABEL = {
   'trial1d':'🧪 Dùng thử 1 Ngày','trial3d':'🧪 Dùng thử 3 Ngày','trial7d':'🧪 Dùng thử 7 Ngày',
   '1month':'1 Tháng','3month':'3 Tháng','6month':'6 Tháng',
@@ -470,13 +471,12 @@ const PLAN_LABEL = {
 // LOCK SCREEN
 // ============================================================
 function unlock() {
-  const pass = document.getElementById('adminPass').value;
+  const pass   = document.getElementById('adminPass').value;
   const stored = localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
   if (pass === stored) {
     document.getElementById('lockScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    renderStats();
-    renderTable();
+    loadAndRender();
   } else {
     const err = document.getElementById('lockErr');
     err.textContent = '❌ Mật khẩu không đúng';
@@ -493,8 +493,8 @@ function showChangePass() {
   setTimeout(() => document.getElementById('newPass1').focus(), 50);
 }
 function changePass() {
-  const p1 = document.getElementById('newPass1').value;
-  const p2 = document.getElementById('newPass2').value;
+  const p1  = document.getElementById('newPass1').value;
+  const p2  = document.getElementById('newPass2').value;
   const msg = document.getElementById('passMsg');
   if (!p1 || p1.length < 6) { msg.style.color='#dc2626'; msg.textContent='Tối thiểu 6 ký tự'; return; }
   if (p1 !== p2) { msg.style.color='#dc2626'; msg.textContent='Mật khẩu không khớp'; return; }
@@ -506,207 +506,175 @@ function changePass() {
 }
 
 // ============================================================
-// STORAGE
+// API HELPER — gọi Google Apps Script
 // ============================================================
-function loadCodes() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
-}
-function saveCodes(codes) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
+async function callAPI(params) {
+  if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) {
+    showToast('⚠️ Chưa cấu hình APPS_SCRIPT_URL! Xem hướng dẫn trong file Code.gs');
+    throw new Error('APPS_SCRIPT_URL chưa được cấu hình');
+  }
+  const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res  = await fetch(url);
+  return res.json();
 }
 
 // ============================================================
-// MÃ GENERATION — dùng hash đơn giản + timestamp
+// HASH — để tạo mã format TUVI-...
 // ============================================================
 function simpleHash(str) {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-  }
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
   return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
 }
 
-// Tạo mã — format TUVI-{PLAN}-{TS}-{CHECKSUM}
-// Hoàn toàn tương thích với verifyCodeOffline() trong tool.html
-function generateCode(plan) {
-  const ts = Date.now().toString(36).toUpperCase();
-  const planShort = {
-    'trial1d':'T1','trial3d':'T3','trial7d':'T7',
-    '1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF'
-  }[plan];
-  const checksum = simpleHash(SECRET_KEY + '|' + plan + '|' + ts);
+function generateCodeStr(plan) {
+  const ts       = Date.now().toString(36).toUpperCase();
+  const planShort = {'trial1d':'T1','trial3d':'T3','trial7d':'T7','1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF'}[plan];
+  const checksum  = simpleHash(SECRET_KEY + '|' + plan + '|' + ts);
   return `TUVI-${planShort}-${ts}-${checksum}`;
 }
 
-// Verify lại mã (dùng khi xác minh trong admin)
-function verifyCodeFormat(code) {
-  const parts = (code||'').split('-');
-  if (parts.length < 4 || parts[0] !== 'TUVI') return null;
-  const planMap = {
-    'T1':'trial1d','T3':'trial3d','T7':'trial7d',
-    '1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'
-  };
-  const plan = planMap[parts[1]];
-  if (!plan) return null;
-  const expected = simpleHash(SECRET_KEY + '|' + plan + '|' + parts[2]);
-  return parts[3] === expected ? plan : null;
-}
-
-function generateCodes() {
-  const plan = document.getElementById('genPlan').value;
-  const note = document.getElementById('genNote').value.trim();
-  const qty  = parseInt(document.getElementById('genQty').value) || 1;
-  const codes = loadCodes();
-  const newCodes = [];
-
-  for (let i = 0; i < Math.min(qty, 50); i++) {
-    // Nhỏ delay để timestamp khác nhau
-    const code = generateCode(plan);
-    const entry = {
-      id: code,
-      plan,
-      note,
-      status: 'active',
-      createdAt: Date.now() + i,
-      usedAt: null,
-      usedBy: null
-    };
-    codes.push(entry);
-    newCodes.push(entry);
-    // Thêm delay nhỏ bằng cách sửa timestamp
-    if (i < qty - 1) {
-      // Đảm bảo mã khác nhau — thêm counter vào hash
-      setTimeout(()=>{}, 1);
-    }
-  }
-
-  // Đảm bảo mã unique nếu tạo nhiều cùng lúc
-  const seen = new Set();
-  for (let i = 0; i < newCodes.length; i++) {
-    let c = newCodes[i];
-    let attempt = 0;
-    while (seen.has(c.id)) {
-      attempt++;
-      const ts = (Date.now() + i * 7 + attempt).toString(36).toUpperCase();
-      const planShort = { 'trial1d':'T1','trial3d':'T3','trial7d':'T7','1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF' }[c.plan];
-      const checksum = simpleHash(SECRET_KEY + '|' + c.plan + '|' + ts + attempt);
-      c.id = `TUVI-${planShort}-${ts}-${checksum}`;
-    }
-    seen.add(c.id);
-  }
-
-  saveCodes(codes);
-  renderStats();
-  renderTable();
-
-  // Hiện kết quả
-  const outEl = document.getElementById('codeOutputList');
-  outEl.innerHTML = newCodes.map(c =>
-    `<div class="code-output" onclick="copyCode('${c.id}')" title="Bấm để copy">${c.id}</div>`
-  ).join('');
-  document.getElementById('genOutput').style.display = 'block';
-
-  // Lưu last generated để copy all
-  window._lastGenerated = newCodes.map(c => c.id);
-
-  showToast(`✅ Đã tạo ${newCodes.length} mã`);
-}
-
 // ============================================================
-// VERIFY
+// TẠO MÃ — ghi lên Google Sheet
 // ============================================================
-function verifyCode() {
-  const input = document.getElementById('verifyInput').value.trim().toUpperCase();
-  const res = document.getElementById('verifyResult');
-  res.style.display = 'block';
+async function generateCodes() {
+  const plan  = document.getElementById('genPlan').value;
+  const email = document.getElementById('genEmail').value.trim().toLowerCase();
+  const note  = document.getElementById('genNote').value.trim();
 
-  const codes = loadCodes();
-  const found = codes.find(c => c.id === input);
-
-  if (!found) {
-    res.className = 'verify-result verify-fail';
-    res.innerHTML = `❌ Mã <b>${input}</b> không tồn tại trong hệ thống`;
+  if (!email || !email.includes('@')) {
+    showToast('⚠️ Vui lòng nhập email khách hàng hợp lệ!');
+    document.getElementById('genEmail').focus();
     return;
   }
 
-  const statusText = { active:'Chưa sử dụng', used:'Đã kích hoạt', expired:'Hết hạn' }[found.status];
-  const createdStr = new Date(found.createdAt).toLocaleString('vi-VN');
-  const usedStr = found.usedAt ? new Date(found.usedAt).toLocaleString('vi-VN') : '—';
+  const btn = document.querySelector('[onclick="generateCodes()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang tạo...'; }
 
-  if (found.status === 'active') {
-    res.className = 'verify-result verify-ok';
-    res.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div>
-          ✅ Mã hợp lệ · Gói: <b>${PLAN_LABEL[found.plan]}</b> · Trạng thái: <b>Chưa sử dụng</b><br>
-          <span style="font-size:.8rem;opacity:.8">Tạo lúc: ${createdStr} · Ghi chú: ${found.note||'—'}</span>
-        </div>
-        <button class="btn btn-green btn-sm" style="white-space:nowrap" onclick="markAsUsed('${found.id}')">
-          ✅ Đánh dấu đã kích hoạt
-        </button>
-      </div>`;
-  } else if (found.status === 'used') {
-    res.className = 'verify-result verify-fail';
-    res.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div>
-          ⚠️ Mã <b>Đã kích hoạt</b> · Gói: <b>${PLAN_LABEL[found.plan]}</b><br>
-          <span style="font-size:.8rem;opacity:.8">Tạo: ${createdStr} · Kích hoạt lúc: <b>${usedStr}</b></span>
-        </div>
-        <button class="btn btn-outline btn-sm" style="white-space:nowrap" onclick="resetToActive('${found.id}')">
-          ↩ Hoàn tác (đặt lại chưa dùng)
-        </button>
-      </div>`;
-  } else {
-    res.className = 'verify-result verify-fail';
-    res.innerHTML = `⚠️ Mã <b>Hết hạn / Đã huỷ</b> · Gói: <b>${PLAN_LABEL[found.plan]}</b><br>
-      <span style="font-size:.8rem;opacity:.8">Tạo: ${createdStr} · Kích hoạt: ${usedStr}</span>`;
+  try {
+    const code   = generateCodeStr(plan);
+    const result = await callAPI({
+      action:   'create',
+      adminKey: SECRET_KEY,
+      code,
+      plan,
+      email,
+      note
+    });
+
+    if (!result.ok) {
+      // Nếu email đã có mã, hỏi xác nhận
+      if (result.existingCode) {
+        if (!confirm(`⚠️ ${result.msg}\n\nVẫn tạo mã mới cho email này?`)) return;
+        // Tạo lại với force (gọi lại, Apps Script sẽ cho qua)
+        const result2 = await callAPI({ action:'create', adminKey:SECRET_KEY, code: generateCodeStr(plan), plan, email, note });
+        if (!result2.ok) { showToast('❌ ' + result2.msg); return; }
+        showCreated(result2);
+      } else {
+        showToast('❌ ' + result.msg);
+      }
+      return;
+    }
+
+    showCreated(result);
+    loadAndRender();
+
+  } catch(e) {
+    showToast('❌ Lỗi kết nối: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✦ Tạo Mã'; }
   }
 }
 
-function markAsUsed(id) {
-  const codes = loadCodes();
-  const c = codes.find(x => x.id === id);
-  if (!c) return;
-  c.status = 'used';
-  c.usedAt = Date.now();
-  saveCodes(codes);
-  renderStats();
-  renderTable();
-  showToast(`✅ Đã đánh dấu kích hoạt: ${id}`);
-  // Cập nhật lại phần verify result
-  verifyCode();
-}
-
-function resetToActive(id) {
-  if (!confirm('Đặt lại mã về trạng thái chưa dùng?')) return;
-  const codes = loadCodes();
-  const c = codes.find(x => x.id === id);
-  if (!c) return;
-  c.status = 'active';
-  c.usedAt = null;
-  saveCodes(codes);
-  renderStats();
-  renderTable();
-  showToast(`↩ Đã đặt lại mã: ${id}`);
-  verifyCode();
+function showCreated(result) {
+  const expireStr = result.expireAt
+    ? new Date(result.expireAt).toLocaleDateString('vi-VN')
+    : '—';
+  const outEl = document.getElementById('codeOutputList');
+  outEl.innerHTML = `
+    <div class="code-output" onclick="copyCode('${result.code}')" title="Bấm để copy">
+      ${result.code}
+      <div style="font-size:.72rem;font-weight:400;letter-spacing:0;margin-top:4px;color:#a07830">
+        📧 ${result.email} · Hết hạn: ${expireStr}
+      </div>
+    </div>`;
+  document.getElementById('genOutput').style.display = 'block';
+  window._lastGenerated = [result.code];
+  showToast(`✅ Đã tạo mã cho ${result.email}`);
 }
 
 // ============================================================
-// TABLE
+// VERIFY — kiểm tra qua Google Sheet
 // ============================================================
+async function verifyCode() {
+  const code       = document.getElementById('verifyInput').value.trim().toUpperCase();
+  const emailInput = (document.getElementById('verifyEmail').value || '').trim().toLowerCase();
+  const res        = document.getElementById('verifyResult');
+  res.style.display = 'block';
+  res.className     = 'verify-result';
+  res.innerHTML     = '⏳ Đang kiểm tra...';
+
+  try {
+    const result = await callAPI({ action:'verify', code, email: emailInput || 'admin_check' });
+
+    if (result.ok) {
+      const expStr   = result.expireAt ? new Date(result.expireAt).toLocaleDateString('vi-VN') : '—';
+      const daysLeft = result.daysLeft >= 999999 ? 'Vĩnh viễn' : result.daysLeft + ' ngày';
+      res.className = 'verify-result verify-ok';
+      res.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div>
+            ✅ Mã hợp lệ · Gói: <b>${PLAN_LABEL[result.plan]||result.plan}</b><br>
+            <span style="font-size:.8rem;opacity:.8">📧 Email: <b>${result.email}</b> · Hết hạn: <b>${expStr}</b> · Còn: <b>${daysLeft}</b></span>
+          </div>
+        </div>`;
+    } else {
+      res.className = 'verify-result verify-fail';
+      res.innerHTML = `❌ ${result.msg}`;
+    }
+  } catch(e) {
+    res.className = 'verify-result verify-fail';
+    res.innerHTML = '❌ Lỗi kết nối tới server. Kiểm tra APPS_SCRIPT_URL.';
+  }
+}
+
+// ============================================================
+// LOAD & RENDER — lấy danh sách từ Sheet
+// ============================================================
+let _cachedCodes = [];
+
+async function loadAndRender() {
+  document.getElementById('codeTable').innerHTML =
+    '<tr><td colspan="9" style="text-align:center;padding:20px;color:#a07830">⏳ Đang tải dữ liệu...</td></tr>';
+
+  try {
+    const result = await callAPI({ action:'list', adminKey: SECRET_KEY });
+    if (!result.ok) { showToast('❌ ' + result.msg); return; }
+    _cachedCodes = result.codes || [];
+    renderStats();
+    renderTable();
+  } catch(e) {
+    showToast('❌ Lỗi tải danh sách: ' + e.message);
+  }
+}
+
+function renderStats() {
+  const now = new Date();
+  document.getElementById('statTotal').textContent   = _cachedCodes.length;
+  document.getElementById('statActive').textContent  = _cachedCodes.filter(c => c.status==='active').length;
+  document.getElementById('statUsed').textContent    = _cachedCodes.filter(c => c.status==='used').length;
+  document.getElementById('statExpired').textContent = _cachedCodes.filter(c => c.status==='expired').length;
+}
+
 function renderTable() {
-  const codes = loadCodes();
-  const filter = document.getElementById('filterInput').value.toLowerCase();
+  const filter       = document.getElementById('filterInput').value.toLowerCase();
   const statusFilter = document.getElementById('filterStatus').value;
 
-  let filtered = codes.filter(c => {
-    const matchText = !filter ||
-      c.id.toLowerCase().includes(filter) ||
-      (c.note||'').toLowerCase().includes(filter);
+  const filtered = _cachedCodes.filter(c => {
+    const matchText   = !filter || (c.code||'').toLowerCase().includes(filter) || (c.email||'').toLowerCase().includes(filter) || (c.note||'').toLowerCase().includes(filter);
     const matchStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchText && matchStatus;
-  }).sort((a,b) => b.createdAt - a.createdAt);
+  }).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const tbody = document.getElementById('codeTable');
   const empty = document.getElementById('emptyState');
@@ -718,81 +686,40 @@ function renderTable() {
   }
   empty.style.display = 'none';
 
-  const badgeClass = { active:'badge-active', used:'badge-used', expired:'badge-expired' };
-  const badgeText  = { active:'Chưa dùng', used:'Đã dùng', expired:'Hết hạn' };
+  const badgeClassMap = { active:'badge-active', used:'badge-used', expired:'badge-expired', revoked:'badge-expired' };
+  const badgeTextMap  = { active:'Chưa dùng', used:'Đã dùng', expired:'Hết hạn', revoked:'Đã huỷ' };
 
-  tbody.innerHTML = filtered.map(c => `
+  tbody.innerHTML = filtered.map(c => {
+    const expStr    = c.expireAt ? new Date(c.expireAt).toLocaleDateString('vi-VN') : '—';
+    const isExpired = c.status === 'expired' || c.status === 'revoked';
+    return `
     <tr>
-      <td class="code-cell" onclick="copyCode('${c.id}')" title="Bấm để copy">${c.id}</td>
+      <td class="code-cell" onclick="copyCode('${c.code}')" title="Bấm để copy">${c.code}</td>
       <td>${PLAN_LABEL[c.plan]||c.plan}</td>
-      <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.note||''}">${c.note||'—'}</td>
-      <td style="white-space:nowrap;font-size:.82rem">${new Date(c.createdAt).toLocaleDateString('vi-VN')}</td>
-      <td><span class="badge ${badgeClass[c.status]}">${badgeText[c.status]}</span></td>
-      <td style="font-size:.82rem;white-space:nowrap">${c.usedAt ? new Date(c.usedAt).toLocaleString('vi-VN') : '—'}</td>
+      <td style="font-size:.82rem;color:#1d4ed8;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.email||''}">${c.email||'—'}</td>
+      <td style="color:var(--text3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.note||''}">${c.note||'—'}</td>
+      <td style="white-space:nowrap;font-size:.82rem">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('vi-VN') : '—'}</td>
+      <td style="white-space:nowrap;font-size:.82rem;color:${isExpired?'#dc2626':'#15803d'}">${expStr}</td>
+      <td><span class="badge ${badgeClassMap[c.status]||'badge-expired'}">${badgeTextMap[c.status]||c.status}</span></td>
+      <td style="font-size:.82rem;white-space:nowrap">${c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : '—'}</td>
       <td style="white-space:nowrap">
-        ${c.status === 'active' ? `
-          <button class="btn btn-green btn-sm" onclick="markAsUsedFromTable('${c.id}')" title="Đánh dấu đã kích hoạt">✅ Dùng</button>
-          <button class="btn btn-red btn-sm" onclick="revokeCode('${c.id}')" style="margin-left:4px">Huỷ</button>
-        ` : ''}
-        ${c.status === 'used' ? `
-          <button class="btn btn-outline btn-sm" onclick="resetToActiveFromTable('${c.id}')" title="Hoàn tác">↩</button>
-        ` : ''}
-        <button class="btn btn-outline btn-sm" style="margin-left:4px" onclick="deleteCode('${c.id}')">Xoá</button>
+        ${c.status === 'active' ? `<button class="btn btn-red btn-sm" onclick="revokeCode('${c.code}')">Huỷ</button>` : ''}
+        ${c.status === 'used' ? `<span style="font-size:.78rem;color:#818cf8">Đã kích hoạt bởi ${c.usedBy||'—'}</span>` : ''}
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
-function renderStats() {
-  const codes = loadCodes();
-  document.getElementById('statTotal').textContent   = codes.length;
-  document.getElementById('statActive').textContent  = codes.filter(c=>c.status==='active').length;
-  document.getElementById('statUsed').textContent    = codes.filter(c=>c.status==='used').length;
-  document.getElementById('statExpired').textContent = codes.filter(c=>c.status==='expired').length;
-}
-
-function markAsUsedFromTable(id) {
-  const codes = loadCodes();
-  const c = codes.find(x => x.id === id);
-  if (!c) return;
-  c.status = 'used';
-  c.usedAt = Date.now();
-  saveCodes(codes);
-  renderStats();
-  renderTable();
-  showToast(`✅ Đã đánh dấu kích hoạt: ${id}`);
-}
-
-function resetToActiveFromTable(id) {
-  if (!confirm('Đặt lại mã về trạng thái chưa dùng?')) return;
-  const codes = loadCodes();
-  const c = codes.find(x => x.id === id);
-  if (!c) return;
-  c.status = 'active';
-  c.usedAt = null;
-  saveCodes(codes);
-  renderStats();
-  renderTable();
-  showToast(`↩ Đã đặt lại mã: ${id}`);
-}
-
-function revokeCode(id) {
-  if (!confirm(`Huỷ mã ${id}?`)) return;
-  const codes = loadCodes();
-  const c = codes.find(x=>x.id===id);
-  if (c) { c.status = 'expired'; saveCodes(codes); renderStats(); renderTable(); showToast('Đã huỷ mã'); }
-}
-
-function deleteCode(id) {
-  if (!confirm(`Xoá mã ${id}? Không thể khôi phục.`)) return;
-  const codes = loadCodes().filter(c=>c.id!==id);
-  saveCodes(codes); renderStats(); renderTable(); showToast('Đã xoá');
-}
-
-function clearAllUsed() {
-  if (!confirm('Xoá tất cả mã đã dùng?')) return;
-  const codes = loadCodes().filter(c=>c.status!=='used');
-  saveCodes(codes); renderStats(); renderTable(); showToast('Đã xoá mã đã dùng');
+// ============================================================
+// REVOKE MÃ
+// ============================================================
+async function revokeCode(code) {
+  if (!confirm(`Huỷ mã ${code}?\nKhách sẽ không thể dùng mã này nữa.`)) return;
+  try {
+    const result = await callAPI({ action:'revoke', adminKey:SECRET_KEY, code });
+    if (result.ok) { showToast('✅ Đã huỷ mã'); loadAndRender(); }
+    else showToast('❌ ' + result.msg);
+  } catch(e) { showToast('❌ Lỗi: ' + e.message); }
 }
 
 // ============================================================
@@ -808,20 +735,17 @@ function copyAllCodes() {
 }
 
 function exportCSV() {
-  const codes = loadCodes();
-  const rows = [['Mã','Gói','Ghi chú','Ngày tạo','Trạng thái','Ngày kích hoạt']];
-  codes.forEach(c => rows.push([
-    c.id,
-    PLAN_LABEL[c.plan]||c.plan,
-    c.note||'',
-    new Date(c.createdAt).toLocaleDateString('vi-VN'),
-    c.status,
-    c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : ''
+  const rows = [['Mã','Gói','Email KH','Ghi chú','Ngày tạo','Hết hạn','Trạng thái','Kích hoạt lúc','Kích hoạt bởi']];
+  _cachedCodes.forEach(c => rows.push([
+    c.code, PLAN_LABEL[c.plan]||c.plan, c.email||'', c.note||'',
+    c.createdAt ? new Date(c.createdAt).toLocaleDateString('vi-VN') : '',
+    c.expireAt  ? new Date(c.expireAt).toLocaleDateString('vi-VN')  : '',
+    c.status, c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : '', c.usedBy||''
   ]));
-  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const csv  = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
   a.download = `tuvi-codes-${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
   a.click();
 }
@@ -835,54 +759,10 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ============================================================
-// EXPOSE: hàm để tool.html gọi validate mã
-// Tool.html sẽ dùng cùng SECRET_KEY và logic verify dưới đây
-// ============================================================
-/*
-  HƯỚNG DẪN TÍCH HỢP VÀO tool.html
-  ==================================
-  Thay hàm submitInlineCode trong tool.html bằng logic này:
-
-  const SECRET_KEY = 'TUVIMOCLANG2025'; // Phải giống với admin-codegen.html
-
-  function simpleHash(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) {
-      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
-    }
-    return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
-  }
-
-  function verifyAndActivate(code) {
-    // Tìm trong localStorage (nếu dùng chung máy - demo)
-    // Thực tế: gọi API hoặc dùng payload tự verify
-    // Cách đơn giản: mã tự chứa thông tin hợp lệ
-
-    // Parse code: TUVI-{PLAN}-{TS}-{CHECKSUM}
-    const parts = code.split('-');
-    if (parts.length < 4 || parts[0] !== 'TUVI') return null;
-
-    const planShort = parts[1];
-    const ts = parts[2];
-    const checksum = parts[3];
-
-    const planMap = {'1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'};
-    const plan = planMap[planShort];
-    if (!plan) return null;
-
-    const payload = SECRET_KEY + '|' + plan + '|' + ts;
-    const expected = simpleHash(payload);
-    if (checksum !== expected) return null;
-
-    return plan;
-  }
-*/
-
-// Init
+// Khởi tạo
 renderStats();
 renderTable();
 </script>

@@ -139,23 +139,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ============================================================
-// ⚙️ OFFLINE MODE — Đăng nhập Google qua popup đơn giản
-// Mã gắn với email, lưu localStorage. Máy khác nhập lại mã.
-// SECRET_KEY phải giống admin-codegen.html
+// ⚙️ TỬ VI MỘC LANG — AUTH & PREMIUM VERIFICATION
+// Verify mã qua Google Sheets (database trung tâm)
 // ============================================================
-const SECRET_KEY  = 'TUVIMOCLANG2025';
-const STORE_KEY   = 'tuvi_premium';   // lưu {email, code, plan, expireAt}
+
+// ⚠️ THAY BẰNG URL APPS SCRIPT CỦA BẠN (giống admincode.html)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRaBKh2Vw2WrGeU1SPPXocGlKEJmdRqhnxPVVKMsjc8WPl5quPyX-vbl2nNrXnIu4M8Q/exec';
+
+const STORE_KEY = 'tuvi_premium'; // cache local: {email, code, plan, expireAt}
 
 const CODE_FEATURES = [
   'btnNhapQuai','btnNhapQuaiCan','btnLapCuc',
   'btnTraTuong','btnLuanGiai','btnLuuTuHoa','btnSkitch'
 ];
 
-let currentUser  = null;   // { email, name, picture }
-let isActivated  = false;
+let currentUser = null;   // { email, name, picture }
+let isActivated = false;
 
 // ============================================================
-// HASH
+// HASH (dùng để tạo storeKey theo email)
 // ============================================================
 function simpleHash(str) {
   let h = 0;
@@ -163,38 +165,19 @@ function simpleHash(str) {
   return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
 }
 
-// ============================================================
-// VERIFY MÃ: TUVI-{PLAN}-{TS}-{CHECKSUM}
-// ============================================================
-function verifyCodeOffline(code) {
-  code = (code||'').trim().toUpperCase();
-  const parts = code.split('-');
-  if (parts.length < 4 || parts[0] !== 'TUVI') return null;
-  const planMap = {
-    'T1':'trial1d','T3':'trial3d','T7':'trial7d',
-    '1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'
-  };
-  const plan = planMap[parts[1]];
-  if (!plan) return null;
-  if (parts[3] !== simpleHash(SECRET_KEY + '|' + plan + '|' + parts[2])) return null;
-  return plan;
+function getStoreKey(email) {
+  return STORE_KEY + '_' + simpleHash(email);
 }
 
 // ============================================================
-// GOOGLE SIGN-IN — dùng Google Identity Services (GSI)
-// Không cần Firebase, không cần server
+// GOOGLE SIGN-IN
 // ============================================================
 const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
-// Tạo tại: https://console.cloud.google.com/apis/credentials
-// → Create credentials → OAuth 2.0 Client ID → Web application
-// → Authorized JS origins: thêm domain web của bạn (hoặc file:// để test local)
 
 function initGoogleAuth() {
-  // Load GSI script
   const s = document.createElement('script');
   s.src = 'https://accounts.google.com/gsi/client';
-  s.async = true;
-  s.defer = true;
+  s.async = true; s.defer = true;
   s.onload = () => {
     if (typeof google === 'undefined') return;
     google.accounts.id.initialize({
@@ -207,16 +190,10 @@ function initGoogleAuth() {
 }
 
 function handleGoogleResponse(response) {
-  // Decode JWT token từ Google
-  const parts = response.credential.split('.');
+  const parts   = response.credential.split('.');
   const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
-  currentUser = {
-    email:   payload.email,
-    name:    payload.name,
-    picture: payload.picture
-  };
-  // Kiểm tra có Premium lưu sẵn cho email này không
-  loadSavedActivation();
+  currentUser   = { email: payload.email, name: payload.name, picture: payload.picture };
+  restoreSession();
   hideAuthModal();
   updateUI();
 }
@@ -227,35 +204,15 @@ function dangNhapGoogle() {
     return;
   }
   if (typeof google !== 'undefined') {
-    google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+    google.accounts.id.prompt((n) => {
+      if (n.isNotDisplayed() || n.isSkippedMoment()) {
         google.accounts.id.renderButton(
           document.getElementById('googleBtnContainer'),
-          { theme:'outline', size:'large', width: 280 }
+          { theme:'outline', size:'large', width:280 }
         );
       }
     });
   }
-}
-
-function showDemoLoginModal() {
-  // Hiện ô nhập email ngay trong loginWall (không dùng modal riêng)
-  const lwall = document.getElementById('loginWall');
-  const box   = lwall?.querySelector('.lw-box');
-  if (!box) return;
-  box.innerHTML = `
-    <div style="font-size:2.5rem;margin-bottom:12px">☯</div>
-    <h2>Tử Vi Mộc Lang</h2>
-    <p>Nhập Gmail của bạn để đăng nhập</p>
-    <input type="email" id="lwEmail" placeholder="your@gmail.com" autofocus
-      style="width:100%;padding:11px 14px;background:#0d0900;border:1.5px solid #c9a84c66;border-radius:8px;color:#f0e8d0;font-size:.95rem;outline:none;box-sizing:border-box;margin-bottom:12px;text-align:center"
-      onkeydown="if(event.key==='Enter')confirmDemoLogin()">
-    <button onclick="confirmDemoLogin()"
-      style="width:100%;padding:12px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:.95rem;font-weight:900;cursor:pointer;margin-bottom:8px">
-      ✓ Xác nhận đăng nhập
-    </button>
-    <div id="lwAuthErr" style="min-height:18px;font-size:.82rem;color:#f87171"></div>`;
-  setTimeout(() => document.getElementById('lwEmail')?.focus(), 50);
 }
 
 function dangXuat() {
@@ -269,15 +226,34 @@ function dangXuat() {
 // DEMO LOGIN (khi chưa cấu hình Google Client ID)
 // ============================================================
 function showDemoLoginModal() {
-  // Hiện ô nhập email đơn giản để test
+  const lwall = document.getElementById('loginWall');
+  const box   = lwall?.querySelector('.lw-box');
+  if (box) {
+    box.innerHTML = `
+      <div style="font-size:2.5rem;margin-bottom:12px">☯</div>
+      <h2>Tử Vi Mộc Lang</h2>
+      <p>Nhập Gmail của bạn để đăng nhập</p>
+      <input type="email" id="lwEmail" placeholder="your@gmail.com" autofocus
+        style="width:100%;padding:11px 14px;background:#0d0900;border:1.5px solid #c9a84c66;border-radius:8px;color:#f0e8d0;font-size:.95rem;outline:none;box-sizing:border-box;margin-bottom:12px;text-align:center"
+        onkeydown="if(event.key==='Enter')confirmDemoLogin()">
+      <button onclick="confirmDemoLogin()"
+        style="width:100%;padding:12px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:.95rem;font-weight:900;cursor:pointer;margin-bottom:8px">
+        ✓ Xác nhận đăng nhập
+      </button>
+      <div id="lwAuthErr" style="min-height:18px;font-size:.82rem;color:#f87171"></div>`;
+    setTimeout(() => document.getElementById('lwEmail')?.focus(), 50);
+    return;
+  }
+  // Fallback: modal
   const authModal = document.getElementById('authModal');
-  const box = authModal.querySelector('.modal-box');
-  box.innerHTML = `
+  const mbox      = authModal?.querySelector('.modal-box');
+  if (!mbox) return;
+  mbox.innerHTML = `
     <button class="modal-close" onclick="hideAuthModal()">✕</button>
     <div style="font-size:2rem;margin-bottom:8px;text-align:center">☯</div>
     <div class="modal-title">Tử Vi Mộc Lang</div>
     <p style="font-size:.82rem;color:var(--text3,#888);text-align:center;margin-bottom:18px">
-      Nhập Gmail để đăng nhập (chế độ demo)
+      Nhập Gmail để đăng nhập
     </p>
     <div style="margin-bottom:12px">
       <input type="email" id="demoEmail" placeholder="your@gmail.com"
@@ -288,10 +264,7 @@ function showDemoLoginModal() {
       style="width:100%;padding:11px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:.95rem;font-weight:900;cursor:pointer">
       Xác nhận
     </button>
-    <div id="demoLoginErr" style="min-height:18px;font-size:.82rem;color:#f87171;text-align:center;margin-top:8px"></div>
-    <p style="margin-top:14px;font-size:.72rem;color:var(--text3,#888);text-align:center">
-      Để dùng Google Sign-In thật, cấu hình Google Client ID trong tool.html
-    </p>`;
+    <div id="demoLoginErr" style="min-height:18px;font-size:.82rem;color:#f87171;text-align:center;margin-top:8px"></div>`;
   authModal.style.display = 'flex';
 }
 
@@ -300,29 +273,119 @@ function confirmDemoLogin() {
   const err   = document.getElementById('lwAuthErr') || document.getElementById('demoLoginErr');
   if (!email || !email.includes('@')) { if(err) err.textContent = 'Nhập email hợp lệ'; return; }
   currentUser = { email, name: email.split('@')[0], picture: null };
-  loadSavedActivation();
+  restoreSession();
   hideAuthModal();
   updateUI();
 }
 
 // ============================================================
-// LƯU / LOAD TRẠNG THÁI PREMIUM THEO EMAIL
+// RESTORE SESSION — kiểm tra cache local trước, rồi verify server
 // ============================================================
-function getStoreKey(email) {
-  return STORE_KEY + '_' + simpleHash(email);
-}
-
-function loadSavedActivation() {
+function restoreSession() {
   if (!currentUser) return;
   try {
     const saved = JSON.parse(localStorage.getItem(getStoreKey(currentUser.email)) || 'null');
-    if (saved && saved.code && verifyCodeOffline(saved.code)) {
+    if (saved && saved.expireAt) {
+      // Cache tạm thời: nếu còn hạn thì kích hoạt ngay, rồi verify ngầm phía sau
       const valid = saved.expireAt === 'lifetime' || new Date(saved.expireAt) > new Date();
-      isActivated = valid;
-    } else {
-      isActivated = false;
+      if (valid && saved.email === currentUser.email) {
+        isActivated = true;
+        updateUI();
+        // Verify lại với server ngầm (không chặn UI)
+        verifyWithServer(saved.code, saved.email, true);
+        return;
+      }
     }
-  } catch { isActivated = false; }
+  } catch {}
+  isActivated = false;
+}
+
+// ============================================================
+// VERIFY VỚI SERVER — gọi Apps Script để kiểm tra
+// ============================================================
+async function verifyWithServer(code, email, silent = false) {
+  if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) return; // chưa cấu hình
+  try {
+    const url    = APPS_SCRIPT_URL + '?' + new URLSearchParams({ action:'verify', code, email }).toString();
+    const result = await fetch(url).then(r => r.json());
+
+    if (result.ok) {
+      // Cập nhật cache với expireAt từ server (nguồn sự thật)
+      localStorage.setItem(getStoreKey(email), JSON.stringify({
+        email, code,
+        plan:     result.plan,
+        expireAt: result.plan === 'lifetime' ? 'lifetime' : result.expireAt
+      }));
+      isActivated = true;
+    } else {
+      // Server từ chối → xoá cache và deactivate
+      localStorage.removeItem(getStoreKey(email));
+      isActivated = false;
+      if (!silent) {
+        const msg = document.getElementById('codeBarMsg');
+        if (msg) { msg.style.color='#f87171'; msg.textContent = '❌ ' + result.msg; }
+      }
+    }
+    updateUI();
+  } catch(e) {
+    // Lỗi mạng → giữ nguyên trạng thái hiện tại (không khoá user đột ngột)
+    console.warn('verifyWithServer error:', e);
+  }
+}
+
+// ============================================================
+// KÍCH HOẠT MÃ — gọi Apps Script verify, yêu cầu email khớp
+// ============================================================
+async function submitInlineCode() {
+  const input = document.getElementById('inlineCodeInput');
+  const msg   = document.getElementById('codeBarMsg');
+  const btn   = document.getElementById('inlineCodeBtn');
+  const code  = (input?.value || '').trim().toUpperCase();
+
+  if (!code) { msg.style.color='#f87171'; msg.textContent='Vui lòng nhập mã kích hoạt'; return; }
+
+  if (!currentUser) {
+    msg.style.color='#c9a84c'; msg.textContent='👤 Vui lòng đăng nhập trước';
+    showAuthModal(); return;
+  }
+
+  if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) {
+    msg.style.color='#f87171';
+    msg.textContent='⚠️ Hệ thống chưa cấu hình. Liên hệ admin.';
+    return;
+  }
+
+  btn.disabled = true;
+  msg.style.color='#c9a84c'; msg.textContent='⏳ Đang xác minh...';
+
+  try {
+    const url    = APPS_SCRIPT_URL + '?' + new URLSearchParams({ action:'verify', code, email: currentUser.email }).toString();
+    const result = await fetch(url).then(r => r.json());
+
+    if (!result.ok) {
+      msg.style.color='#f87171'; msg.textContent='❌ ' + result.msg;
+      btn.disabled = false; return;
+    }
+
+    // Lưu cache local
+    localStorage.setItem(getStoreKey(currentUser.email), JSON.stringify({
+      email:    currentUser.email,
+      code,
+      plan:     result.plan,
+      expireAt: result.plan === 'lifetime' ? 'lifetime' : result.expireAt
+    }));
+    localStorage.setItem('tuvi_session', JSON.stringify(currentUser));
+
+    const expireStr = result.plan === 'lifetime' ? 'Vĩnh viễn'
+      : new Date(result.expireAt).toLocaleDateString('vi-VN');
+    msg.style.color='#52b788';
+    msg.textContent=`✅ Kích hoạt thành công! Còn ${result.daysLeft} ngày · Hết hạn: ${expireStr}`;
+    isActivated = true; updateUI();
+
+  } catch(e) {
+    msg.style.color='#f87171'; msg.textContent='❌ Lỗi kết nối. Thử lại sau.';
+  }
+  btn.disabled = false;
 }
 
 // ============================================================
@@ -330,12 +393,11 @@ function loadSavedActivation() {
 // ============================================================
 function initAuth() {
   initGoogleAuth();
-  // Khôi phục session từ localStorage nếu có
   try {
     const sess = JSON.parse(localStorage.getItem('tuvi_session') || 'null');
     if (sess && sess.email) {
       currentUser = sess;
-      loadSavedActivation();
+      restoreSession();
     }
   } catch {}
   updateUI();
@@ -345,40 +407,33 @@ function initAuth() {
 // UPDATE UI
 // ============================================================
 function updateUI() {
-  // Lưu session
   if (currentUser) {
     localStorage.setItem('tuvi_session', JSON.stringify(currentUser));
   } else {
     localStorage.removeItem('tuvi_session');
   }
 
-  // ── Login Wall: che toàn bộ khi chưa đăng nhập ──
-  // Mặc định CSS hiện overlay, JS ẩn đi khi đã đăng nhập
-  const loginWall = document.getElementById('loginWall');
+  const loginWall  = document.getElementById('loginWall');
   if (loginWall) {
-    if (currentUser) {
-      loginWall.classList.add('hide');
-    } else {
-      loginWall.classList.remove('hide');
-    }
+    if (currentUser) loginWall.classList.add('hide');
+    else loginWall.classList.remove('hide');
   }
 
-  const codeBar   = document.getElementById('codeBar');
-  const userInfo  = document.getElementById('userInfo');
-  const btnLogout = document.getElementById('btnLogout');
-  const btnGL     = document.getElementById('btnGoogleLogin');
+  const codeBar    = document.getElementById('codeBar');
+  const userInfo   = document.getElementById('userInfo');
+  const btnLogout  = document.getElementById('btnLogout');
+  const btnGL      = document.getElementById('btnGoogleLogin');
   const premiumBar = document.getElementById('premiumBar');
   if (premiumBar) premiumBar.style.display = 'none';
 
   if (currentUser) {
-    const shortName = currentUser.name?.split(' ').pop() || currentUser.email.split('@')[0];
+    const shortName  = currentUser.name?.split(' ').pop() || currentUser.email.split('@')[0];
     const avatarHtml = currentUser.picture
       ? `<img src="${currentUser.picture}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle">`
       : '👤';
     if (userInfo) {
       userInfo.style.display = 'inline-flex';
       if (isActivated) {
-        // Lấy hạn sử dụng từ localStorage
         let expireLabel = '';
         try {
           const saved = JSON.parse(localStorage.getItem(getStoreKey(currentUser.email)) || 'null');
@@ -386,9 +441,8 @@ function updateUI() {
             if (saved.expireAt === 'lifetime') {
               expireLabel = 'Vĩnh viễn';
             } else {
-              const d = new Date(saved.expireAt);
-              const now = new Date();
-              const daysLeft = Math.ceil((d - now) / 86400000);
+              const d        = new Date(saved.expireAt);
+              const daysLeft = Math.ceil((d - new Date()) / 86400000);
               expireLabel = daysLeft > 0
                 ? `HH: ${d.toLocaleDateString('vi-VN')} (còn ${daysLeft} ngày)`
                 : `⚠️ Hết hạn ${d.toLocaleDateString('vi-VN')}`;
@@ -415,135 +469,66 @@ function updateUI() {
     if (el) el.style.display = isActivated ? '' : 'none';
   });
 
-  // Nút LẬP LÁ SỐ — đổi giao diện theo trạng thái
   const btnLap = document.getElementById('btnLapLaSo');
   if (btnLap) {
     if (isActivated) {
       btnLap.textContent = '⭐ LẬP LÁ SỐ';
       btnLap.style.opacity = '1';
-      btnLap.style.cursor = 'pointer';
+      btnLap.style.cursor  = 'pointer';
     } else {
       btnLap.textContent = '🔒 Nhập mã kích hoạt để lập lá số';
       btnLap.style.opacity = '0.6';
-      btnLap.style.cursor = 'not-allowed';
+      btnLap.style.cursor  = 'not-allowed';
     }
   }
 
-  // Ẩn/hiện thanh phi hóa A/B/C/D
   const phiBar = document.getElementById('phiHoaBar');
-  if (phiBar) {
-    if (isActivated) {
-      // Chỉ hiện nếu đã có lá số (class show được add bởi render)
-    } else {
-      phiBar.classList.remove('show'); // Force ẩn khi chưa kích hoạt
-    }
-  }
+  if (phiBar && !isActivated) phiBar.classList.remove('show');
 
-  // Tái áp dụng guards sau mỗi lần updateUI
   if (typeof applyPremiumGuards === 'function') applyPremiumGuards();
 }
 
 function checkPremium() {
-  if (!isActivated) {
-    const cb = document.getElementById('codeBar');
-    if (cb) {
-      cb.scrollIntoView({ behavior:'smooth', block:'center' });
-      document.getElementById('inlineCodeInput')?.focus();
-      cb.style.boxShadow = '0 0 0 3px #c9a84c88';
-      setTimeout(() => { cb.style.boxShadow = ''; }, 1500);
-    }
-    return false;
-  }
+  if (!isActivated) { flashCodeBar(); return false; }
   return true;
 }
 
 // ============================================================
-// KÍCH HOẠT MÃ — OFFLINE, GẮN VỚI EMAIL
+// PREMIUM GUARD
 // ============================================================
-async function submitInlineCode() {
-  const input = document.getElementById('inlineCodeInput');
-  const msg   = document.getElementById('codeBarMsg');
-  const btn   = document.getElementById('inlineCodeBtn');
-  const code  = (input?.value || '').trim().toUpperCase();
+function applyPremiumGuards() {
+  const GUARDED = [
+    'showSaoTooltip','showHoaTooltip','showCungTooltip',
+    'showChinhTinhDetail','showSaoPanel','showCungPanel',
+    'togglePhiHoa','toggleSkitch','onCungClick','showTheDungPanel'
+  ];
+  GUARDED.forEach(fnName => {
+    const orig = window[fnName];
+    if (typeof orig !== 'function' || orig._guarded) return;
+    const wrapped = function(...args) {
+      if (!isActivated) { flashCodeBar(); return; }
+      return orig.apply(this, args);
+    };
+    wrapped._guarded = true;
+    window[fnName] = wrapped;
+  });
+}
 
-  if (!code) { msg.style.color='#f87171'; msg.textContent='Vui lòng nhập mã kích hoạt'; return; }
-
-  if (!currentUser) {
-    msg.style.color='#c9a84c'; msg.textContent='👤 Vui lòng đăng nhập trước';
-    showAuthModal(); return;
-  }
-
-  btn.disabled = true;
-  msg.style.color='#c9a84c'; msg.textContent='⏳ Đang xác minh...';
-  await new Promise(r => setTimeout(r, 400));
-
-  // Verify chữ ký
-  const plan = verifyCodeOffline(code);
-  if (!plan) {
-    msg.style.color='#f87171'; msg.textContent='❌ Mã không hợp lệ. Liên hệ Zalo 0909794441';
-    btn.disabled=false; return;
-  }
-
-  // Kiểm tra mã đã bị dùng bởi email khác chưa
-  const usedKey = 'tuvi_used_' + simpleHash(code);
-  const usedBy  = localStorage.getItem(usedKey);
-  if (usedBy && usedBy !== currentUser.email) {
-    msg.style.color='#f87171'; msg.textContent='❌ Mã này đã được kích hoạt bởi tài khoản khác';
-    btn.disabled=false; return;
-  }
-
-  // Tính hạn
-  const PLAN_DAYS  = {
-    'trial1d':1,'trial3d':3,'trial7d':7,
-    '1month':30,'3month':90,'6month':180,'1year':365,'lifetime':'lifetime'
-  };
-  const PLAN_LABEL = {
-    'trial1d':'Dùng thử 1 ngày','trial3d':'Dùng thử 3 ngày','trial7d':'Dùng thử 7 ngày',
-    '1month':'1 tháng','3month':'3 tháng','6month':'6 tháng','1year':'1 năm','lifetime':'Vĩnh viễn'
-  };
-  const days     = PLAN_DAYS[plan];
-  const expireAt = days === 'lifetime' ? 'lifetime' : new Date(Date.now() + days*86400000).toISOString();
-
-  // Lưu vào localStorage theo email
-  const activatedAt = new Date().toISOString();
-  localStorage.setItem(getStoreKey(currentUser.email), JSON.stringify({
-    code, plan, expireAt, activatedAt
-  }));
-  localStorage.setItem(usedKey, currentUser.email); // đánh dấu mã đã dùng
-
-  // ✅ Đồng bộ ngược vào tuvi_admin_codes để trang admin thấy trạng thái
-  syncCodeToAdmin(code, currentUser.email, activatedAt);
-
-  const expireStr = expireAt === 'lifetime' ? 'Vĩnh viễn' : new Date(expireAt).toLocaleDateString('vi-VN');
-  msg.style.color='#52b788';
-  msg.textContent=`✅ Kích hoạt thành công! Gói ${PLAN_LABEL[plan]} · Hết hạn: ${expireStr}`;
-  isActivated = true; updateUI(); btn.disabled=false;
+function flashCodeBar() {
+  const cb = document.getElementById('codeBar');
+  if (!cb) return;
+  cb.scrollIntoView({ behavior:'smooth', block:'center' });
+  cb.style.transition  = 'box-shadow .15s';
+  cb.style.boxShadow   = '0 0 0 4px #c9a84ccc';
+  setTimeout(() => { cb.style.boxShadow = ''; }, 1400);
 }
 
 // ============================================================
-// ĐỒNG BỘ VỚI ADMIN — cập nhật tuvi_admin_codes khi khách kích hoạt
-// ============================================================
-function syncCodeToAdmin(code, email, activatedAt) {
-  try {
-    const ADMIN_KEY = 'tuvi_admin_codes';
-    const codes = JSON.parse(localStorage.getItem(ADMIN_KEY) || '[]');
-    const found = codes.find(c => c.id === code);
-    if (found) {
-      found.status = 'used';
-      found.usedAt = new Date(activatedAt).getTime();
-      found.usedBy = email;
-      localStorage.setItem(ADMIN_KEY, JSON.stringify(codes));
-    }
-  } catch(e) { console.warn('syncCodeToAdmin:', e); }
-}
-
-// ============================================================
-// MODAL & STUBS
+// MODAL HELPERS
 // ============================================================
 function showAuthModal() {
   const modal = document.getElementById('authModal');
   if (!modal) return;
-  // Reset nội dung modal về dạng gốc
   const box = modal.querySelector('.modal-box');
   box.innerHTML = `
     <button class="modal-close" onclick="hideAuthModal()">✕</button>
@@ -573,57 +558,21 @@ function showActivationModal() {
   if (cb) { cb.scrollIntoView({behavior:'smooth',block:'center'}); document.getElementById('inlineCodeInput')?.focus(); }
 }
 function hideActivationModal() {}
-function showUpgradeModal() { showActivationModal(); }
-function hideUpgradeModal() {}
-function selectPlan(el) { document.querySelectorAll('.plan-card').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
+function showUpgradeModal()    { showActivationModal(); }
+function hideUpgradeModal()    {}
+function selectPlan(el)        { document.querySelectorAll('.plan-card').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
 
 // ============================================================
-// PREMIUM GUARD — chặn tính năng khi chưa kích hoạt
-// Dùng CSS pointer-events + overlay để chặn toàn bộ tương tác
+// GUARD WATCH & INIT
 // ============================================================
-function applyPremiumGuards() {
-  // Guard các hàm window — chạy sau khi tất cả script đã load
-  const GUARDED = [
-    'showSaoTooltip','showHoaTooltip','showCungTooltip',
-    'showChinhTinhDetail','showSaoPanel','showCungPanel',
-    'togglePhiHoa','toggleSkitch','onCungClick','showTheDungPanel'
-  ];
-  GUARDED.forEach(fnName => {
-    const orig = window[fnName];
-    if (typeof orig !== 'function' || orig._guarded) return;
-    const wrapped = function(...args) {
-      if (!isActivated) { flashCodeBar(); return; }
-      return orig.apply(this, args);
-    };
-    wrapped._guarded = true;
-    window[fnName] = wrapped;
-  });
-}
-
-function flashCodeBar() {
-  const cb = document.getElementById('codeBar');
-  if (!cb) return;
-  cb.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  cb.style.transition = 'box-shadow .15s';
-  cb.style.boxShadow = '0 0 0 4px #c9a84ccc';
-  setTimeout(() => { cb.style.boxShadow = ''; }, 1400);
-}
-
-// Chạy guard liên tục mỗi 300ms cho đến khi tất cả hàm đã load
-// (các hàm nằm trong script thứ 2 load sau)
 let _guardInterval = null;
 function startGuardWatch() {
   _guardInterval = setInterval(() => {
     applyPremiumGuards();
-    // Dừng khi đã guard đủ hàm
     const allGuarded = ['showSaoTooltip','showCungTooltip','togglePhiHoa','onCungClick']
       .every(fn => typeof window[fn] === 'function' && window[fn]._guarded);
-    if (allGuarded) {
-      clearInterval(_guardInterval);
-      _guardInterval = null;
-    }
+    if (allGuarded) { clearInterval(_guardInterval); _guardInterval = null; }
   }, 300);
-  // Dừng tối đa sau 10 giây
   setTimeout(() => { if (_guardInterval) clearInterval(_guardInterval); }, 10000);
 }
 
