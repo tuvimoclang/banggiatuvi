@@ -9,31 +9,108 @@
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center}
 .modal-box{background:var(--bg2,#1a1400);border:2px solid #c9a84c;border-radius:14px;padding:28px 32px;width:360px;max-width:95vw;box-shadow:0 8px 40px #0008}
 .modal-title{font-size:1.2rem;font-weight:900;color:#f0c040;margin-bottom:18px;text-align:center}
-.auth-tabs{display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid #c9a84c44}
-.auth-tab-btn{flex:1;padding:9px;background:transparent;border:none;color:var(--text2,#b8a88a);font-size:.9rem;font-weight:700;cursor:pointer;transition:.15s}
-.auth-tab-btn.active{background:#c9a84c22;color:#f0c040}
-.auth-field{margin-bottom:13px}
-.auth-field label{display:block;font-size:.82rem;color:var(--text2,#b8a88a);margin-bottom:5px;font-weight:600}
-.auth-field input{width:100%;padding:9px 12px;background:var(--bg,#0d0900);border:1px solid #c9a84c44;border-radius:6px;color:var(--text,#f0e8d0);font-size:.95rem;outline:none;box-sizing:border-box}
-.auth-field input:focus{border-color:#c9a84c}
-.auth-submit{width:100%;padding:11px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:1rem;font-weight:900;cursor:pointer;margin-top:4px;transition:.15s}
-.auth-submit:hover{background:#f0c040}
-.auth-submit:disabled{opacity:.5;cursor:not-allowed}
 .auth-error{min-height:20px;font-size:.85rem;color:#f87171;text-align:center;margin-top:10px}
-.auth-footer{text-align:center;margin-top:14px;font-size:.82rem;color:var(--text3,#888)}
-.auth-footer a{color:#c9a84c;cursor:pointer;text-decoration:underline}
 .modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text3,#888);font-size:1.2rem;cursor:pointer}
-/* ── Upgrade Modal ── */
-.upgrade-box{background:var(--bg2,#1a1400);border:2px solid #c9a84c;border-radius:14px;padding:32px;width:380px;max-width:95vw;text-align:center}
-.upgrade-icon{font-size:2.5rem;margin-bottom:12px}
-.upgrade-title{font-size:1.2rem;font-weight:900;color:#f0c040;margin-bottom:10px}
-.upgrade-desc{font-size:.9rem;color:var(--text2,#b8a88a);line-height:1.7;margin-bottom:20px}
-.upgrade-price{font-size:1.6rem;font-weight:900;color:#f0c040;margin-bottom:6px}
-.upgrade-period{font-size:.82rem;color:var(--text3,#888);margin-bottom:20px}
-.upgrade-btn{display:inline-block;padding:12px 32px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:1rem;font-weight:900;cursor:pointer;text-decoration:none;transition:.15s}
-.upgrade-btn:hover{background:#f0c040}
-.upgrade-cancel{display:block;margin-top:12px;font-size:.82rem;color:var(--text3,#888);cursor:pointer}
-.upgrade-cancel:hover{color:var(--text2,#b8a88a)}
+/* ── Upgrade Modal — Light & Modern ── */
+.upgrade-box{
+  background:#fffdf7;
+  border:none;
+  border-radius:20px;
+  padding:32px 28px 24px;
+  width:420px;
+  max-width:95vw;
+  text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.25), 0 0 0 1px rgba(201,168,76,.3);
+  font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+}
+.upgrade-icon{font-size:2.6rem;margin-bottom:8px;line-height:1}
+.upgrade-title{
+  font-size:1.25rem;
+  font-weight:800;
+  color:#7a4f00;
+  margin-bottom:6px;
+  letter-spacing:.3px;
+}
+.upgrade-desc{
+  font-size:.88rem;
+  color:#6b5a3e;
+  line-height:1.8;
+  margin-bottom:18px;
+  background:#fef9ec;
+  border-radius:10px;
+  padding:10px 14px;
+  text-align:left;
+  border:1px solid #f0d890;
+}
+.upgrade-desc span{display:block}
+/* Plan cards */
+.plan-grid{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:nowrap}
+.plan-card{
+  flex:1;
+  padding:14px 8px;
+  background:#fff;
+  border:2px solid #e8d49a;
+  border-radius:12px;
+  cursor:pointer;
+  transition:all .18s;
+  position:relative;
+  min-width:100px;
+}
+.plan-card:hover{border-color:#c9a84c;box-shadow:0 4px 16px #c9a84c22;transform:translateY(-2px)}
+.plan-card.selected{border-color:#c9a84c;background:#fffbee;box-shadow:0 4px 20px #c9a84c33}
+.plan-badge{
+  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(90deg,#c9a84c,#f0c040);
+  color:#5a3a00;font-size:.65rem;font-weight:800;
+  padding:2px 10px;border-radius:20px;white-space:nowrap;
+  letter-spacing:.3px;box-shadow:0 2px 6px #c9a84c44;
+}
+.plan-label{font-size:.75rem;color:#a07830;font-weight:700;letter-spacing:.5px;margin-bottom:5px;text-transform:uppercase}
+.plan-price{font-size:1.35rem;font-weight:900;color:#7a4f00;line-height:1}
+.plan-per{font-size:.7rem;color:#52b788;font-weight:700;margin-top:4px}
+/* Payment box */
+.payment-box{
+  background:linear-gradient(135deg,#fef9ec,#fdf3d0);
+  border:1.5px solid #e8d49a;
+  border-radius:12px;
+  padding:13px 16px;
+  margin-bottom:14px;
+  font-size:.85rem;
+  color:#5a3a00;
+  line-height:2;
+  text-align:left;
+}
+.payment-box .p-label{font-weight:800;color:#7a4f00;font-size:.8rem;letter-spacing:.3px;margin-bottom:2px}
+.payment-box .p-val{font-weight:700;color:#a05000}
+/* Zalo button */
+.zalo-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px 20px;
+  background:linear-gradient(90deg,#0068ff,#1a7fff);
+  color:#fff;font-size:.95rem;font-weight:700;
+  border:none;border-radius:12px;cursor:pointer;
+  text-decoration:none;
+  box-shadow:0 4px 16px #0068ff44;
+  transition:.15s;letter-spacing:.2px;
+}
+.zalo-btn:hover{background:linear-gradient(90deg,#0055dd,#1070ee);box-shadow:0 6px 20px #0068ff55;transform:translateY(-1px)}
+.upgrade-footer{margin-top:10px;font-size:.78rem;color:#a07830}
+.upgrade-footer a{color:#c9a84c;cursor:pointer;text-decoration:underline}
+.upgrade-cancel{
+  display:inline-block;margin-top:10px;
+  font-size:.78rem;color:#bbb;cursor:pointer;
+  padding:4px 10px;border-radius:6px;transition:.1s;
+}
+.upgrade-cancel:hover{color:#888;background:#f0f0f0}
+.modal-close{
+  position:absolute;top:12px;right:14px;
+  background:#f5f0e8;border:none;
+  color:#a07830;font-size:1rem;cursor:pointer;
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:.1s;font-weight:700;
+}
+.modal-close:hover{background:#e8d49a;color:#5a3a00}
 /* ── Locked button ── */
 .btn-action.locked{opacity:.45;position:relative}
 .btn-action.locked::after{content:'🔒';position:absolute;top:-6px;right:-6px;font-size:.65rem;background:#1a0d00;border-radius:50%;padding:1px 3px}
@@ -41,234 +118,479 @@
 #userInfo{align-items:center;gap:6px;padding:6px 12px;background:#1a0d00;border:1px solid #c9a84c44;border-radius:6px;font-size:.82rem;color:#f0c040;font-weight:700}
 #btnAuth{border-color:#c9a84c;color:#c9a84c}
 #btnLogout{border-color:#f87171;color:#f87171}
+/* ── Google button ── */
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3,#888);font-size:.8rem}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#c9a84c33}
+.btn-google{width:100%;padding:10px;background:#fff;border:1.5px solid #ddd;border-radius:8px;color:#333;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s;margin-bottom:2px}
+.btn-google:hover{background:#f5f5f5;border-color:#aaa}
+.btn-google svg{width:20px;height:20px;flex-shrink:0}
+/* ── Code activation bar ── */
+#codeBar{display:none;align-items:center;justify-content:center;gap:10px;padding:14px 20px;background:linear-gradient(90deg,#fef9ec,#fdf3d0);border:1.5px solid #e8c96a;border-radius:10px;margin:12px 0;flex-wrap:wrap;box-shadow:0 2px 10px #c9a84c18}
+#codeBar .code-msg{font-size:.9rem;color:#7a4f00;font-weight:700}
+#codeBar .code-input-wrap{display:flex;gap:8px;align-items:center}
+#codeBar input{padding:8px 12px;background:#fff;border:1.5px solid #d4a843;border-radius:6px;color:#4a3000;font-size:.95rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;width:190px;outline:none}
+#codeBar input:focus{border-color:#c9a84c;box-shadow:0 0 0 2px #c9a84c33}
+#codeBar input::placeholder{color:#c8a870;font-weight:400;letter-spacing:0}
+#codeBar .code-btn{padding:8px 18px;background:linear-gradient(90deg,#c9a84c,#e0bc60);border:none;border-radius:6px;color:#3a2000;font-weight:900;cursor:pointer;font-size:.9rem;white-space:nowrap;box-shadow:0 2px 6px #c9a84c44;transition:.15s}
+#codeBar .code-btn:hover{background:linear-gradient(90deg,#b8973d,#c9a84c);transform:translateY(-1px)}
+#codeBarMsg{font-size:.85rem;text-align:center;min-height:18px;margin-top:6px}
 </style>
 <title>Tử Vi Mộc Lang</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-// ⚙️ CẤU HÌNH SUPABASE — thay 2 giá trị này sau khi tạo project
+// ⚙️ OFFLINE MODE — Đăng nhập Google qua popup đơn giản
+// Mã gắn với email, lưu localStorage. Máy khác nhập lại mã.
+// SECRET_KEY phải giống admin-codegen.html
 // ============================================================
-const SUPABASE_URL = 'https://zqsddznsbhhekoilbtbh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxc2Rkem5zYmhoZWtvaWxidGJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0Mjg0MTQsImV4cCI6MjA5MDAwNDQxNH0.gXljzRdCJHRuzxD2Jp6pb3VCK4sYriL5NCbqvffgDdU';
+const SECRET_KEY  = 'TUVIMOCLANG2025';
+const STORE_KEY   = 'tuvi_premium';   // lưu {email, code, plan, expireAt}
 
-// ⚙️ Backend URL - Render deployment
-const API_URL = 'https://tuvimoclang.onrender.com';
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Danh sách features chỉ dành cho premium
-const PREMIUM_FEATURES = [
+const CODE_FEATURES = [
   'btnNhapQuai','btnNhapQuaiCan','btnLapCuc',
-  'btnTraTuong','btnLuanGiai','btnLuuTuHoa'
+  'btnTraTuong','btnLuanGiai','btnLuuTuHoa','btnSkitch'
 ];
 
-// State auth
-let currentUser = null;
-let isPremium = false;
+let currentUser  = null;   // { email, name, picture }
+let isActivated  = false;
 
 // ============================================================
-// AUTH FUNCTIONS
+// HASH
 // ============================================================
-async function initAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProfile(session.user.id);
-  }
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
+}
+
+// ============================================================
+// VERIFY MÃ: TUVI-{PLAN}-{TS}-{CHECKSUM}
+// ============================================================
+function verifyCodeOffline(code) {
+  code = (code||'').trim().toUpperCase();
+  const parts = code.split('-');
+  if (parts.length < 4 || parts[0] !== 'TUVI') return null;
+  const planMap = {
+    'T1':'trial1d','T3':'trial3d','T7':'trial7d',
+    '1M':'1month','3M':'3month','6M':'6month','1Y':'1year','LF':'lifetime'
+  };
+  const plan = planMap[parts[1]];
+  if (!plan) return null;
+  if (parts[3] !== simpleHash(SECRET_KEY + '|' + plan + '|' + parts[2])) return null;
+  return plan;
+}
+
+// ============================================================
+// GOOGLE SIGN-IN — dùng Google Identity Services (GSI)
+// Không cần Firebase, không cần server
+// ============================================================
+const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
+// Tạo tại: https://console.cloud.google.com/apis/credentials
+// → Create credentials → OAuth 2.0 Client ID → Web application
+// → Authorized JS origins: thêm domain web của bạn (hoặc file:// để test local)
+
+function initGoogleAuth() {
+  // Load GSI script
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.async = true;
+  s.defer = true;
+  s.onload = () => {
+    if (typeof google === 'undefined') return;
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleResponse,
+      auto_select: false,
+    });
+  };
+  document.head.appendChild(s);
+}
+
+function handleGoogleResponse(response) {
+  // Decode JWT token từ Google
+  const parts = response.credential.split('.');
+  const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+  currentUser = {
+    email:   payload.email,
+    name:    payload.name,
+    picture: payload.picture
+  };
+  // Kiểm tra có Premium lưu sẵn cho email này không
+  loadSavedActivation();
+  hideAuthModal();
   updateUI();
-
-  // Lắng nghe thay đổi auth
-  sb.auth.onAuthStateChange(async (event, session) => {
-    currentUser = session?.user || null;
-    if (currentUser) await loadProfile(currentUser.id);
-    else isPremium = false;
-    updateUI();
-  });
 }
 
-async function loadProfile(userId) {
-  const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
-  if (data) {
-    isPremium = data.is_premium &&
-      (!data.premium_until || new Date(data.premium_until) > new Date());
+function dangNhapGoogle() {
+  if (GOOGLE_CLIENT_ID === 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID') {
+    showDemoLoginModal();
+    return;
+  }
+  if (typeof google !== 'undefined') {
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        google.accounts.id.renderButton(
+          document.getElementById('googleBtnContainer'),
+          { theme:'outline', size:'large', width: 280 }
+        );
+      }
+    });
   }
 }
 
-async function dangKy(email, password, hoTen) {
-  const { error } = await sb.auth.signUp({
-    email, password,
-    options: { data: { full_name: hoTen } }
-  });
-  if (error) throw error;
+function showDemoLoginModal() {
+  // Hiện ô nhập email ngay trong loginWall (không dùng modal riêng)
+  const lwall = document.getElementById('loginWall');
+  const box   = lwall?.querySelector('.lw-box');
+  if (!box) return;
+  box.innerHTML = `
+    <div style="font-size:2.5rem;margin-bottom:12px">☯</div>
+    <h2>Tử Vi Mộc Lang</h2>
+    <p>Nhập Gmail của bạn để đăng nhập</p>
+    <input type="email" id="lwEmail" placeholder="your@gmail.com" autofocus
+      style="width:100%;padding:11px 14px;background:#0d0900;border:1.5px solid #c9a84c66;border-radius:8px;color:#f0e8d0;font-size:.95rem;outline:none;box-sizing:border-box;margin-bottom:12px;text-align:center"
+      onkeydown="if(event.key==='Enter')confirmDemoLogin()">
+    <button onclick="confirmDemoLogin()"
+      style="width:100%;padding:12px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:.95rem;font-weight:900;cursor:pointer;margin-bottom:8px">
+      ✓ Xác nhận đăng nhập
+    </button>
+    <div id="lwAuthErr" style="min-height:18px;font-size:.82rem;color:#f87171"></div>`;
+  setTimeout(() => document.getElementById('lwEmail')?.focus(), 50);
 }
 
-async function dangNhap(email, password) {
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-}
-
-async function dangXuat() {
-  await sb.auth.signOut();
+function dangXuat() {
   currentUser = null;
-  isPremium = false;
+  isActivated = false;
+  if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
   updateUI();
 }
 
+// ============================================================
+// DEMO LOGIN (khi chưa cấu hình Google Client ID)
+// ============================================================
+function showDemoLoginModal() {
+  // Hiện ô nhập email đơn giản để test
+  const authModal = document.getElementById('authModal');
+  const box = authModal.querySelector('.modal-box');
+  box.innerHTML = `
+    <button class="modal-close" onclick="hideAuthModal()">✕</button>
+    <div style="font-size:2rem;margin-bottom:8px;text-align:center">☯</div>
+    <div class="modal-title">Tử Vi Mộc Lang</div>
+    <p style="font-size:.82rem;color:var(--text3,#888);text-align:center;margin-bottom:18px">
+      Nhập Gmail để đăng nhập (chế độ demo)
+    </p>
+    <div style="margin-bottom:12px">
+      <input type="email" id="demoEmail" placeholder="your@gmail.com"
+        style="width:100%;padding:10px 14px;background:var(--bg,#0d0900);border:1.5px solid #c9a84c66;border-radius:8px;color:var(--text,#f0e8d0);font-size:.95rem;outline:none;box-sizing:border-box"
+        onkeydown="if(event.key==='Enter')confirmDemoLogin()">
+    </div>
+    <button onclick="confirmDemoLogin()"
+      style="width:100%;padding:11px;background:#c9a84c;border:none;border-radius:8px;color:#000;font-size:.95rem;font-weight:900;cursor:pointer">
+      Xác nhận
+    </button>
+    <div id="demoLoginErr" style="min-height:18px;font-size:.82rem;color:#f87171;text-align:center;margin-top:8px"></div>
+    <p style="margin-top:14px;font-size:.72rem;color:var(--text3,#888);text-align:center">
+      Để dùng Google Sign-In thật, cấu hình Google Client ID trong tool.html
+    </p>`;
+  authModal.style.display = 'flex';
+}
+
+function confirmDemoLogin() {
+  const email = (document.getElementById('lwEmail')?.value || document.getElementById('demoEmail')?.value || '').trim().toLowerCase();
+  const err   = document.getElementById('lwAuthErr') || document.getElementById('demoLoginErr');
+  if (!email || !email.includes('@')) { if(err) err.textContent = 'Nhập email hợp lệ'; return; }
+  currentUser = { email, name: email.split('@')[0], picture: null };
+  loadSavedActivation();
+  hideAuthModal();
+  updateUI();
+}
+
+// ============================================================
+// LƯU / LOAD TRẠNG THÁI PREMIUM THEO EMAIL
+// ============================================================
+function getStoreKey(email) {
+  return STORE_KEY + '_' + simpleHash(email);
+}
+
+function loadSavedActivation() {
+  if (!currentUser) return;
+  try {
+    const saved = JSON.parse(localStorage.getItem(getStoreKey(currentUser.email)) || 'null');
+    if (saved && saved.code && verifyCodeOffline(saved.code)) {
+      const valid = saved.expireAt === 'lifetime' || new Date(saved.expireAt) > new Date();
+      isActivated = valid;
+    } else {
+      isActivated = false;
+    }
+  } catch { isActivated = false; }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initAuth() {
+  initGoogleAuth();
+  // Khôi phục session từ localStorage nếu có
+  try {
+    const sess = JSON.parse(localStorage.getItem('tuvi_session') || 'null');
+    if (sess && sess.email) {
+      currentUser = sess;
+      loadSavedActivation();
+    }
+  } catch {}
+  updateUI();
+}
+
+// ============================================================
+// UPDATE UI
+// ============================================================
 function updateUI() {
-  const btnAuth = document.getElementById('btnAuth');
+  // Lưu session
+  if (currentUser) {
+    localStorage.setItem('tuvi_session', JSON.stringify(currentUser));
+  } else {
+    localStorage.removeItem('tuvi_session');
+  }
+
+  // ── Login Wall: che toàn bộ khi chưa đăng nhập ──
+  // Mặc định CSS hiện overlay, JS ẩn đi khi đã đăng nhập
+  const loginWall = document.getElementById('loginWall');
+  if (loginWall) {
+    if (currentUser) {
+      loginWall.classList.add('hide');
+    } else {
+      loginWall.classList.remove('hide');
+    }
+  }
+
+  const codeBar   = document.getElementById('codeBar');
+  const userInfo  = document.getElementById('userInfo');
   const btnLogout = document.getElementById('btnLogout');
-  const userInfo = document.getElementById('userInfo');
-  const resultDiv = document.getElementById('result');
+  const btnGL     = document.getElementById('btnGoogleLogin');
   const premiumBar = document.getElementById('premiumBar');
+  if (premiumBar) premiumBar.style.display = 'none';
 
   if (currentUser) {
-    if (btnAuth) btnAuth.style.display = 'none';
-    if (btnLogout) btnLogout.style.display = 'inline-flex';
+    const shortName = currentUser.name?.split(' ').pop() || currentUser.email.split('@')[0];
+    const avatarHtml = currentUser.picture
+      ? `<img src="${currentUser.picture}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle">`
+      : '👤';
     if (userInfo) {
       userInfo.style.display = 'inline-flex';
-      userInfo.innerHTML = isPremium
-        ? `👑 ${currentUser.email.split('@')[0]} <span style="font-size:.7rem;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:4px;padding:1px 5px;margin-left:4px">Premium</span>`
-        : `👤 ${currentUser.email.split('@')[0]}`;
+      userInfo.innerHTML = isActivated
+        ? `👑 ${shortName} <span style="font-size:.7rem;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:4px;padding:1px 6px;margin-left:4px">Premium</span>`
+        : `${avatarHtml} ${shortName}`;
     }
-    if (premiumBar) premiumBar.style.display = isPremium ? 'none' : 'flex';
+    if (btnLogout) btnLogout.style.display = 'inline-flex';
+    if (btnGL)     btnGL.style.display     = 'none';
+    if (codeBar)   codeBar.style.display   = isActivated ? 'none' : 'flex';
   } else {
-    if (btnAuth) btnAuth.style.display = 'inline-flex';
+    if (userInfo)  userInfo.style.display  = 'none';
     if (btnLogout) btnLogout.style.display = 'none';
-    if (userInfo) userInfo.style.display = 'none';
-    if (resultDiv) resultDiv.style.display = 'none';
-    if (premiumBar) premiumBar.style.display = 'none';
+    if (btnGL)     btnGL.style.display     = 'inline-flex';
+    if (codeBar)   codeBar.style.display   = 'flex';
   }
 
-  PREMIUM_FEATURES.forEach(id => {
+  CODE_FEATURES.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
-    if (isPremium) { el.classList.remove('locked'); el.title = ''; }
-    else { el.classList.add('locked'); el.title = '🔒 Tính năng Premium'; }
+    if (el) el.style.display = isActivated ? '' : 'none';
   });
+
+  // Nút LẬP LÁ SỐ — đổi giao diện theo trạng thái
+  const btnLap = document.getElementById('btnLapLaSo');
+  if (btnLap) {
+    if (isActivated) {
+      btnLap.textContent = '⭐ LẬP LÁ SỐ';
+      btnLap.style.opacity = '1';
+      btnLap.style.cursor = 'pointer';
+    } else {
+      btnLap.textContent = '🔒 Nhập mã kích hoạt để lập lá số';
+      btnLap.style.opacity = '0.6';
+      btnLap.style.cursor = 'not-allowed';
+    }
+  }
+
+  // Ẩn/hiện thanh phi hóa A/B/C/D
+  const phiBar = document.getElementById('phiHoaBar');
+  if (phiBar) {
+    if (isActivated) {
+      // Chỉ hiện nếu đã có lá số (class show được add bởi render)
+    } else {
+      phiBar.classList.remove('show'); // Force ẩn khi chưa kích hoạt
+    }
+  }
+
+  // Tái áp dụng guards sau mỗi lần updateUI
+  if (typeof applyPremiumGuards === 'function') applyPremiumGuards();
 }
 
 function checkPremium() {
-  if (!currentUser) { showAuthModal('login'); return false; }
-  if (!isPremium) { showUpgradeModal(); return false; }
+  if (!isActivated) {
+    const cb = document.getElementById('codeBar');
+    if (cb) {
+      cb.scrollIntoView({ behavior:'smooth', block:'center' });
+      document.getElementById('inlineCodeInput')?.focus();
+      cb.style.boxShadow = '0 0 0 3px #c9a84c88';
+      setTimeout(() => { cb.style.boxShadow = ''; }, 1500);
+    }
+    return false;
+  }
   return true;
 }
 
 // ============================================================
-// ACTIVATION CODE
+// KÍCH HOẠT MÃ — OFFLINE, GẮN VỚI EMAIL
 // ============================================================
-function showActivationModal() {
-  if (!currentUser) { showAuthModal('login'); return; }
-  document.getElementById('activationModal').style.display = 'flex';
-  document.getElementById('activationCode').value = '';
-  document.getElementById('activationMsg').textContent = '';
-}
-function hideActivationModal() {
-  document.getElementById('activationModal').style.display = 'none';
-}
-async function submitActivationCode() {
-  const code = document.getElementById('activationCode').value.trim().toUpperCase();
-  const msg = document.getElementById('activationMsg');
+async function submitInlineCode() {
+  const input = document.getElementById('inlineCodeInput');
+  const msg   = document.getElementById('codeBarMsg');
+  const btn   = document.getElementById('inlineCodeBtn');
+  const code  = (input?.value || '').trim().toUpperCase();
+
   if (!code) { msg.style.color='#f87171'; msg.textContent='Vui lòng nhập mã kích hoạt'; return; }
-  const btn = document.getElementById('activationBtn');
+
+  if (!currentUser) {
+    msg.style.color='#c9a84c'; msg.textContent='👤 Vui lòng đăng nhập trước';
+    showAuthModal(); return;
+  }
+
   btn.disabled = true;
-  msg.style.color='#c9a84c'; msg.textContent='⏳ Đang kiểm tra mã...';
-  try {
-    const { data, error } = await sb.rpc('use_activation_code', {
-      p_code: code, p_user_id: currentUser.id
-    });
-    if (error) throw error;
-    if (data.success) {
-      const until = new Date(data.premium_until);
-      const planNames = {'1month':'1 tháng','3month':'3 tháng','6month':'6 tháng'};
-      msg.style.color='#52b788';
-      msg.textContent=`✅ Kích hoạt thành công! Gói ${planNames[data.plan]||data.plan} — hết hạn ${until.toLocaleDateString('vi-VN')}`;
-      isPremium = true; updateUI();
-      setTimeout(hideActivationModal, 2500);
-    } else {
-      msg.style.color='#f87171'; msg.textContent='❌ '+(data.error||'Mã không hợp lệ');
-    }
-  } catch(e) {
-    msg.style.color='#f87171'; msg.textContent='❌ Có lỗi xảy ra, thử lại sau';
-  } finally { btn.disabled=false; }
+  msg.style.color='#c9a84c'; msg.textContent='⏳ Đang xác minh...';
+  await new Promise(r => setTimeout(r, 400));
+
+  // Verify chữ ký
+  const plan = verifyCodeOffline(code);
+  if (!plan) {
+    msg.style.color='#f87171'; msg.textContent='❌ Mã không hợp lệ. Liên hệ Zalo 0909794441';
+    btn.disabled=false; return;
+  }
+
+  // Kiểm tra mã đã bị dùng bởi email khác chưa
+  const usedKey = 'tuvi_used_' + simpleHash(code);
+  const usedBy  = localStorage.getItem(usedKey);
+  if (usedBy && usedBy !== currentUser.email) {
+    msg.style.color='#f87171'; msg.textContent='❌ Mã này đã được kích hoạt bởi tài khoản khác';
+    btn.disabled=false; return;
+  }
+
+  // Tính hạn
+  const PLAN_DAYS  = {
+    'trial1d':1,'trial3d':3,'trial7d':7,
+    '1month':30,'3month':90,'6month':180,'1year':365,'lifetime':'lifetime'
+  };
+  const PLAN_LABEL = {
+    'trial1d':'Dùng thử 1 ngày','trial3d':'Dùng thử 3 ngày','trial7d':'Dùng thử 7 ngày',
+    '1month':'1 tháng','3month':'3 tháng','6month':'6 tháng','1year':'1 năm','lifetime':'Vĩnh viễn'
+  };
+  const days     = PLAN_DAYS[plan];
+  const expireAt = days === 'lifetime' ? 'lifetime' : new Date(Date.now() + days*86400000).toISOString();
+
+  // Lưu vào localStorage theo email
+  localStorage.setItem(getStoreKey(currentUser.email), JSON.stringify({
+    code, plan, expireAt, activatedAt: new Date().toISOString()
+  }));
+  localStorage.setItem(usedKey, currentUser.email); // đánh dấu mã đã dùng
+
+  const expireStr = expireAt === 'lifetime' ? 'Vĩnh viễn' : new Date(expireAt).toLocaleDateString('vi-VN');
+  msg.style.color='#52b788';
+  msg.textContent=`✅ Kích hoạt thành công! Gói ${PLAN_LABEL[plan]} · Hết hạn: ${expireStr}`;
+  isActivated = true; updateUI(); btn.disabled=false;
 }
 
 // ============================================================
-// MODAL AUTH
+// MODAL & STUBS
 // ============================================================
-function showAuthModal(tab = 'login') {
-  document.getElementById('authModal').style.display = 'flex';
-  switchAuthTab(tab);
+function showAuthModal() {
+  const modal = document.getElementById('authModal');
+  if (!modal) return;
+  // Reset nội dung modal về dạng gốc
+  const box = modal.querySelector('.modal-box');
+  box.innerHTML = `
+    <button class="modal-close" onclick="hideAuthModal()">✕</button>
+    <div style="font-size:2.2rem;margin-bottom:10px;text-align:center">☯</div>
+    <div class="modal-title" style="margin-bottom:6px">Tử Vi Mộc Lang</div>
+    <p style="font-size:.85rem;color:var(--text3,#888);margin-bottom:24px;line-height:1.6;text-align:center">
+      Đăng nhập để kích hoạt mã Premium<br>
+      <span style="font-size:.78rem">Không cần mật khẩu — nhanh chóng &amp; bảo mật</span>
+    </p>
+    <div id="googleBtnContainer" style="display:flex;justify-content:center;margin-bottom:12px"></div>
+    <button class="btn-google" onclick="dangNhapGoogle()" style="max-width:320px;margin:0 auto 6px;padding:13px 20px;font-size:1rem;border-radius:10px;box-shadow:0 2px 8px #0002">
+      <svg viewBox="0 0 48 48" style="width:22px;height:22px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Tiếp tục với Google
+    </button>
+    <div class="auth-error" id="authError" style="margin-top:12px"></div>
+    <p style="margin-top:16px;font-size:.75rem;color:var(--text3,#888);text-align:center">
+      Chỉ dùng để xác thực · Không đăng thứ gì thay bạn
+    </p>`;
+  modal.style.display = 'flex';
 }
-
 function hideAuthModal() {
-  document.getElementById('authModal').style.display = 'none';
-  document.getElementById('authError').textContent = '';
+  const m = document.getElementById('authModal');
+  if (m) m.style.display = 'none';
 }
-
-function switchAuthTab(tab) {
-  document.getElementById('tabLogin').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('tabRegister').style.display = tab === 'register' ? 'block' : 'none';
-  document.querySelectorAll('.auth-tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tabBtn' + (tab === 'login' ? 'Login' : 'Register')).classList.add('active');
+function showActivationModal() {
+  const cb = document.getElementById('codeBar');
+  if (cb) { cb.scrollIntoView({behavior:'smooth',block:'center'}); document.getElementById('inlineCodeInput')?.focus(); }
 }
+function hideActivationModal() {}
+function showUpgradeModal() { showActivationModal(); }
+function hideUpgradeModal() {}
+function selectPlan(el) { document.querySelectorAll('.plan-card').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); }
 
-async function submitLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPass').value;
-  const err = document.getElementById('authError');
-  err.textContent = '';
-  if (!email || !pass) { err.textContent = 'Vui lòng nhập đủ thông tin'; return; }
-  try {
-    document.getElementById('authSubmitBtn').disabled = true;
-    await dangNhap(email, pass);
-    hideAuthModal();
-  } catch(e) {
-    err.textContent = 'Email hoặc mật khẩu không đúng';
-  } finally {
-    document.getElementById('authSubmitBtn').disabled = false;
-  }
-}
-
-async function submitRegister() {
-  const hoTen = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const pass = document.getElementById('regPass').value;
-  const pass2 = document.getElementById('regPass2').value;
-  const err = document.getElementById('authError');
-  err.textContent = '';
-  if (!hoTen || !email || !pass) { err.textContent = 'Vui lòng nhập đủ thông tin'; return; }
-  if (pass !== pass2) { err.textContent = 'Mật khẩu không khớp'; return; }
-  if (pass.length < 6) { err.textContent = 'Mật khẩu tối thiểu 6 ký tự'; return; }
-  try {
-    document.getElementById('authSubmitBtn').disabled = true;
-    await dangKy(email, pass, hoTen);
-    err.style.color = '#52b788';
-    err.textContent = '✅ Đăng ký thành công! Kiểm tra email để xác nhận.';
-  } catch(e) {
-    err.style.color = '#f87171';
-    err.textContent = 'Email đã được sử dụng';
-  } finally {
-    document.getElementById('authSubmitBtn').disabled = false;
-  }
-}
-
-function showUpgradeModal() {
-  document.getElementById('upgradeModal').style.display = 'flex';
-}
-
-function hideUpgradeModal() {
-  document.getElementById('upgradeModal').style.display = 'none';
-}
-
-function selectPlan(el, plan) {
-  document.querySelectorAll('#upgradeModal [onclick*="selectPlan"]').forEach(e => {
-    e.style.borderColor = '#c9a84c44';
+// ============================================================
+// PREMIUM GUARD — chặn tính năng khi chưa kích hoạt
+// Dùng CSS pointer-events + overlay để chặn toàn bộ tương tác
+// ============================================================
+function applyPremiumGuards() {
+  // Guard các hàm window — chạy sau khi tất cả script đã load
+  const GUARDED = [
+    'showSaoTooltip','showHoaTooltip','showCungTooltip',
+    'showChinhTinhDetail','showSaoPanel','showCungPanel',
+    'togglePhiHoa','toggleSkitch','onCungClick','showTheDungPanel'
+  ];
+  GUARDED.forEach(fnName => {
+    const orig = window[fnName];
+    if (typeof orig !== 'function' || orig._guarded) return;
+    const wrapped = function(...args) {
+      if (!isActivated) { flashCodeBar(); return; }
+      return orig.apply(this, args);
+    };
+    wrapped._guarded = true;
+    window[fnName] = wrapped;
   });
-  el.style.borderColor = '#f0c040';
 }
 
-window.addEventListener('DOMContentLoaded', initAuth);
+function flashCodeBar() {
+  const cb = document.getElementById('codeBar');
+  if (!cb) return;
+  cb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  cb.style.transition = 'box-shadow .15s';
+  cb.style.boxShadow = '0 0 0 4px #c9a84ccc';
+  setTimeout(() => { cb.style.boxShadow = ''; }, 1400);
+}
+
+// Chạy guard liên tục mỗi 300ms cho đến khi tất cả hàm đã load
+// (các hàm nằm trong script thứ 2 load sau)
+let _guardInterval = null;
+function startGuardWatch() {
+  _guardInterval = setInterval(() => {
+    applyPremiumGuards();
+    // Dừng khi đã guard đủ hàm
+    const allGuarded = ['showSaoTooltip','showCungTooltip','togglePhiHoa','onCungClick']
+      .every(fn => typeof window[fn] === 'function' && window[fn]._guarded);
+    if (allGuarded) {
+      clearInterval(_guardInterval);
+      _guardInterval = null;
+    }
+  }, 300);
+  // Dừng tối đa sau 10 giây
+  setTimeout(() => { if (_guardInterval) clearInterval(_guardInterval); }, 10000);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+  startGuardWatch();
+});
 </script>
 <script charset="utf-8">
 // ============================================================
@@ -2271,10 +2593,37 @@ body:not(.light-mode) #traTuongPanel .tt-item{color:#3a2000}
 .lg-section-title{font-size:1.0rem;font-weight:900;color:var(--text2);margin-bottom:6px}
 .lg-title{font-size:1.3rem;font-weight:900;color:var(--text);margin-bottom:2px}
 .lg-subtitle{font-size:1.0rem;color:var(--text3);margin-bottom:10px}
+/* ── Login Wall Overlay ── */
+#loginWall{
+  display:flex;position:fixed;inset:0;z-index:8000;
+  background:rgba(10,7,0,.88);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;padding:20px;
+}
+#loginWall.hide{display:none !important}
+.lw-box{
+  background:#1a1400;border:2px solid #c9a84c;border-radius:16px;
+  padding:38px 42px;max-width:400px;width:100%;
+  box-shadow:0 20px 60px #000c;text-align:center;
+}
+.lw-box h2{font-size:1.2rem;font-weight:900;color:#f0c040;margin-bottom:10px}
+.lw-box p{font-size:.88rem;color:#b8a88a;line-height:1.7;margin-bottom:24px}
 </style>
 </head>
 <body>
-<div id="saveToast">✓ Đã lưu ảnh!</div>
+<!-- ── Login Wall — che toàn bộ khi chưa đăng nhập ── -->
+<div id="loginWall">
+  <div class="lw-box">
+    <div style="font-size:2.5rem;margin-bottom:12px">☯</div>
+    <h2>Tử Vi Mộc Lang</h2>
+    <p>Công cụ nội bộ — vui lòng đăng nhập để sử dụng</p>
+    <button class="btn-google" onclick="dangNhapGoogle()"
+      style="max-width:300px;margin:0 auto;padding:13px 20px;font-size:1rem;border-radius:10px;box-shadow:0 2px 8px #0004">
+      <svg viewBox="0 0 48 48" style="width:22px;height:22px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Đăng nhập bằng Google
+    </button>
+    <div id="lwAuthErr" style="min-height:18px;font-size:.82rem;color:#f87171;margin-top:12px"></div>
+  </div>
+</div>
 <div id="ttBox" class="tt-box"></div>
 <!-- btnLuanGiai removed -->
 <div id="phiHoaBar">
@@ -2289,7 +2638,7 @@ body:not(.light-mode) #traTuongPanel .tt-item{color:#3a2000}
   </div>
   <div style="margin-top:4px;border-top:1px solid #c9a84c44;padding-top:5px">
     <button id="btnSkitch" onclick="toggleSkitch()" title="Vẽ / Draw"
-      style="width:100%;padding:5px 2px;background:none;border:1.5px solid #ff8800;border-radius:6px;color:#ff8800;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .15s"
+      style="width:100%;padding:5px 2px;background:none;border:1.5px solid #ff8800;border-radius:6px;color:#ff8800;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .15s;display:none"
       onmouseenter="this.style.background='#1a0800'" onmouseleave="if(!this.classList.contains('active'))this.style.background='none'">✏ Vẽ</button>
   </div>
   <div id="skBar">
@@ -2343,10 +2692,13 @@ body:not(.light-mode) #traTuongPanel .tt-item{color:#3a2000}
 
 <header>
   <div><h1>☯ Tử Vi Mộc Lang</h1><p class="hdr-sub">Tử Vi Bắc Phái - Khâm Thiên Môn</p><p class="hdr-sub">Zalo Luận Giải: 0909794441</p></div>
-  <div style="display:flex;gap:8px;align-items:center">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <span id="userInfo" style="display:none"></span>
-    <button class="btn-action" id="btnAuth" onclick="showAuthModal('login')" style="border-color:#c9a84c;color:#c9a84c">🔑 Đăng nhập</button>
-    <button class="btn-action" id="btnLogout" onclick="dangXuat()" style="display:none;border-color:#f87171;color:#f87171">Đăng xuất</button>
+    <button class="btn-action" id="btnGoogleLogin" onclick="window.showAuthModal()" style="border-color:#c9a84c;color:#c9a84c;display:none">
+      <svg width="14" height="14" viewBox="0 0 48 48" style="margin-right:4px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Đăng nhập
+    </button>
+    <button class="btn-action" id="btnLogout" onclick="window.dangXuat()" style="display:none;border-color:#f87171;color:#f87171;font-size:.78rem">Đăng xuất</button>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☀ Sáng</button>
     <button class="theme-btn" onclick="toggleBanSang()" id="btnBanSang" style="font-size:.8rem;padding:6px 10px">🌅 Bàn Sáng</button>
   </div>
@@ -2453,14 +2805,20 @@ body:not(.light-mode) #traTuongPanel .tt-item{color:#3a2000}
       <div style="font-size:.75rem;color:var(--text3);margin-top:4px">Mặc định: năm hiện tại. Đổi để xem hạn năm khác.</div>
     </div>
   </div>
-  <button class="btn-submit" onclick="if(!currentUser){showAuthModal('login');return;}lapLaSo()">⭐ LẬP LÁ SỐ</button>
+  <button class="btn-submit" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">⭐ LẬP LÁ SỐ</button>
 </div>
-<!-- Thanh kích hoạt premium (hiện khi đăng nhập nhưng chưa premium) -->
-<div id="premiumBar" style="display:none;align-items:center;justify-content:center;gap:12px;padding:12px 20px;background:linear-gradient(90deg,#1a0d00,#2a1800);border:1px solid #c9a84c66;border-radius:10px;margin:12px 0;flex-wrap:wrap">
-  <span style="font-size:.95rem;color:#f0c040;font-weight:700">🔒 Mở khóa đầy đủ tính năng Tử Vi Mộc Lang</span>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button onclick="showActivationModal()" style="padding:8px 18px;background:#c9a84c;border:none;border-radius:6px;color:#000;font-weight:900;cursor:pointer;font-size:.9rem">🔑 Nhập mã kích hoạt</button>
-    <button onclick="showUpgradeModal()" style="padding:8px 18px;background:transparent;border:1px solid #c9a84c;border-radius:6px;color:#c9a84c;font-weight:700;cursor:pointer;font-size:.9rem">💳 Mua gói</button>
+<!-- Thanh nhập code kích hoạt (hiện sau đăng nhập, ẩn khi đã kích hoạt) -->
+<div id="codeBar">
+  <span class="code-msg">🔑 Nhập mã để mở đầy đủ tính năng</span>
+  <div class="code-input-wrap">
+    <input type="text" id="inlineCodeInput" placeholder="VD: TUVI-3M-XXXXXX" onkeydown="if(event.key==='Enter')submitInlineCode()" oninput="this.value=this.value.toUpperCase()">
+    <button class="code-btn" id="inlineCodeBtn" onclick="submitInlineCode()">Kích hoạt</button>
+  </div>
+  <div style="width:100%;text-align:center">
+    <div id="codeBarMsg"></div>
+    <div style="font-size:.78rem;color:#a07830;margin-top:6px">
+      Cần <span style="color:#c9a84c;cursor:pointer;font-weight:700;text-decoration:underline" onclick="showAuthModal()">đăng nhập Google</span> để kích hoạt &nbsp;·&nbsp; Chưa có mã? Nhắn Zalo <a href="https://zalo.me/0909794441" target="_blank" style="color:#c9a84c;font-weight:700">0909794441</a>
+    </div>
   </div>
 </div>
 <div id="loader"><div class="spinner"></div>Đang tính toán...</div>
@@ -4252,10 +4610,14 @@ async function lapLaSo(){
   const ns=`${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
   const btn=document.querySelector('.btn-submit');btn.disabled=true;
   document.getElementById('loader').style.display='block';document.getElementById('result').style.display='none';document.getElementById('errorBox').style.display='none';
+  // Tự động detect URL server: nếu chạy local dùng localhost, còn lại dùng cùng origin
+  const API_URL = window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'
+    ? 'http://localhost:5000'
+    : window.location.origin;
   try{const res=await fetch(`${API_URL}/api/lap-laso`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hoTen:document.getElementById('hoTen').value,gioiTinh:document.getElementById('gioiTinh').value,lichLoai:document.getElementById('lichLoai').value,ngaySinh:ns,gioSinh:document.getElementById('gioSinh').value,muiGio:parseFloat(document.getElementById('muiGio').value),thanhPho:curCity?.n||'',quocGia:document.getElementById('quocGia').value,thangNhuan:document.getElementById('lichLoai').value==='am'&&document.getElementById('thangNhuan').checked})});
   const data=await res.json();document.getElementById('loader').style.display='none';btn.disabled=false;
   if(data.status!=='success'){document.getElementById('errorBox').textContent='⚠️ '+data.message;document.getElementById('errorBox').style.display='block';return;}
-  render(data);}catch(e){document.getElementById('loader').style.display='none';btn.disabled=false;document.getElementById('errorBox').textContent='❌ Không kết nối server. Hãy chạy: python app.py';document.getElementById('errorBox').style.display='block';}
+  render(data);}catch(e){document.getElementById('loader').style.display='none';btn.disabled=false;document.getElementById('errorBox').textContent='❌ Không kết nối được server. Kiểm tra app.py đã chạy chưa, hoặc mở file bằng http:// thay vì file://';document.getElementById('errorBox').style.display='block';}
 }
 
 function onLichLoaiChange(){
@@ -4315,14 +4677,14 @@ function render(d){
     ${daiVanCungHienTai>=0?`<span class="badge" style="background:#001a0a;color:#52b788;border:1px solid #2d6a4f">📅 Đại Vận: ${dvMap[daiVanCungHienTai]}–${dvMap[daiVanCungHienTai]+9} tuổi</span>`:''}
   </div>
   <div class="btn-row">
-    <button class="btn-action" id="btnNhapQuai" onclick="if(!checkPremium())return;toggleNhapQuai()" style="border-color:#a855f7;color:#a855f7;margin-right:4px">🔮 Nhập Quái</button><div style="position:relative;display:inline-block;margin-right:4px"><button class="btn-action" id="btnNhapQuaiCan" onclick="if(!checkPremium())return;toggleNhapQuaiCanMenu()" style="border-color:#a855f7;color:#a855f7;padding:6px 8px;font-size:.8rem" title="Nhập quái theo Thiên Can">天</button><div id="nhapQuaiCanMenu" style="display:none;position:absolute;left:0;top:100%;z-index:600;background:var(--bg2);border:1.5px solid #a855f7;border-radius:8px;padding:4px 0;box-shadow:0 4px 16px #a855f744;min-width:80px">${['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'].map((c,i)=>`<div class="nhapquai-can-item" data-can="${i}" onclick="selectNhapQuaiCan(${i})" style="padding:6px 14px;cursor:pointer;font-size:.9rem;color:#e879f9;font-weight:700">${c}</div>`).join('')}</div></div>
+    <button class="btn-action" id="btnNhapQuai" onclick="if(!window.checkPremium())return;toggleNhapQuai()" style="border-color:#a855f7;color:#a855f7;margin-right:4px;display:none">🔮 Nhập Quái</button><div style="position:relative;display:inline-block;margin-right:4px"><button class="btn-action" id="btnNhapQuaiCan" onclick="if(!window.checkPremium())return;toggleNhapQuaiCanMenu()" style="border-color:#a855f7;color:#a855f7;padding:6px 8px;font-size:.8rem;display:none" title="Nhập quái theo Thiên Can">天</button><div id="nhapQuaiCanMenu" style="display:none;position:absolute;left:0;top:100%;z-index:600;background:var(--bg2);border:1.5px solid #a855f7;border-radius:8px;padding:4px 0;box-shadow:0 4px 16px #a855f744;min-width:80px">${['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'].map((c,i)=>`<div class="nhapquai-can-item" data-can="${i}" onclick="selectNhapQuaiCan(${i})" style="padding:6px 14px;cursor:pointer;font-size:.9rem;color:#e879f9;font-weight:700">${c}</div>`).join('')}</div></div>
     <button class="btn-action" id="btnSave" onclick="saveImage()">💾 Save</button>
     <button class="btn-action" id="btnInfo" onclick="toggleCenterInfo()">ℹ Thông Tin</button>
     <button class="btn-action" id="btnArrows" onclick="toggleArrows()">👁 Mũi Tên</button>
     <button class="btn-action dv" id="btnDaiVan" onclick="toggleDaiVan()">📅 Đại Vận</button>
     <button class="btn-action ln" id="btnLuuNien" onclick="toggleLuuNien()">🗓 Lưu Niên</button>
-    <button class="btn-action ln" id="btnLuuTuHoa" onclick="if(!checkPremium())return;toggleLuuTuHoa()" style="border-color:#a855f7;color:#a855f7">🔮 L.Tứ hóa</button>
-    <button class="btn-action" id="btnTraTuong" onclick="if(!checkPremium())return;toggleTraTuong()" style="border-color:#d97706;color:#d97706">🔍 Tra Tượng</button>
+    <button class="btn-action ln" id="btnLuuTuHoa" onclick="if(!window.checkPremium())return;toggleLuuTuHoa()" style="border-color:#a855f7;color:#a855f7;display:none">🔮 L.Tứ hóa</button>
+    <button class="btn-action" id="btnTraTuong" onclick="if(!window.checkPremium())return;toggleTraTuong()" style="border-color:#d97706;color:#d97706;display:none">🔍 Tra Tượng</button>
   </div>
   <div class="ban-area">
   <div id="drawPad">
@@ -4422,6 +4784,8 @@ function render(d){
   const el=document.getElementById('result');el.innerHTML=h;el.style.display='block';
   // Cập nhật lại trạng thái premium sau khi render
   updateUI();
+  // Tái áp dụng guards ngay sau khi render HTML mới
+  applyPremiumGuards();
 
   cachedCungData=d;theCungIdx=null;skActive=false;const oldC=document.getElementById('drawCanvas');if(oldC)oldC.remove();skCanvas=null;skHistory=[];skDrawing=false;
   selectedCungForLuan=-1;
@@ -4438,11 +4802,10 @@ function render(d){
     drawAllArrows(lyTamList,huongTamList);
     initSkCanvas();
   },200);
-  // Hiện phi hóa bar và đặt vị trí
+  // Hiện phi hóa bar và đặt vị trí — chỉ khi đã kích hoạt Premium
   const phBar=document.getElementById('phiHoaBar');
-  if(phBar){
+  if(phBar && isActivated){
     phBar.classList.add('show');
-
   }
   // Vẽ lại mũi tên khi resize để luôn bám đúng vị trí cung-chuc
   if(window._arrowResizeObserver)window._arrowResizeObserver.disconnect();
@@ -9933,33 +10296,22 @@ function doTraTuong(){
 </script>
 <!-- ── Modal Đăng nhập / Đăng ký ── -->
 <div id="authModal" class="modal-overlay" onclick="if(event.target===this)hideAuthModal()">
-  <div class="modal-box" style="position:relative">
+  <div class="modal-box" style="position:relative;text-align:center;padding:36px 32px 28px">
     <button class="modal-close" onclick="hideAuthModal()">✕</button>
-    <div class="modal-title">☯ Tử Vi Mộc Lang</div>
-    <div class="auth-tabs">
-      <button class="auth-tab-btn active" id="tabBtnLogin" onclick="switchAuthTab('login')">Đăng nhập</button>
-      <button class="auth-tab-btn" id="tabBtnRegister" onclick="switchAuthTab('register')">Đăng ký</button>
-    </div>
-
-    <!-- Tab Đăng nhập -->
-    <div id="tabLogin">
-      <div class="auth-field"><label>Email</label><input type="email" id="loginEmail" placeholder="email@example.com" onkeydown="if(event.key==='Enter')submitLogin()"></div>
-      <div class="auth-field"><label>Mật khẩu</label><input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')submitLogin()"></div>
-      <button class="auth-submit" id="authSubmitBtn" onclick="submitLogin()">Đăng nhập</button>
-      <div class="auth-footer">Chưa có tài khoản? <a onclick="switchAuthTab('register')">Đăng ký ngay</a></div>
-    </div>
-
-    <!-- Tab Đăng ký -->
-    <div id="tabRegister" style="display:none">
-      <div class="auth-field"><label>Họ tên</label><input type="text" id="regName" placeholder="Nguyễn Văn A"></div>
-      <div class="auth-field"><label>Email</label><input type="email" id="regEmail" placeholder="email@example.com"></div>
-      <div class="auth-field"><label>Mật khẩu</label><input type="password" id="regPass" placeholder="Tối thiểu 6 ký tự"></div>
-      <div class="auth-field"><label>Xác nhận mật khẩu</label><input type="password" id="regPass2" placeholder="Nhập lại mật khẩu"></div>
-      <button class="auth-submit" id="authSubmitBtn" onclick="submitRegister()">Tạo tài khoản</button>
-      <div class="auth-footer">Đã có tài khoản? <a onclick="switchAuthTab('login')">Đăng nhập</a></div>
-    </div>
-
-    <div class="auth-error" id="authError"></div>
+    <div style="font-size:2.2rem;margin-bottom:10px">☯</div>
+    <div class="modal-title" style="margin-bottom:6px">Tử Vi Mộc Lang</div>
+    <p style="font-size:.85rem;color:var(--text3,#888);margin-bottom:24px;line-height:1.6">
+      Đăng nhập để kích hoạt mã Premium<br>
+      <span style="font-size:.78rem">Không cần mật khẩu — nhanh chóng &amp; bảo mật</span>
+    </p>
+    <button class="btn-google" onclick="dangNhapGoogle()" style="max-width:320px;margin:0 auto 6px;padding:13px 20px;font-size:1rem;border-radius:10px;box-shadow:0 2px 8px #0002">
+      <svg viewBox="0 0 48 48" style="width:22px;height:22px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Tiếp tục với Google
+    </button>
+    <div class="auth-error" id="authError" style="margin-top:12px"></div>
+    <p style="margin-top:16px;font-size:.75rem;color:var(--text3,#888)">
+      Chỉ dùng để xác thực · Không đăng thứ gì thay bạn
+    </p>
   </div>
 </div>
 
@@ -9987,47 +10339,57 @@ function doTraTuong(){
 
 <!-- ── Modal Nâng cấp Premium ── -->
 <div id="upgradeModal" class="modal-overlay" onclick="if(event.target===this)hideUpgradeModal()">
-  <div class="upgrade-box" style="position:relative;max-width:440px">
+  <div class="upgrade-box" style="position:relative">
     <button class="modal-close" onclick="hideUpgradeModal()">✕</button>
+
     <div class="upgrade-icon">👑</div>
     <div class="upgrade-title">Tử Vi Mộc Lang Premium</div>
+
     <div class="upgrade-desc">
-      ✅ Nhập Quái & An Thiên Can<br>
-      ✅ Lập Cực — Thể Dụng<br>
-      ✅ Tra Tượng 672 Phi Hóa<br>
-      ✅ Luận Giải AI tự động<br>
-      ✅ Lưu & quản lý lá số
+      <span>✅ Nhập Quái &amp; An Thiên Can</span>
+      <span>✅ Lập Cực — Thể Dụng</span>
+      <span>✅ Tra Tượng 672 Phi Hóa</span>
+      <span>✅ Luận Giải AI tự động</span>
+      <span>✅ Lưu &amp; quản lý lá số</span>
     </div>
+
     <!-- Bảng giá -->
-    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;flex-wrap:wrap">
-      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c44;border-radius:10px;text-align:center;cursor:pointer" onclick="selectPlan(this,'1month')">
-        <div style="font-size:.8rem;color:#888;margin-bottom:4px">1 THÁNG</div>
-        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">299k</div>
+    <div class="plan-grid">
+      <div class="plan-card" onclick="selectPlan(this,'1month')">
+        <div class="plan-label">1 Tháng</div>
+        <div class="plan-price">199k</div>
       </div>
-      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c;border-radius:10px;text-align:center;cursor:pointer;position:relative" onclick="selectPlan(this,'3month')">
-        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#c9a84c;color:#000;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:10px">PHỔ BIẾN</div>
-        <div style="font-size:.8rem;color:#888;margin-bottom:4px">3 THÁNG</div>
-        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">799k</div>
-        <div style="font-size:.72rem;color:#52b788">~266k/tháng</div>
+      <div class="plan-card selected" onclick="selectPlan(this,'3month')">
+        <div class="plan-badge">✦ PHỔ BIẾN</div>
+        <div class="plan-label">3 Tháng</div>
+        <div class="plan-price">549k</div>
+        <div class="plan-per">~183k/tháng</div>
       </div>
-      <div style="flex:1;min-width:110px;padding:14px 10px;background:#1a0d00;border:2px solid #c9a84c44;border-radius:10px;text-align:center;cursor:pointer" onclick="selectPlan(this,'6month')">
-        <div style="font-size:.8rem;color:#888;margin-bottom:4px">6 THÁNG</div>
-        <div style="font-size:1.2rem;font-weight:900;color:#f0c040">1,499k</div>
-        <div style="font-size:.72rem;color:#52b788">~250k/tháng</div>
+      <div class="plan-card" onclick="selectPlan(this,'6month')">
+        <div class="plan-label">6 Tháng</div>
+        <div class="plan-price">1.000k</div>
+        <div class="plan-per">~167k/tháng</div>
       </div>
     </div>
+
     <!-- Thanh toán -->
-    <div style="background:#0d0900;border-radius:8px;padding:14px;margin-bottom:14px;font-size:.88rem;color:var(--text2,#b8a88a);line-height:1.8">
-      <b style="color:#f0c040">Chuyển khoản:</b><br>
-      🏦 Vietcombank · STK: <b style="color:#f0c040">1234567890</b><br>
-      👤 NGUYEN VAN A<br>
-      📝 Nội dung: <b style="color:#f0c040">[email] premium [gói]</b>
+    <div class="payment-box">
+      <div class="p-label">🏦 Chuyển khoản</div>
+      <div>Vietcombank &nbsp;·&nbsp; STK: <span class="p-val">1234567890</span></div>
+      <div>Chủ TK: <span class="p-val">NGUYEN VAN A</span></div>
+      <div>Nội dung: <span class="p-val">[SĐT] premium [gói]</span></div>
     </div>
-    <a class="upgrade-btn" href="https://zalo.me/0909794441" target="_blank">💬 Nhắn Zalo nhận mã ngay</a>
-    <div style="margin-top:10px;font-size:.8rem;color:#888">
-      Sau khi chuyển khoản → nhận mã qua Zalo → 
-      <span style="color:#c9a84c;cursor:pointer" onclick="hideUpgradeModal();showActivationModal()">nhập mã tại đây</span>
+
+    <a class="zalo-btn" href="https://zalo.me/0909794441" target="_blank">
+      <svg width="22" height="22" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="24" fill="#fff"/><text x="24" y="31" text-anchor="middle" font-size="18" font-weight="900" fill="#0068ff" font-family="Arial">Z</text></svg>
+      Nhắn Zalo nhận mã ngay
+    </a>
+
+    <div class="upgrade-footer" style="margin-top:10px">
+      Sau khi chuyển khoản → nhận mã qua Zalo →
+      <a onclick="hideUpgradeModal();showActivationModal()">nhập mã tại đây</a>
     </div>
+
     <span class="upgrade-cancel" onclick="hideUpgradeModal()">Để sau</span>
   </div>
 </div>
