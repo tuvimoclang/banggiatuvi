@@ -391,7 +391,7 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
         <option value="used">Đã kích hoạt</option>
         <option value="expired">Hết hạn</option>
       </select>
-      <button class="btn btn-red btn-sm" onclick="clearAllUsed()" style="margin-left:auto">🗑 Xoá mã đã dùng</button>
+      <button class="btn btn-outline btn-sm" onclick="loadAndRender()" style="margin-left:auto">🔄 Làm mới</button>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Xuất CSV</button>
     </div>
     <div class="tbl-wrap">
@@ -703,7 +703,7 @@ function renderTable() {
       <td><span class="badge ${badgeClassMap[c.status]||'badge-expired'}">${badgeTextMap[c.status]||c.status}</span></td>
       <td style="font-size:.82rem;white-space:nowrap">${c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : '—'}</td>
       <td style="white-space:nowrap">
-        ${c.status === 'active' ? `<button class="btn btn-red btn-sm" onclick="revokeCode('${c.code}')">Huỷ</button>` : ''}
+        ${(c.status === 'active' || c.status === 'used') ? `<button class="btn btn-red btn-sm" onclick="revokeCode('${c.code}')">Huỷ</button>` : ''}
         ${c.status === 'used' ? `<span style="font-size:.78rem;color:#818cf8">Đã kích hoạt bởi ${c.usedBy||'—'}</span>` : ''}
       </td>
     </tr>`;
