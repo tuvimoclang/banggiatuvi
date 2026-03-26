@@ -377,9 +377,28 @@ function updateUI() {
       : '👤';
     if (userInfo) {
       userInfo.style.display = 'inline-flex';
-      userInfo.innerHTML = isActivated
-        ? `👑 ${shortName} <span style="font-size:.7rem;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:4px;padding:1px 6px;margin-left:4px">Premium</span>`
-        : `${avatarHtml} ${shortName}`;
+      if (isActivated) {
+        // Lấy hạn sử dụng từ localStorage
+        let expireLabel = '';
+        try {
+          const saved = JSON.parse(localStorage.getItem(getStoreKey(currentUser.email)) || 'null');
+          if (saved) {
+            if (saved.expireAt === 'lifetime') {
+              expireLabel = 'Vĩnh viễn';
+            } else {
+              const d = new Date(saved.expireAt);
+              const now = new Date();
+              const daysLeft = Math.ceil((d - now) / 86400000);
+              expireLabel = daysLeft > 0
+                ? `HH: ${d.toLocaleDateString('vi-VN')} (còn ${daysLeft} ngày)`
+                : `⚠️ Hết hạn ${d.toLocaleDateString('vi-VN')}`;
+            }
+          }
+        } catch {}
+        userInfo.innerHTML = `👑 ${shortName} <span style="font-size:.7rem;background:#c9a84c22;border:1px solid #c9a84c44;border-radius:4px;padding:1px 6px;margin-left:4px">Premium · ${expireLabel}</span>`;
+      } else {
+        userInfo.innerHTML = `${avatarHtml} ${shortName}`;
+      }
     }
     if (btnLogout) btnLogout.style.display = 'inline-flex';
     if (btnGL)     btnGL.style.display     = 'none';
@@ -486,15 +505,36 @@ async function submitInlineCode() {
   const expireAt = days === 'lifetime' ? 'lifetime' : new Date(Date.now() + days*86400000).toISOString();
 
   // Lưu vào localStorage theo email
+  const activatedAt = new Date().toISOString();
   localStorage.setItem(getStoreKey(currentUser.email), JSON.stringify({
-    code, plan, expireAt, activatedAt: new Date().toISOString()
+    code, plan, expireAt, activatedAt
   }));
   localStorage.setItem(usedKey, currentUser.email); // đánh dấu mã đã dùng
+
+  // ✅ Đồng bộ ngược vào tuvi_admin_codes để trang admin thấy trạng thái
+  syncCodeToAdmin(code, currentUser.email, activatedAt);
 
   const expireStr = expireAt === 'lifetime' ? 'Vĩnh viễn' : new Date(expireAt).toLocaleDateString('vi-VN');
   msg.style.color='#52b788';
   msg.textContent=`✅ Kích hoạt thành công! Gói ${PLAN_LABEL[plan]} · Hết hạn: ${expireStr}`;
   isActivated = true; updateUI(); btn.disabled=false;
+}
+
+// ============================================================
+// ĐỒNG BỘ VỚI ADMIN — cập nhật tuvi_admin_codes khi khách kích hoạt
+// ============================================================
+function syncCodeToAdmin(code, email, activatedAt) {
+  try {
+    const ADMIN_KEY = 'tuvi_admin_codes';
+    const codes = JSON.parse(localStorage.getItem(ADMIN_KEY) || '[]');
+    const found = codes.find(c => c.id === code);
+    if (found) {
+      found.status = 'used';
+      found.usedAt = new Date(activatedAt).getTime();
+      found.usedBy = email;
+      localStorage.setItem(ADMIN_KEY, JSON.stringify(codes));
+    }
+  } catch(e) { console.warn('syncCodeToAdmin:', e); }
 }
 
 // ============================================================
