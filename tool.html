@@ -4244,121 +4244,222 @@ function toggleArrows(){
 }
 function toggleDaiVan(){daiVanMode=!daiVanMode;document.getElementById('btnDaiVan').classList.toggle('active',daiVanMode);document.getElementById('btnDaiVan').textContent=daiVanMode?'📅 Tắt Đại Vận':'📅 Đại Vận';document.querySelectorAll('.dv-name-label').forEach(el=>el.classList.toggle('show',daiVanMode));}
 
-function saveImage(){
-  const bw=document.getElementById('banWrap');
-  if(!bw){alert('Chưa có lá số!');return;}
-  const btn=document.getElementById('btnSave');
-  if(btn){btn.disabled=true;btn.textContent='⏳...';}
+// ══════════════════════════════════════════════════════════════
+// SAVE IMAGE — Refactored: null-safe, crisp PNG, arrows intact
+// ══════════════════════════════════════════════════════════════
 
-  const bg=isLight?'#fdf5dc':'#0a0800';
-  const M=90; // margin around board for overflow arrows
+/** Step 1: Locate the single export root and validate it exists */
+function getExportRoot() {
+  const root = document.getElementById('banWrap');
+  if (!root) { console.error('[saveImage] Missing #banWrap'); return null; }
+  return root;
+}
 
-  // Tạm bỏ zoom để html2canvas chụp đúng kích thước
-  const htmlEl=document.documentElement;
-  const origZoom=htmlEl.style.zoom||'';
-  htmlEl.style.zoom='1';
+/** Step 2: Measure the TRUE layout bounds (pre-transform, no zoom distortion) */
+function getChartExportBounds(root) {
+  // offsetWidth/offsetHeight give layout size before CSS zoom on <html>
+  const W = root.offsetWidth;
+  const H = root.offsetHeight;
+  if (!W || !H) { console.error('[saveImage] banWrap has zero size'); return null; }
+  return { W, H };
+}
 
-  // Đợi 1 frame để layout re-render sau khi bỏ zoom
-  requestAnimationFrame(()=>{
-  const BW=bw.offsetWidth, BH=bw.offsetHeight;
-  const SCALE=2;
+/**
+ * Step 3: Export banWrap (DOM) + banSVG (arrows) into a single canvas.
+ * - DPR-aware for crispness
+ * - SVG is composited IN the same coordinate space as the board
+ * - M px margin on all sides to catch overflowing arrowheads
+ */
+function exportChartToCanvas(root, bounds, bgColor) {
+  return new Promise((resolve, reject) => {
+    const { W, H } = bounds;
+    const M = 90; // margin for overflow arrows
+    const dpr = Math.max(window.devicePixelRatio || 1, 2); // min 2× for sharpness
 
-  // Step 1: capture banWrap DOM (without SVG) via html2canvas
-  const liveSVG=document.getElementById('banSVG');
-  if(liveSVG) liveSVG.style.display='none';
+    // ── Hide SVG so html2canvas only captures DOM ──
+    const liveSVG = document.getElementById('banSVG');
+    if (liveSVG) liveSVG.style.visibility = 'hidden'; // visibility keeps layout
 
-  html2canvas(bw,{
-    backgroundColor:bg,scale:SCALE,useCORS:true,logging:false,allowTaint:true,
-    width:BW,height:BH,
-  }).then(boardCanvas=>{
-    if(liveSVG) liveSVG.style.display='';
-    // Khôi phục zoom
-    htmlEl.style.zoom=origZoom;
+    // ── Temporarily remove html zoom so html2canvas measures correctly ──
+    const htmlEl = document.documentElement;
+    const origZoom = htmlEl.style.zoom || '';
+    htmlEl.style.zoom = '1';
 
-    // Step 2: serialize SVG to data URL then draw onto a larger canvas
-    const liveSVG2=document.getElementById('banSVG');
-    if(!liveSVG2){
-      // No SVG, just download board
-      finish(boardCanvas); return;
-    }
+    // Wait for layout to settle after zoom reset
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
 
-    // Build final canvas with margin
-    const out=document.createElement('canvas');
-    out.width=(BW+M*2)*SCALE;
-    out.height=(BH+M*2)*SCALE;
-    const ctx=out.getContext('2d');
+        html2canvas(root, {
+          backgroundColor: bgColor,
+          scale: dpr,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          width: W,
+          height: H,
+          scrollX: 0,
+          scrollY: 0,
+        }).then(boardCanvas => {
 
-    // Fill background
-    ctx.fillStyle=bg;
-    ctx.fillRect(0,0,out.width,out.height);
+          // ── Restore SVG and zoom immediately ──
+          if (liveSVG) liveSVG.style.visibility = '';
+          htmlEl.style.zoom = origZoom;
 
-    // Draw board centered with margin
-    ctx.drawImage(boardCanvas,M*SCALE,M*SCALE);
+          // ── Build output canvas: board + margin ──
+          const outW = (W + M * 2);
+          const outH = (H + M * 2);
+          const out = document.createElement('canvas');
+          out.width  = outW * dpr;
+          out.height = outH * dpr;
+          out.style.width  = outW + 'px';
+          out.style.height = outH + 'px';
 
-    // Draw SVG overlay: serialize → Blob → Image
-    const ser=new XMLSerializer();
-    let svgStr=ser.serializeToString(liveSVG2);
+          const ctx = out.getContext('2d');
+          ctx.scale(dpr, dpr); // all drawing in logical px below
 
-    // The SVG is position:absolute top:0 left:0 inside banWrap
-    // Its drawn coordinates are relative to banWrap
-    // We need to render it at offset (M,M) on the output canvas
-    // Expand SVG viewBox to include the overflow area
-    svgStr=svgStr
-      .replace(/width="(\d+)"/, `width="${BW+M*2}"`)
-      .replace(/height="(\d+)"/, `height="${BH+M*2}"`)
-      .replace(/<svg /, `<svg viewBox="${-M} ${-M} ${BW+M*2} ${BH+M*2}" `);
+          // Fill solid background
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, outW, outH);
 
-    const blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const img=new Image();
-    img.onload=()=>{
-      ctx.drawImage(img,0,0,out.width,out.height);
-      URL.revokeObjectURL(url);
-      finish(out);
-    };
-    img.onerror=()=>{ URL.revokeObjectURL(url); finish(boardCanvas); };
-    img.src=url;
-  }).catch(e=>{
-    if(liveSVG) liveSVG.style.display='';
-    htmlEl.style.zoom=origZoom;
-    alert('Lỗi: '+e.message);
-    if(btn){btn.disabled=false;btn.textContent='💾 Lưu ảnh';}
+          // Draw board with margin offset
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(boardCanvas, M, M, W, H);
+
+          // ── Now draw SVG arrows on top ──
+          const svgEl = document.getElementById('banSVG');
+          if (!svgEl) {
+            // No SVG — return board-only canvas
+            return resolve(out);
+          }
+
+          // Serialize SVG
+          const ser = new XMLSerializer();
+          let svgStr = ser.serializeToString(svgEl);
+
+          // The SVG viewport matches banWrap (W×H), arrows use banWrap-local coords.
+          // We need to shift them by M so they land correctly over the board.
+          // Strategy: expand the SVG's viewBox so coords (-M,-M) to (W+M, H+M) are visible,
+          // set physical size to (W+2M) × (H+2M), then draw at (0,0) on output canvas.
+          const vbX = -M, vbY = -M, vbW = W + M * 2, vbH = H + M * 2;
+
+          // Remove any existing width/height/viewBox attrs then inject correct ones
+          svgStr = svgStr
+            .replace(/\s+width="[^"]*"/, '')
+            .replace(/\s+height="[^"]*"/, '')
+            .replace(/\s+viewBox="[^"]*"/, '');
+          // Inject after first <svg
+          svgStr = svgStr.replace('<svg ', `<svg width="${vbW}" height="${vbH}" viewBox="${vbX} ${vbY} ${vbW} ${vbH}" `);
+
+          const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+          const url  = URL.createObjectURL(blob);
+          const img  = new Image();
+
+          img.onload = () => {
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, 0, 0, outW, outH);
+            URL.revokeObjectURL(url);
+            resolve(out);
+          };
+          img.onerror = () => {
+            console.warn('[saveImage] SVG render failed — saving without arrows');
+            URL.revokeObjectURL(url);
+            resolve(out); // still resolve with board-only
+          };
+          img.src = url;
+
+        }).catch(err => {
+          if (liveSVG) liveSVG.style.visibility = '';
+          htmlEl.style.zoom = origZoom;
+          reject(err);
+        });
+
+      }); // rAF 2
+    }); // rAF 1
   });
+}
 
-  function finish(canvas){
-    const fileName=`TuVi_${cachedCungData?.thongTin?.hoTen?.replace(/\s+/g,'_')||'laso'}.png`;
-    if(window.showSaveFilePicker){
-      // Modern API: show Save dialog with folder picker
-      canvas.toBlob(async blob=>{
-        try{
-          const fh=await window.showSaveFilePicker({
-            suggestedName:fileName,
-            types:[{description:'PNG Image',accept:{'image/png':['.png']}}]
-          });
-          const ws=await fh.createWritable();
-          await ws.write(blob);
-          await ws.close();
-          document.getElementById('saveToast').style.display='block';
-          setTimeout(()=>document.getElementById('saveToast').style.display='none',2500);
-        }catch(e){
-          if(e.name!=='AbortError') alert('Lỗi lưu file: '+e.message);
-        }
-        htmlEl.style.zoom=origZoom;
-        if(btn){btn.disabled=false;btn.textContent='💾 Lưu ảnh';}
-      },'image/png');
-    } else {
-      // Fallback: auto-download to Downloads folder
-      const link=document.createElement('a');
-      link.download=fileName;
-      link.href=canvas.toDataURL('image/png');
-      link.click();
-      document.getElementById('saveToast').style.display='block';
-      setTimeout(()=>document.getElementById('saveToast').style.display='none',2500);
-      htmlEl.style.zoom=origZoom;
-      if(btn){btn.disabled=false;btn.textContent='💾 Lưu ảnh';}
+/** Step 4: Convert canvas to Blob */
+function exportChartToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    try {
+      canvas.toBlob(blob => {
+        if (blob) resolve(blob);
+        else reject(new Error('toBlob returned null'));
+      }, 'image/png');
+    } catch(e) { reject(e); }
+  });
+}
+
+/** Step 5: Trigger download / File picker */
+async function saveChart(canvas) {
+  const btn      = document.getElementById('btnSave');
+  const toast    = document.getElementById('saveToast');
+  const hoTen    = (typeof cachedCungData !== 'undefined' && cachedCungData?.thongTin?.hoTen) || '';
+  const fileName = `TuVi_${hoTen.replace(/\s+/g,'_') || 'laso'}.png`;
+
+  const showToast = () => {
+    if (toast) {
+      toast.style.display = 'block';
+      setTimeout(() => { if (toast) toast.style.display = 'none'; }, 2500);
     }
+  };
+  const resetBtn = () => {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save'; }
+  };
+
+  if (window.showSaveFilePicker) {
+    let blob;
+    try { blob = await exportChartToBlob(canvas); } catch(e) { resetBtn(); throw e; }
+    try {
+      const fh = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }]
+      });
+      const ws = await fh.createWritable();
+      await ws.write(blob);
+      await ws.close();
+      showToast();
+    } catch(e) {
+      if (e.name !== 'AbortError') alert('Lỗi lưu file: ' + e.message);
+    }
+  } else {
+    // Fallback download
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast();
   }
-  }); // end requestAnimationFrame
+  resetBtn();
+}
+
+/** Main entry — called by 💾 Save button */
+async function saveImage() {
+  // ── Guard: export root must exist ──
+  const root = getExportRoot();
+  if (!root) { alert('Chưa có lá số!'); return; }
+
+  const btn = document.getElementById('btnSave');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+
+  // ── Guard: bounds must be valid ──
+  const bounds = getChartExportBounds(root);
+  if (!bounds) {
+    alert('Không đọc được kích thước lá số!');
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save'; }
+    return;
+  }
+
+  const bgColor = (typeof isLight !== 'undefined' && isLight) ? '#fdf5dc' : '#0a0800';
+
+  try {
+    const canvas = await exportChartToCanvas(root, bounds, bgColor);
+    await saveChart(canvas);
+  } catch(e) {
+    console.error('[saveImage] Export failed:', e);
+    alert('Lỗi xuất ảnh: ' + (e.message || e));
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save'; }
+  }
 }
 
 
