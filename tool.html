@@ -2285,7 +2285,7 @@ header p.hdr-sub{font-size:1rem;color:#f5c842;margin-top:4px;font-weight:600;tex
 @media(max-width:700px){.info-bar,.info-bar-row2{grid-template-columns:repeat(2,1fr)}#cucPanel{width:calc(100vw - 24px);right:12px}#luanGiaiBox{width:calc(100vw - 16px)}}
 
 /* ── Phi Hóa Tool ── */
-#phiHoaBar{display:none;position:fixed;left:0;top:calc(50% - 150px);z-index:501;background:var(--bg2);border:2px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:8px 7px 8px 5px;flex-direction:column;align-items:stretch;gap:5px;box-shadow:4px 0 24px #c9a84c44;width:auto;overflow:visible;height:auto;max-height:none}
+#phiHoaBar{display:none;position:fixed;left:0;top:calc(50% - 150px);z-index:501;background:var(--bg2);border:2px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:8px 7px 14px 5px;flex-direction:column;align-items:stretch;gap:5px;box-shadow:4px 0 24px #c9a84c44;width:auto;overflow:visible;height:auto;max-height:none;min-height:fit-content}
 #phiHoaBar.show{display:flex}
 #skBar.show{display:flex}
 .phi-btn-row{display:flex;gap:4px}
@@ -3974,6 +3974,21 @@ function _removeTextOverlay(){
   if(_textOverlay){_textOverlay.remove();_textOverlay=null;}
 }
 
+function clampPhiHoaBarToViewport(){
+  const ph=document.getElementById('phiHoaBar');
+  if(!ph||!ph.classList.contains('show'))return;
+  ph.style.top='';
+  requestAnimationFrame(()=>{
+    const h=ph.offsetHeight;
+    const vh=window.innerHeight;
+    const margin=8;
+    let t=Math.round(vh/2-h/2);
+    if(t+h+margin>vh)t=vh-h-margin;
+    if(t<margin)t=margin;
+    ph.style.top=t+'px';
+  });
+}
+
 function toggleSkitch(){
   skActive=!skActive;
   const btn=document.getElementById('btnSkitch'),bar=document.getElementById('skBar');
@@ -3984,6 +3999,7 @@ function toggleSkitch(){
     skCanvas.style.pointerEvents='all';
     btn.classList.add('active');btn.textContent='✏ Tắt Vẽ';
     bar.classList.add('show');
+    setTimeout(clampPhiHoaBarToViewport,30);
     document.querySelectorAll('.cung').forEach(el=>el.style.pointerEvents='none');
     // Lắng nghe click toàn trang cho text tool
     _createTextOverlay();
@@ -3993,6 +4009,7 @@ function toggleSkitch(){
     skCanvas.style.cursor='default';
     btn.classList.remove('active');btn.textContent='✏ Vẽ';
     bar.classList.remove('show');
+    clampPhiHoaBarToViewport();
     document.querySelectorAll('.cung').forEach(el=>el.style.pointerEvents='');
     _removeTextOverlay();
     skDrawing=false;
