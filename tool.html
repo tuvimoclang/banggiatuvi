@@ -2049,39 +2049,88 @@ header p.hdr-sub{font-size:1rem;color:#f5c842;margin-top:4px;font-weight:600;tex
 .dv-name-label{text-align:right;font-size:.65rem;font-weight:600;color:#e8c840;font-family:'Segoe UI',sans-serif;letter-spacing:.3px;display:none;position:absolute;bottom:18px;right:4px;z-index:4;pointer-events:none;}
 .dv-name-label.show{display:block}
 .light-mode .dv-name-label{color:#000000}
-/* ── Nhập Quái ── */
-.quai-label{
+/* ── Nhập Quái — Refactored ── */
+/*
+  Cấu trúc đáy cung (từ dưới lên):
+    bottom:3px  right:4px  → .ln-label     (dãy số lưu niên)
+    bottom:18px right:4px  → .dv-name-label (chữ "Mệnh ĐV")
+  → Đặt .quai-slot ở bottom:38px, canh giữa, để nằm trên cụm ĐV
+    và không chạm dãy số bên phải.
+*/
+.quai-slot{
   position:absolute;
   left:50%;
-  top:55%;
-  transform:translate(-50%,-50%);
-  font-size:.82rem;font-weight:900;
+  transform:translateX(-50%);
+  bottom:36px;          /* trên .dv-name-label (~18px cao) + khoảng đệm */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  z-index:7;
+  pointer-events:none; /* slot không chặn click của cung cha */
+  max-width:calc(100% - 8px);
+  width:max-content;
+}
+/* Label chính — tên cung Quái */
+.quai-label{
+  font-size:10px;
+  font-weight:700;
   color:#c026d3;
   text-align:center;
-  line-height:1.3;
-  z-index:6;
-  pointer-events:none;
-  text-shadow:none;
-  white-space:nowrap;
-  letter-spacing:.3px;
-  background:none;
-  padding:0;
+  line-height:1.25;
+  pointer-events:auto; /* click được, bubble lên onCungClick */
+  cursor:pointer;
+  white-space:normal;
+  word-break:break-word;
+  max-width:100%;
+  letter-spacing:.1px;
+  background:rgba(0,0,0,.38);
+  border-radius:3px;
+  padding:1px 5px;
+  transition:color .15s, opacity .15s;
 }
+.quai-label:hover{
+  color:#e879f9;
+  opacity:.9;
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+/* Label phụ — Thiên Can quái: nằm trong .cung-cc như dòng thứ 2 bên dưới can gốc */
 .quai-can-label{
-  position:absolute;
-  left:4px;
-  bottom:4px;
-  font-size:.72rem;font-weight:900;
+  display:block;
+  font-size:9px;
+  font-weight:700;
   color:#a855f7;
-  z-index:6;
-  pointer-events:none;
-  white-space:nowrap;
+  text-align:right;
+  line-height:1.3;
+  margin-top:2px;
   letter-spacing:.2px;
+  pointer-events:auto;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:color .15s, opacity .15s;
 }
+.quai-can-label:hover{
+  color:#d8b4fe;
+  opacity:.9;
+}
+/* Light mode overrides */
+.light-mode .quai-label{color:#7e22ce;background:rgba(255,255,255,.6);}
+.light-mode .quai-label:hover{color:#6b21a8;}
 .light-mode .quai-can-label{color:#7e22ce;}
+.light-mode .quai-can-label:hover{color:#581c87;}
 .nhapquai-can-item:hover{background:#a855f722;}
-.light-mode .quai-label{color:#7e22ce;}
 .nhap-quai-mode .cung{cursor:crosshair!important;}
+/* Khi không có dv-name-label (daiVan tắt), hạ slot xuống thấp hơn một chút */
+.cung:not(:has(.dv-name-label.show)) .quai-slot{
+  bottom:22px;
+}
+/* Mobile: chữ nhỏ hơn, bottom điều chỉnh */
+@media(max-width:600px){
+  .quai-label{font-size:8px;padding:1px 3px;}
+  .quai-can-label{font-size:7px;padding:1px 3px;}
+  .quai-slot{bottom:32px;}
+}
 .nhap-quai-mode .cung:hover{outline:2px solid #e879f9!important;}
 #btnSkitch.active{background:#1a0800!important;}
 .light-mode .light-mode .lg-section.s1 .lg-section.s2 .lg-section.s3 .lg-section.s4 .hoa-row{display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:6px;margin-bottom:6px;border:1px solid transparent}
@@ -4259,7 +4308,7 @@ function toggleArrows(){
   document.getElementById('btnArrows').classList.toggle('active',!showArrows);
   document.getElementById('btnArrows').textContent=showArrows?'👁 Ẩn Mũi Tên':'👁 Hiện Mũi Tên';
 }
-function toggleDaiVan(){daiVanMode=!daiVanMode;document.getElementById('btnDaiVan').classList.toggle('active',daiVanMode);document.getElementById('btnDaiVan').textContent=daiVanMode?'📅 Tắt Đại Vận':'📅 Đại Vận';document.querySelectorAll('.dv-name-label').forEach(el=>el.classList.toggle('show',daiVanMode));}
+function toggleDaiVan(){daiVanMode=!daiVanMode;document.getElementById('btnDaiVan').classList.toggle('active',daiVanMode);document.getElementById('btnDaiVan').textContent=daiVanMode?'📅 Tắt Đại Vận':'📅 Đại Vận';document.querySelectorAll('.dv-name-label').forEach(el=>el.classList.toggle('show',daiVanMode));if(nhapQuaiActive){document.querySelectorAll('.quai-slot').forEach(slot=>{const ce=slot.closest('.cung');if(!ce)return;const dv=ce.querySelector('.dv-name-label');slot.style.bottom=(dv&&dv.classList.contains('show'))?'38px':'22px';});}}
 
 // ══════════════════════════════════════════════════════════════
 // SAVE IMAGE — Refactored: null-safe, crisp PNG, arrows intact
@@ -5330,10 +5379,15 @@ function applyNhapQuaiCan() {
     const canIdx = (canKhoi + step) % 10;
     const el = document.getElementById('cung-' + viTri);
     if (!el) return;
+    // Append vào .cung-cc (container góc trên phải đang chứa can gốc)
+    // → can Quái hiển thị dưới can gốc, cùng khối absolute, không xung đột
+    const ccEl = el.querySelector('.cung-cc');
     const label = document.createElement('div');
     label.className = 'quai-can-label';
     label.textContent = TC[canIdx];
-    el.appendChild(label);
+    label.dataset.viTri = viTri;
+    if (ccEl) ccEl.appendChild(label);
+    else el.appendChild(label); // fallback
   });
 }
 
@@ -5365,8 +5419,35 @@ function toggleNhapQuai() {
 }
 
 function clearNhapQuaiLabels() {
+  // Xóa toàn bộ quai-slot (chứa cả quai-label và quai-can-label)
+  document.querySelectorAll('.quai-slot').forEach(el => el.remove());
+  // Fallback: xóa label lẻ nếu còn sót
   document.querySelectorAll('.quai-label').forEach(el => el.remove());
   document.querySelectorAll('.quai-can-label').forEach(el => el.remove());
+}
+
+/**
+ * Đảm bảo mỗi cung có đúng một .quai-slot.
+ * Slot nằm giữa cung, ngay phía trên cụm "... ĐV" ở đáy,
+ * không đè lên dãy số lưu niên (ln-label ở bottom:3px)
+ * và không đè lên dòng chữ ĐV (dv-name-label ở bottom:18px).
+ * @param {HTMLElement} cungEl — phần tử .cung (đã có position:relative)
+ * @returns {HTMLElement} slot element
+ */
+function ensureQuaiSlot(cungEl) {
+  let slot = cungEl.querySelector('.quai-slot');
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.className = 'quai-slot';
+    cungEl.appendChild(slot);
+  }
+  // Điều chỉnh bottom theo trạng thái hiển thị của dv-name-label
+  // dv-name-label: bottom:18px, height ~14px → cần bottom ≥ 36px
+  // Nếu không có ĐV hoặc ĐV đang ẩn → chỉ cần tránh ln-label (bottom:3px, ~12px)
+  const dvLabel = cungEl.querySelector('.dv-name-label');
+  const dvVisible = dvLabel && dvLabel.classList.contains('show');
+  slot.style.bottom = dvVisible ? '38px' : '22px';
+  return slot;
 }
 
 function applyNhapQuai(menhViTri) {
@@ -5385,10 +5466,15 @@ function applyNhapQuai(menhViTri) {
     nhapQuaiMap[viTri] = quaiChucIdx;
     const el = document.getElementById('cung-' + viTri);
     if (!el) continue;
+    // Đảm bảo có .quai-slot trong cung
+    const slot = ensureQuaiSlot(el);
+    // Tạo label chính (Quái)
     const label = document.createElement('div');
     label.className = 'quai-label';
     label.textContent = NHAP_QUAI_LABEL[quaiChucIdx];
-    el.appendChild(label);
+    label.dataset.viTri = viTri;
+    // Click bubble lên cung cha → onCungClick(viTri) tự xử lý showCungPanelQuai
+    slot.appendChild(label);
   }
   nhapQuaiActive = true;
 }
