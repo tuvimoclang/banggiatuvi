@@ -2332,6 +2332,15 @@ header p.hdr-sub{font-size:1rem;color:#f5c842;margin-top:4px;font-weight:600;tex
 .light-mode #cucPanelInner button[style*="background:linear-gradient"],
 .light-mode #cucPanelInner button[style*="background:#4c1d95"] {background:#fde8c8!important;color:#4a1e00!important;border-color:#a0782066!important}
 @media(max-width:700px){.info-bar,.info-bar-row2{grid-template-columns:repeat(2,1fr)}#cucPanel{width:calc(100vw - 24px);right:12px}#luanGiaiBox{width:calc(100vw - 16px)}}
+/* ── Mobile: chữ A/B/C/D luôn nổi trên mũi tên ── */
+@media(max-width:700px){
+  #svgTextLayer text{
+    paint-order:stroke fill;
+    stroke:rgba(0,0,0,0.88);
+    stroke-width:3.5px;
+    stroke-linejoin:round;
+  }
+}
 
 /* ── Phi Hóa Tool ── */
 #phiHoaBar{display:none;position:fixed;left:0;top:calc(50% - 50px);z-index:501;background:var(--bg2);border:2px solid var(--border);border-left:none;border-radius:0 10px 10px 0;padding:8px 7px 14px 5px;flex-direction:column;align-items:stretch;gap:5px;box-shadow:4px 0 24px #c9a84c44;width:auto;overflow:visible;height:auto;max-height:none;min-height:fit-content}
@@ -4542,6 +4551,12 @@ function drawAllArrows(lyTamList,huongTamList){
   ['A','B','C','D'].forEach(k=>{const m=document.createElementNS(ns,'marker');m.setAttribute('id',`mk-${k}`);m.setAttribute('markerWidth','9');m.setAttribute('markerHeight','7');m.setAttribute('refX','8');m.setAttribute('refY','3.5');m.setAttribute('orient','auto');const p=document.createElementNS(ns,'path');p.setAttribute('d','M0,0 L9,3.5 L0,7 Z');p.setAttribute('fill',KY_COLOR[k]);m.appendChild(p);defs.appendChild(m);});
   svg.appendChild(defs);
   wrap.appendChild(svg);
+  // ── textLayer: group luôn được append SAU CÙNG vào SVG
+  // → mọi chữ A/B/C/D sẽ render trên tất cả mũi tên (SVG paint order)
+  // → chỉ áp dụng offset vuông góc trên mobile (≤700px)
+  const textLayer=document.createElementNS(ns,'g');
+  textLayer.setAttribute('id','svgTextLayer');
+  textLayer.style.pointerEvents='none';
 
   function localRect(el){let lx=0,ly=0,cur=el;while(cur&&cur!==wrap){lx+=cur.offsetLeft;ly+=cur.offsetTop;cur=cur.offsetParent;}return{l:lx,t:ly,r:lx+el.offsetWidth,b:ly+el.offsetHeight,cx:lx+el.offsetWidth/2,cy:ly+el.offsetHeight/2};}
   function intersect(p1,p2,rect){const dx=p2[0]-p1[0],dy=p2[1]-p1[1];const segs=[[rect.l,rect.t,rect.r,rect.t],[rect.l,rect.b,rect.r,rect.b],[rect.l,rect.t,rect.l,rect.b],[rect.r,rect.t,rect.r,rect.b]];let best=null,bestT=Infinity;segs.forEach(([ax,ay,bx,by])=>{const ex=bx-ax,ey=by-ay,den=dx*ey-dy*ex;if(Math.abs(den)<1e-9)return;const t=((ax-p1[0])*ey-(ay-p1[1])*ex)/den,u=((ax-p1[0])*dy-(ay-p1[1])*dx)/den;if(t>0.01&&t<bestT&&u>=-0.01&&u<=1.01){bestT=t;best=[p1[0]+t*dx,p1[1]+t*dy];}});return best;}
@@ -4588,33 +4603,42 @@ function drawAllArrows(lyTamList,huongTamList){
 
     // Label: only when showLabel=true (single arrow case)
     if(showLabel){
-      // Label luôn đặt bên dưới đầu mũi tên 25px (theo trục Y)
-      // Nếu mũi tên hướng lên (up), label đặt bên phải thay vì dưới (sẽ bị trùng với mũi tên)
-      const isUp = Math.sin(ang) < -0.5;   // ang ≈ -PI/2
-      const isDown = Math.sin(ang) > 0.5;   // ang ≈ PI/2
+      // Hướng vuông góc với mũi tên (dùng để offset trên mobile)
+      const isMob=window.innerWidth<=700;
+      const PERP_OFF=isMob?12:0; // offset vuông góc 12px trên mobile
+      const perpX=-Math.sin(ang)*PERP_OFF;
+      const perpY= Math.cos(ang)*PERP_OFF;
+
+      const isUp   = Math.sin(ang) < -0.5;
+      const isDown = Math.sin(ang) >  0.5;
       let lblX, lblY;
       if(isUp){
-        // Hướng lên: label sang phải đầu mũi tên
-        lblX = tipX + 22;
-        lblY = tipY + 6;
+        lblX = tipX + 22 + perpX;
+        lblY = tipY +  6 + perpY;
       } else if(isDown){
-        // Hướng xuống: label sang phải, ngang đầu mũi tên
-        lblX = tipX + 23;
-        lblY = tipY;
+        lblX = tipX + 23 + perpX;
+        lblY = tipY      + perpY;
       } else {
-        // Left/right: label bên dưới đầu mũi tên
-        lblX = tipX;
-        lblY = tipY + 25;
+        // left / right: đặt bên dưới, rồi thêm offset vuông góc
+        lblX = tipX      + perpX;
+        lblY = tipY + 25 + perpY;
       }
       const txt=document.createElementNS(ns,'text');
       txt.setAttribute('x',String(lblX));txt.setAttribute('y',String(lblY));
       txt.setAttribute('text-anchor','middle');txt.setAttribute('font-size','19');
       txt.setAttribute('fill',KY_COLOR[k]);txt.setAttribute('font-weight','300');txt.setAttribute('opacity','1');
+      // stroke nền đen giúp chữ nổi rõ trên đường bất kỳ màu nào
+      txt.style.paintOrder='stroke fill';
+      txt.style.stroke='rgba(0,0,0,0.85)';
+      txt.style.strokeWidth='3px';
+      txt.style.strokeLinejoin='round';
       txt.style.filter='drop-shadow(0 0 3px '+KY_COLOR[k]+')';
       txt.style.pointerEvents='none';txt.textContent=k;
-      [hit,line,arrow,txt].forEach(el=>{svg.appendChild(el);});
+      // arrows vào svg, chữ vào textLayer (luôn trên cùng)
+      [hit,line,arrow].forEach(el=>svg.appendChild(el));
+      textLayer.appendChild(txt);
     } else {
-      [hit,line,arrow].forEach(el=>{svg.appendChild(el);});
+      [hit,line,arrow].forEach(el=>svg.appendChild(el));
     }
     hit.addEventListener('mouseenter',e=>showArrowTooltip(e,k,meta,'ly'));
     hit.addEventListener('mousemove',moveTT);
@@ -4678,8 +4702,12 @@ function drawAllArrows(lyTamList,huongTamList){
     hitPath.addEventListener('mouseenter',e=>showArrowTooltip(e,k,meta,'huong'));
     hitPath.addEventListener('mousemove',moveTT);
     hitPath.addEventListener('click',e=>{e.stopPropagation();hideTT();openArrowInTraTuong('huong',k,meta);});
-    [dashP1,dashP2,path,hitPath,badgeCirc,badgeTxt,h1.c,h1.t,h2.c,h2.t,hM.c,hM.t].forEach(el=>g.appendChild(el));
-    svg.appendChild(g);updateAll();
+    [dashP1,dashP2,path,hitPath,h1.c,h1.t,h2.c,h2.t,hM.c,hM.t].forEach(el=>g.appendChild(el));
+    svg.appendChild(g);
+    // Badge (circle + chữ) vào textLayer → luôn render trên đường bezier
+    textLayer.appendChild(badgeCirc);
+    textLayer.appendChild(badgeTxt);
+    updateAll();
   }
 
   const dirAng={up:-Math.PI/2,down:Math.PI/2,left:Math.PI,right:0};
@@ -4730,19 +4758,29 @@ function drawAllArrows(lyTamList,huongTamList){
       }
       // Draw letters side by side horizontally (always horizontal row)
       const N=dirItems2.length, STEP=13;
+      // Mobile: offset thêm 10px vuông góc với hướng mũi tên
+      const isMobLbl=window.innerWidth<=700;
+      const PERP_OFF2=isMobLbl?10:0;
+      const mobPerpX=-Math.sin(ang)*PERP_OFF2;
+      const mobPerpY= Math.cos(ang)*PERP_OFF2;
       dirItems2.forEach((item,i)=>{
-        const lx=lblAnchorX+(i-(N-1)/2)*STEP;
+        const lx=lblAnchorX+(i-(N-1)/2)*STEP + mobPerpX;
+        const ly=lblAnchorY+6 + mobPerpY;
         const lbl=document.createElementNS(ns,'text');
         lbl.setAttribute('x',String(lx));
-        lbl.setAttribute('y',String(lblAnchorY+6));
+        lbl.setAttribute('y',String(ly));
         lbl.setAttribute('text-anchor','middle');
         lbl.setAttribute('font-size','19');
         lbl.setAttribute('fill',KY_COLOR[item.ky]);
         lbl.setAttribute('font-weight','300');
+        lbl.style.paintOrder='stroke fill';
+        lbl.style.stroke='rgba(0,0,0,0.85)';
+        lbl.style.strokeWidth='3px';
+        lbl.style.strokeLinejoin='round';
         lbl.style.filter='drop-shadow(0 0 3px '+KY_COLOR[item.ky]+')';
         lbl.style.pointerEvents='none';
         lbl.textContent=item.ky;
-        svg.appendChild(lbl);
+        textLayer.appendChild(lbl); // textLayer → luôn trên mũi tên
       });
     });
   });
@@ -4758,6 +4796,8 @@ function drawAllArrows(lyTamList,huongTamList){
       addHuongTamArrow(ptS[0],ptS[1],ptD[0],ptD[1],item.ky,cpKey,{srcChucIdx:chucMapGlobal[item.srcIdx],dstChucIdx:chucMapGlobal[item.dstIdx],saoTen:item.saoTen});
     });
   });
+  // ── Append textLayer SAU CÙNG: đảm bảo A/B/C/D luôn trên tất cả mũi tên ──
+  svg.appendChild(textLayer);
 }
 
 async function lapLaSo(){
