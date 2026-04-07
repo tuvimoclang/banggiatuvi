@@ -122,16 +122,49 @@ def _get_lunar_month11(yy, tz=7):
         nm = _new_moon(k - 1, tz)
     return nm
 
+def _sun_longitude_raw(jdn, tz=7):
+    """Trả về kinh độ mặt trời theo độ (float, chưa làm tròn cung).
+    Dùng để phát hiện trung khí rơi ngay đầu tháng (edge case thiên văn).
+    """
+    T  = (jdn - tz / 24.0 - 2451545.0) / 36525.0
+    dr = math.pi / 180
+    M  = 357.52910 + 35999.05030 * T - 0.0001559 * T * T - 0.00000048 * T * T * T
+    L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T
+    DL = (1.914600 - 0.004817 * T - 0.000014 * T * T) * math.sin(dr * M)
+    DL += (0.019993 - 0.000101 * T) * math.sin(2 * dr * M)
+    DL += 0.000290 * math.sin(3 * dr * M)
+    L  = L0 + DL
+    omega = 125.04 - 1934.136 * T
+    L = L - 0.00569 - 0.00478 * math.sin(omega * dr)
+    L = L % 360
+    return L
+
+# Ngưỡng (độ) để phát hiện trung khí rơi ngay vào mùng 1 tháng sau.
+# ~0.5° ≈ 12h chuyển động của mặt trời. Đủ nhỏ để không ảnh hưởng các năm khác.
+_ZHONGQI_EDGE_THRESH = 0.5
+
 def _find_leap_month(k_start, n_months, tz=7):
     """Tìm vị trí tháng nhuận (0-based) trong chuỗi n_months tháng từ k_start.
-    Tháng nhuận = tháng đầu tiên trong cặp liên tiếp cùng sun_longitude.
-    Trả về -1 nếu không có.
+    Tháng nhuận = tháng không chứa trung khí (bội số 30° của kinh độ mặt trời).
+    
+    Thuật toán chuẩn: sl(mùng 1 tháng i) == sl(mùng 1 tháng i+1).
+    Edge case: trung khí rơi CỰC SÁT mùng 1 tháng sau (< _ZHONGQI_EDGE_THRESH độ)
+    → coi như trung khí vừa thoát khỏi tháng i → tháng i là nhuận.
+    Điều này xảy ra với năm 1993 (trung khí Tiểu mãn 60° rơi đúng rạng sáng 21/5).
     """
     for i in range(n_months):
         nm_cur  = _new_moon(k_start + i,     tz)
         nm_next = _new_moon(k_start + i + 1, tz)
-        if _sun_longitude(nm_cur, tz) == _sun_longitude(nm_next, tz):
+        sl_cur  = _sun_longitude(nm_cur,  tz)
+        sl_next = _sun_longitude(nm_next, tz)
+        if sl_cur == sl_next:
             return i
+        # Edge case: trung khí rơi ngay vào mùng 1 tháng sau
+        # (raw_next vừa vượt qua bội số 30°, phần dư < ngưỡng)
+        if sl_next == sl_cur + 1:
+            raw_next = _sun_longitude_raw(nm_next, tz)
+            if raw_next % 30 < _ZHONGQI_EDGE_THRESH:
+                return i
     return -1
 
 def duong_sang_am(sy, sm, sd, tz=7):
