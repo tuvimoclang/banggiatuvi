@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ═══════════════════════════════════════════════════════════
 @app.route('/')
 def index():
-    return send_from_directory(BASE_DIR, 'tool.html')
+    return send_from_directory(BASE_DIR, 'index.html')
 
 @app.route('/<path:filename>')
 def static_files(filename):
@@ -333,7 +333,12 @@ def lap_laso():
         return jsonify({"status":"error","message":"Định dạng ngày/giờ không hợp lệ."})
 
     if lich_loai == 'duong':
-        ay, am, ad, is_leap = ngay_am_lich_cho_gio(sy, sm, sd, gio_h, tz=int(mui_gio))
+        # Giờ Tý đầu (23h-24h) - theo quy ước "ngày" đổi tại giờ Tý chứ không phải 0h dương lịch, nên ngày
+        # dương lịch hiển thị/dùng để an sao cũng phải nhảy sang hôm sau, không chỉ riêng phần âm lịch.
+        if gio_h >= 23:
+            eff_dt = datetime.date(sy, sm, sd) + datetime.timedelta(days=1)
+            sy, sm, sd = eff_dt.year, eff_dt.month, eff_dt.day
+        ay, am, ad, is_leap = duong_sang_am(sy, sm, sd, tz=int(mui_gio))
         duong_str = f"{sd:02d}/{sm:02d}/{sy}"
         am_str    = f"{ad:02d}/{am:02d}/{ay}" + (" (nhuận)" if is_leap else "")
     else:

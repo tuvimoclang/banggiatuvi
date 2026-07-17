@@ -10,65 +10,71 @@
 *{box-sizing:border-box;margin:0;padding:0}
 
 :root{
-  --gold:#b8860b;
-  --gold2:#8b6914;
-  --bg:#faf7f0;
-  --bg2:#ffffff;
-  --bg3:#fef9ec;
-  --bg4:#fdf3d0;
-  --text:#2c1f00;
-  --text2:#5a3e00;
-  --text3:#a07830;
+  --jade:#00b3a4;
+  --jade-deep:#00806f;
+  --jade-tint:#e5faf7;
+  --ink:#111111;
+  --ink-soft:#5c6470;
+  --line:#e6e8eb;
+  --bg:#ffffff;
+  --bg-soft:#f7f8f9;
   --red:#dc2626;
+  --red-tint:#fef2f2;
+  --red-line:#fca5a5;
   --green:#15803d;
-  --purple:#7c3aed;
+  --green-tint:#f0fdf4;
+  --green-line:#86efac;
+  --blue:#1d4ed8;
+  --blue-tint:#eff6ff;
+  --blue-line:#93c5fd;
 }
 
+html,body{overflow-x:hidden}
+
 body{
-  background:#faf7f0;
-  color:var(--text);
+  background:var(--bg);
+  color:var(--ink);
   font-family:'Be Vietnam Pro',sans-serif;
   min-height:100vh;
-  background-image:
-    radial-gradient(ellipse 60% 40% at 20% 10%, #fdf3d0 0%, transparent 60%),
-    radial-gradient(ellipse 50% 30% at 80% 90%, #fef9ec 0%, transparent 50%);
 }
 
 header{
-  border-bottom:1.5px solid #e8d49a;
-  padding:20px 32px;
+  border-bottom:1px solid var(--line);
+  padding:18px 32px;
   display:flex;
+  flex-wrap:wrap;
   align-items:center;
   gap:16px;
-  background:linear-gradient(90deg,#fdf3d0,#faf7f0);
-  box-shadow:0 2px 8px #c9a84c18;
+  background:var(--bg);
 }
 header h1{
   font-family:'Playfair Display',serif;
-  font-size:1.3rem;
+  font-size:1.25rem;
   font-weight:900;
-  color:#7a4f00;
-  letter-spacing:2px;
+  color:var(--jade);
+  letter-spacing:1.5px;
 }
-header p{font-size:.82rem;color:#a07830;font-style:italic;margin-top:2px}
-.hdr-icon{font-size:2rem}
+header p{font-size:.82rem;color:var(--ink-soft);font-style:italic;margin-top:2px}
+.hdr-icon{font-size:2rem;color:var(--jade)}
+.hdr-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 
-.main{max-width:1000px;margin:0 auto;padding:28px 20px;display:grid;gap:20px}
+.main{max-width:1280px;margin:0 auto;padding:28px 32px;display:grid;gap:20px}
 
 /* ── Cards ── */
 .card{
-  background:#ffffff;
-  border:1px solid #e8d49a;
+  min-width:0;
+  background:var(--bg);
+  border:1px solid var(--line);
   border-radius:12px;
   padding:24px 28px;
-  box-shadow:0 2px 8px #c9a84c0d;
+  box-shadow:0 1px 3px rgba(17,17,17,.04);
 }
 .card-title{
   font-family:'Playfair Display',serif;
   font-size:1rem;
   font-weight:700;
-  color:var(--gold);
-  letter-spacing:1px;
+  color:var(--jade);
+  letter-spacing:.5px;
   margin-bottom:18px;
   display:flex;
   align-items:center;
@@ -78,21 +84,21 @@ header p{font-size:.82rem;color:#a07830;font-style:italic;margin-top:2px}
 /* ── Form ── */
 .form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
 .form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
-.form-group label{font-size:.78rem;color:var(--text3);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.form-group label{font-size:.78rem;color:var(--ink-soft);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 .form-group select,
 .form-group input{
   padding:9px 12px;
-  background:#faf7f0;
-  border:1px solid #c9a84c33;
+  background:var(--bg-soft);
+  border:1px solid var(--line);
   border-radius:6px;
-  color:var(--text);
+  color:var(--ink);
   font-size:.95rem;
   font-family:'Be Vietnam Pro',sans-serif;
   outline:none;
   width:100%;
 }
 .form-group select:focus,
-.form-group input:focus{border-color:var(--gold)}
+.form-group input:focus{border-color:var(--jade)}
 
 .btn{
   padding:10px 22px;
@@ -106,36 +112,40 @@ header p{font-size:.82rem;color:#a07830;font-style:italic;margin-top:2px}
   transition:.15s;
   white-space:nowrap;
 }
-.btn-gold{background:linear-gradient(90deg,#c9a84c,#e0bc60);color:#3a2000;font-weight:800;box-shadow:0 2px 8px #c9a84c33}
-.btn-gold:hover{background:linear-gradient(90deg,#b8973d,#c9a84c)}
-.btn-outline{background:transparent;border:1.5px solid #c9a84c;color:#7a4f00}
-.btn-outline:hover{background:#fef9ec}
-.btn-red{background:#fef2f2;color:#dc2626;border:1.5px solid #fca5a5}
+.btn-gold{background:var(--jade);color:#fff;font-weight:800;box-shadow:0 2px 8px rgba(0,179,164,.25)}
+.btn-gold:hover{background:var(--jade-deep)}
+.btn-outline{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn-outline:hover{border-color:var(--jade);color:var(--jade-deep)}
+.btn-red{background:var(--red-tint);color:var(--red);border:1.5px solid var(--red-line)}
 .btn-red:hover{background:#fee2e2}
-.btn-green{background:#f0fdf4;color:#15803d;border:1.5px solid #86efac}
+.btn-danger{background:var(--red);color:#fff;border:1.5px solid var(--red)}
+.btn-danger:hover{background:#b91c1c}
+.btn-green{background:var(--green-tint);color:var(--green);border:1.5px solid var(--green-line)}
 .btn-green:hover{background:#dcfce7}
+.btn-jade-outline{background:var(--jade-tint);color:var(--jade-deep);border:1.5px solid var(--jade)}
+.btn-jade-outline:hover{background:#d7f6f1}
 .btn-sm{padding:6px 14px;font-size:.78rem}
+.btn-icon{width:28px;height:28px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;line-height:1;flex:none}
 
 /* ── Generated code display ── */
 .code-output{
-  background:linear-gradient(135deg,#fef9ec,#fdf3d0);
-  border:2px solid #d4a843;
+  background:var(--jade-tint);
+  border:2px solid var(--jade);
   border-radius:8px;
   padding:16px 20px;
   font-family:'Playfair Display',serif;
   font-size:1.1rem;
   font-weight:700;
-  color:#7a4f00;
+  color:var(--jade-deep);
   letter-spacing:2px;
   text-align:center;
   margin:14px 0 10px;
   cursor:pointer;
   position:relative;
   transition:.15s;
-  box-shadow:0 2px 8px #c9a84c22;
 }
-.code-output:hover{background:linear-gradient(135deg,#fdf3d0,#f5e8a0);transform:translateY(-1px)}
-.copy-hint{font-size:.75rem;color:#a07830;text-align:center;font-style:italic;margin-bottom:14px}
+.code-output:hover{background:#d7f6f1;transform:translateY(-1px)}
+.copy-hint{font-size:.75rem;color:var(--ink-soft);text-align:center;font-style:italic;margin-bottom:14px}
 
 /* ── Table ── */
 .tbl-wrap{overflow-x:auto;margin-top:4px}
@@ -144,27 +154,27 @@ thead th{
   font-family:'Playfair Display',serif;
   font-size:.72rem;
   font-weight:700;
-  color:#a07830;
+  color:var(--ink-soft);
   letter-spacing:1px;
   text-transform:uppercase;
   padding:8px 10px;
-  border-bottom:2px solid #e8d49a;
+  border-bottom:2px solid var(--line);
   text-align:left;
   white-space:nowrap;
-  background:#fef9ec;
+  background:var(--bg-soft);
 }
-tbody tr{border-bottom:1px solid #f0e8c8;transition:.1s}
-tbody tr:hover{background:#fef9ec}
-tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
+tbody tr{border-bottom:1px solid var(--line);transition:.1s}
+tbody tr:hover{background:var(--bg-soft)}
+tbody td{padding:9px 10px;color:var(--ink);vertical-align:middle}
 .code-cell{
   font-family:'Playfair Display',serif;
   font-weight:700;
-  color:#b8860b;
+  color:var(--jade-deep);
   letter-spacing:1px;
   cursor:pointer;
   font-size:.9rem;
 }
-.code-cell:hover{color:#7a4f00}
+.code-cell:hover{color:var(--jade)}
 .badge{
   display:inline-block;
   padding:2px 8px;
@@ -174,85 +184,71 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
   font-family:'Playfair Display',serif;
   letter-spacing:.5px;
 }
-.badge-active{background:#f0fdf4;color:#15803d;border:1px solid #86efac}
-.badge-used{background:#eff6ff;color:#1d4ed8;border:1px solid #93c5fd}
-.badge-expired{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5}
+.badge-active{background:var(--green-tint);color:var(--green);border:1px solid var(--green-line)}
+.badge-used{background:var(--blue-tint);color:var(--blue);border:1px solid var(--blue-line)}
+.badge-expired{background:var(--red-tint);color:var(--red);border:1px solid var(--red-line)}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 
 /* ── Stats ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
 .stat-box{
-  background:#ffffff;
-  border:1.5px solid #e8d49a;
+  background:var(--bg);
+  border:1px solid var(--line);
   border-radius:8px;
   padding:14px 16px;
   text-align:center;
-  box-shadow:0 2px 6px #c9a84c0d;
 }
-.stat-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#7a4f00}
-.stat-label{font-size:.72rem;color:#a07830;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
-
-/* ── Secret key setup ── */
-.key-setup{
-  background:linear-gradient(135deg,#1a0d00,#120e00);
-  border:1.5px solid var(--gold);
-  border-radius:12px;
-  padding:28px;
-  text-align:center;
-}
-.key-setup h2{font-family:'Playfair Display',serif;color:var(--gold2);font-size:1.1rem;margin-bottom:10px}
-.key-setup p{color:var(--text2);font-size:.9rem;line-height:1.7;margin-bottom:18px}
-.key-input-row{display:flex;gap:10px;max-width:500px;margin:0 auto}
-.key-input-row input{flex:1}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--ink)}
+.stat-label{font-size:.72rem;color:var(--ink-soft);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
 
 /* ── Toast ── */
 .toast{
   position:fixed;bottom:24px;right:24px;
-  background:#ffffff;
-  border:1.5px solid #d4a843;
+  background:var(--ink);
+  border:none;
   border-radius:8px;
   padding:12px 20px;
   font-family:'Playfair Display',serif;
   font-size:.85rem;
-  color:#7a4f00;
+  color:#fff;
   z-index:9999;
   opacity:0;
   transform:translateY(10px);
   transition:.3s;
   pointer-events:none;
-  box-shadow:0 4px 20px #c9a84c33;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
 }
 .toast.show{opacity:1;transform:translateY(0)}
 
 /* ── Password screen ── */
 #lockScreen{
   position:fixed;inset:0;
-  background:#faf7f0;
+  background:var(--bg);
   z-index:9999;
   display:flex;
   align-items:center;
   justify-content:center;
-  background-image:radial-gradient(ellipse 70% 50% at 50% 50%,#fdf3d0,transparent);
 }
 .lock-box{
-  background:var(--bg2);
-  border:2px solid var(--gold);
+  background:var(--bg);
+  border:1px solid var(--line);
   border-radius:16px;
   padding:40px 48px;
   text-align:center;
   max-width:380px;
   width:90%;
-  box-shadow:0 20px 60px #00000088;
+  box-shadow:0 20px 60px rgba(17,17,17,.08);
 }
-.lock-icon{font-size:3rem;margin-bottom:12px}
-.lock-box h2{font-family:'Playfair Display',serif;color:var(--gold2);font-size:1.3rem;margin-bottom:6px}
-.lock-box p{color:var(--text3);font-size:.85rem;margin-bottom:22px;font-style:italic}
+.lock-icon{font-size:3rem;margin-bottom:12px;color:var(--jade)}
+.lock-box h2{font-family:'Playfair Display',serif;color:var(--jade);font-size:1.3rem;margin-bottom:6px}
+.lock-box p{color:var(--ink-soft);font-size:.85rem;margin-bottom:22px;font-style:italic}
 .lock-input{
   width:100%;
   padding:12px 16px;
-  background:var(--bg);
-  border:1px solid var(--gold);
+  background:var(--bg-soft);
+  border:1px solid var(--line);
   border-radius:8px;
-  color:var(--text);
+  color:var(--ink);
   font-size:1rem;
   font-family:'Be Vietnam Pro',sans-serif;
   outline:none;
@@ -260,8 +256,9 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
   text-align:center;
   letter-spacing:2px;
 }
+.lock-input:focus{border-color:var(--jade)}
 .lock-err{color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:8px}
-.lock-hint{color:var(--text3);font-size:.75rem;margin-top:10px;font-style:italic}
+.lock-hint{color:var(--ink-soft);font-size:.75rem;margin-top:10px;font-style:italic}
 
 /* ── Verify panel ── */
 .verify-result{
@@ -271,14 +268,14 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
   font-size:.9rem;
   display:none;
 }
-.verify-ok{background:#f0fdf4;border:1.5px solid #86efac;color:#15803d}
-.verify-fail{background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626}
+.verify-ok{background:var(--green-tint);border:1.5px solid var(--green-line);color:var(--green)}
+.verify-fail{background:var(--red-tint);border:1.5px solid var(--red-line);color:var(--red)}
 
 .filter-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .filter-row input{max-width:220px;flex:1}
-.filter-row select{background:#faf7f0;border:1.5px solid #d4a843;color:#2c1f00;border-radius:6px;padding:8px 10px}
+.filter-row select{background:var(--bg-soft);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:8px 10px}
 
-.empty-state{text-align:center;padding:30px;color:#a07830;font-style:italic}
+.empty-state{text-align:center;padding:30px;color:var(--ink-soft);font-style:italic}
 </style>
 </head>
 <body>
@@ -304,7 +301,7 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
     <h1>TỬ VI MỘC LANG — QUẢN LÝ MÃ</h1>
     <p>Tạo & quản lý mã kích hoạt Premium</p>
   </div>
-  <div style="margin-left:auto;display:flex;gap:8px">
+  <div class="hdr-actions">
     <button class="btn btn-outline btn-sm" onclick="showChangePass()">🔐 Đổi mật khẩu</button>
     <button class="btn btn-red btn-sm" onclick="location.reload()">Đăng xuất</button>
   </div>
@@ -315,9 +312,9 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
   <!-- Stats -->
   <div class="stats-grid" id="statsGrid">
     <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Tổng mã</div></div>
-    <div class="stat-box"><div class="stat-num" id="statActive" style="color:#52b788">0</div><div class="stat-label">Chưa dùng</div></div>
-    <div class="stat-box"><div class="stat-num" id="statUsed" style="color:#818cf8">0</div><div class="stat-label">Đã kích hoạt</div></div>
-    <div class="stat-box"><div class="stat-num" id="statExpired" style="color:#f87171">0</div><div class="stat-label">Hết hạn</div></div>
+    <div class="stat-box"><div class="stat-num" id="statActive" style="color:#15803d">0</div><div class="stat-label">Chưa dùng</div></div>
+    <div class="stat-box"><div class="stat-num" id="statUsed" style="color:#1d4ed8">0</div><div class="stat-label">Đã kích hoạt</div></div>
+    <div class="stat-box"><div class="stat-num" id="statExpired" style="color:#dc2626">0</div><div class="stat-label">Hết hạn</div></div>
   </div>
 
   <!-- Tạo mã -->
@@ -338,7 +335,7 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
         </select>
       </div>
       <div class="form-group">
-        <label>Email khách hàng <span style="color:#dc2626">*</span></label>
+        <label>Email khách hàng <span style="color:var(--red)">*</span></label>
         <input type="email" id="genEmail" placeholder="khachhang@email.com" style="font-size:.9rem">
       </div>
       <div class="form-group">
@@ -391,6 +388,7 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
         <option value="used">Đã kích hoạt</option>
         <option value="expired">Hết hạn</option>
       </select>
+      <button class="btn btn-danger btn-sm" id="deleteAllExpiredBtn" onclick="deleteAllExpired()" style="display:none">🗑 Xóa hết</button>
       <button class="btn btn-outline btn-sm" onclick="loadAndRender()" style="margin-left:auto">🔄 Làm mới</button>
       <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Xuất CSV</button>
     </div>
@@ -421,20 +419,20 @@ tbody td{padding:9px 10px;color:#5a3e00;vertical-align:middle}
 
 <!-- Modal đổi mật khẩu -->
 <div id="changePassModal" onclick="if(event.target===this)this.style.display='none'"
-  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#fff;border:2px solid #d4a843;border-radius:14px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 12px 40px #c9a84c22;position:relative">
+  style="display:none;position:fixed;inset:0;background:rgba(17,17,17,.35);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 12px 40px rgba(17,17,17,.15);position:relative">
     <button onclick="document.getElementById('changePassModal').style.display='none'"
-      style="position:absolute;top:12px;right:14px;background:#fef9ec;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;color:#a07830;font-weight:700">✕</button>
-    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:#7a4f00;margin-bottom:20px">🔐 Đổi Mật Khẩu Admin</div>
+      style="position:absolute;top:12px;right:14px;background:var(--bg-soft);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;color:var(--ink-soft);font-weight:700">✕</button>
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--jade);margin-bottom:20px">🔐 Đổi Mật Khẩu Admin</div>
     <div style="margin-bottom:13px">
-      <label style="display:block;font-size:.78rem;color:#a07830;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Mật khẩu mới</label>
+      <label style="display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Mật khẩu mới</label>
       <input type="password" id="newPass1" placeholder="Tối thiểu 6 ký tự" onkeydown="if(event.key==='Enter')document.getElementById('newPass2').focus()"
-        style="width:100%;padding:10px 13px;background:#faf7f0;border:1.5px solid #d4a843;border-radius:7px;color:#2c1f00;font-size:.95rem;outline:none;box-sizing:border-box">
+        style="width:100%;padding:10px 13px;background:var(--bg-soft);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:.95rem;outline:none;box-sizing:border-box">
     </div>
     <div style="margin-bottom:16px">
-      <label style="display:block;font-size:.78rem;color:#a07830;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Xác nhận mật khẩu</label>
+      <label style="display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Xác nhận mật khẩu</label>
       <input type="password" id="newPass2" placeholder="Nhập lại mật khẩu mới" onkeydown="if(event.key==='Enter')changePass()"
-        style="width:100%;padding:10px 13px;background:#faf7f0;border:1.5px solid #d4a843;border-radius:7px;color:#2c1f00;font-size:.95rem;outline:none;box-sizing:border-box">
+        style="width:100%;padding:10px 13px;background:var(--bg-soft);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:.95rem;outline:none;box-sizing:border-box">
     </div>
     <div id="passMsg" style="min-height:20px;font-size:.85rem;margin-bottom:10px"></div>
     <div style="display:flex;gap:10px">
@@ -594,7 +592,7 @@ function showCreated(result) {
   outEl.innerHTML = `
     <div class="code-output" onclick="copyCode('${result.code}')" title="Bấm để copy">
       ${result.code}
-      <div style="font-size:.72rem;font-weight:400;letter-spacing:0;margin-top:4px;color:#a07830">
+      <div style="font-size:.72rem;font-weight:400;letter-spacing:0;margin-top:4px;color:var(--ink-soft)">
         📧 ${result.email} · Hết hạn: ${expireStr}
       </div>
     </div>`;
@@ -645,7 +643,7 @@ let _cachedCodes = [];
 
 async function loadAndRender() {
   document.getElementById('codeTable').innerHTML =
-    '<tr><td colspan="9" style="text-align:center;padding:20px;color:#a07830">⏳ Đang tải dữ liệu...</td></tr>';
+    '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Đang tải dữ liệu...</td></tr>';
 
   try {
     const result = await callAPI({ action:'list', adminKey: SECRET_KEY });
@@ -669,6 +667,8 @@ function renderStats() {
 function renderTable() {
   const filter       = document.getElementById('filterInput').value.toLowerCase();
   const statusFilter = document.getElementById('filterStatus').value;
+
+  document.getElementById('deleteAllExpiredBtn').style.display = statusFilter === 'expired' ? 'inline-flex' : 'none';
 
   const filtered = _cachedCodes.filter(c => {
     const matchText   = !filter || (c.code||'').toLowerCase().includes(filter) || (c.email||'').toLowerCase().includes(filter) || (c.note||'').toLowerCase().includes(filter);
@@ -696,30 +696,92 @@ function renderTable() {
     <tr>
       <td class="code-cell" onclick="copyCode('${c.code}')" title="Bấm để copy">${c.code}</td>
       <td>${PLAN_LABEL[c.plan]||c.plan}</td>
-      <td style="font-size:.82rem;color:#1d4ed8;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.email||''}">${c.email||'—'}</td>
-      <td style="color:var(--text3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.note||''}">${c.note||'—'}</td>
+      <td style="font-size:.82rem;color:var(--blue);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.email||''}">${c.email||'—'}</td>
+      <td style="color:var(--ink-soft);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${c.note||''}">${c.note||'—'}</td>
       <td style="white-space:nowrap;font-size:.82rem">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('vi-VN') : '—'}</td>
-      <td style="white-space:nowrap;font-size:.82rem;color:${isExpired?'#dc2626':'#15803d'}">${expStr}</td>
+      <td style="white-space:nowrap;font-size:.82rem;color:${isExpired?'var(--red)':'var(--green)'}">${expStr}</td>
       <td><span class="badge ${badgeClassMap[c.status]||'badge-expired'}">${badgeTextMap[c.status]||c.status}</span></td>
       <td style="font-size:.82rem;white-space:nowrap">${c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : '—'}</td>
       <td style="white-space:nowrap">
-        ${(c.status === 'active' || c.status === 'used') ? `<button class="btn btn-red btn-sm" onclick="revokeCode('${c.code}')">Huỷ</button>` : ''}
-        ${c.status === 'used' ? `<span style="font-size:.78rem;color:#818cf8">Đã kích hoạt bởi ${c.usedBy||'—'}</span>` : ''}
+        <div class="row-actions">
+          ${c.status === 'revoked'
+            ? `<button class="btn btn-jade-outline btn-icon" onclick="restoreCode('${c.code}')" title="Khôi phục mã">↺</button>`
+            : `<button class="btn btn-danger btn-sm" onclick="${(c.status === 'active' || c.status === 'used') ? `softDeleteCode('${c.code}')` : `hardDeleteCode('${c.code}')`}">Xóa</button>`}
+          ${c.status === 'used' ? `<span style="font-size:.78rem;color:var(--ink-soft)">Đã kích hoạt bởi ${c.usedBy||'—'}</span>` : ''}
+        </div>
       </td>
     </tr>`;
   }).join('');
 }
 
 // ============================================================
-// REVOKE MÃ
+// XÓA MÃ (mềm — có thể khôi phục) — dùng cho mã còn hiệu lực
 // ============================================================
-async function revokeCode(code) {
-  if (!confirm(`Huỷ mã ${code}?\nKhách sẽ không thể dùng mã này nữa.`)) return;
+async function softDeleteCode(code) {
+  if (!confirm(`Xóa mã ${code}?\nKhách sẽ không thể dùng mã này nữa. Có thể khôi phục lại sau nếu lỡ tay.`)) return;
   try {
     const result = await callAPI({ action:'revoke', adminKey:SECRET_KEY, code });
-    if (result.ok) { showToast('✅ Đã huỷ mã'); loadAndRender(); }
+    if (result.ok) { showToast('✅ Đã xóa mã'); loadAndRender(); }
     else showToast('❌ ' + result.msg);
   } catch(e) { showToast('❌ Lỗi: ' + e.message); }
+}
+
+// ============================================================
+// KHÔI PHỤC MÃ ĐÃ XÓA (Undo)
+// ============================================================
+async function restoreCode(code) {
+  try {
+    const result = await callAPI({ action:'restore', adminKey:SECRET_KEY, code });
+    if (result.ok) { showToast('✅ Đã khôi phục mã'); loadAndRender(); }
+    else showToast('❌ ' + result.msg);
+  } catch(e) { showToast('❌ Lỗi: ' + e.message); }
+}
+
+// ============================================================
+// XÓA MÃ VĨNH VIỄN — dùng cho mã đã hết hạn (dọn dẹp mã cũ)
+// ============================================================
+async function hardDeleteCode(code) {
+  if (!confirm(`Xóa vĩnh viễn mã ${code}?\nHành động này không thể hoàn tác.`)) return;
+  try {
+    const result = await callAPI({ action:'delete', adminKey:SECRET_KEY, code });
+    if (result.ok) {
+      showToast('✅ Đã xóa mã');
+      _cachedCodes = _cachedCodes.filter(c => c.code !== code);
+      renderStats();
+      renderTable();
+    } else {
+      showToast('❌ ' + result.msg);
+    }
+  } catch(e) { showToast('❌ Lỗi: ' + e.message); }
+}
+
+// ============================================================
+// XÓA HẾT MÃ ĐÃ HẾT HẠN (theo bộ lọc hiện tại)
+// ============================================================
+async function deleteAllExpired() {
+  const filter  = document.getElementById('filterInput').value.toLowerCase();
+  const targets = _cachedCodes.filter(c => c.status === 'expired' &&
+    (!filter || (c.code||'').toLowerCase().includes(filter) || (c.email||'').toLowerCase().includes(filter) || (c.note||'').toLowerCase().includes(filter)));
+
+  if (!targets.length) { showToast('Không có mã hết hạn để xóa'); return; }
+  if (!confirm(`Xóa vĩnh viễn ${targets.length} mã đã hết hạn?\nHành động này không thể hoàn tác.`)) return;
+
+  const btn = document.getElementById('deleteAllExpiredBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang xóa...'; }
+
+  try {
+    for (const c of targets) {
+      const result = await callAPI({ action:'delete', adminKey:SECRET_KEY, code: c.code });
+      if (result.ok) _cachedCodes = _cachedCodes.filter(x => x.code !== c.code);
+    }
+    showToast(`✅ Đã xóa ${targets.length} mã hết hạn`);
+    renderStats();
+    renderTable();
+  } catch(e) {
+    showToast('❌ Lỗi: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🗑 Xóa hết'; }
+  }
 }
 
 // ============================================================
@@ -743,7 +805,7 @@ function exportCSV() {
     c.status, c.usedAt ? new Date(c.usedAt).toLocaleDateString('vi-VN') : '', c.usedBy||''
   ]));
   const csv  = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
   a.download = `tuvi-codes-${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.csv`;
