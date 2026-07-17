@@ -26,14 +26,10 @@ button{font-family:inherit;cursor:pointer}
 /* ═══ TOP BAR ═══ */
 .topbar{display:grid;grid-template-columns:1fr auto 1fr;column-gap:8px;align-items:flex-end;border-bottom:1px solid var(--border);padding:0 14px}
 .tabs{grid-row:1;grid-column:2;justify-self:center;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.chart-tabs{grid-row:1;grid-column:1;justify-self:start}
 .topbar-auth{grid-row:1;grid-column:3;justify-self:end}
-@media(max-width:760px){.topbar{grid-template-columns:1fr}.tabs,.chart-tabs,.topbar-auth{grid-row:auto;grid-column:1;justify-self:center}}
+@media(max-width:760px){.topbar{grid-template-columns:1fr}.tabs,.topbar-auth{grid-row:auto;grid-column:1;justify-self:center}}
 .tab{background:none;border:none;padding:8px 10px;font-size:.74rem;font-weight:500;letter-spacing:.3px;color:var(--muted);border-bottom:2px solid transparent;flex:0 0 auto;text-align:center;white-space:nowrap}
 .tab.active{color:var(--red);border-bottom-color:var(--red)}
-.chart-tabs{display:flex;flex-direction:column;gap:3px;padding:5px 0}
-.chart-tab{background:var(--panel);border:1px solid var(--border-lt);border-radius:4px;font-size:.6rem;font-weight:500;color:var(--text);padding:3px 9px;line-height:1.15;text-align:center}
-.chart-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
 /* ═══ FORM ROW ═══ */
 .panel-flat{padding:10px 14px;color:var(--muted);font-size:.82rem;border-bottom:1px solid var(--border-lt)}
@@ -469,7 +465,6 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
       <button class="tab" data-tab="toado" onclick="switchTopTab('toado')">TỌA ĐỘ ĐỊA ĐIỂM SINH</button>
       <button class="tab" data-tab="dual" onclick="switchTopTab('dual')">2 LÁ SỐ</button>
     </div>
-    <div class="chart-tabs" id="chartTabs"></div>
     <div class="topbar-auth" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0">
       <span id="userInfo" style="display:none"></span>
       <button class="btn-action" id="btnGoogleLogin" onclick="window.showAuthModal()" style="border-color:#c9a84c;color:#c9a84c;display:none">Đăng nhập</button>
@@ -840,6 +835,12 @@ function getStoreKey(email) { return STORE_KEY + '_' + simpleHash(email); }
 const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
 
 function initGoogleAuth() {
+  // Đang ở demo mode (chưa điền GOOGLE_CLIENT_ID thật) - KHÔNG tải SDK Google Identity Services, vì:
+  // (1) không dùng tới (dangNhapGoogle() tự chuyển sang showDemoLoginModal() khi client_id còn placeholder),
+  // (2) SDK này không hỗ trợ origin file:// (chỉ hỗ trợ http/https đã đăng ký) - initialize() với client_id
+  // giả trên file:// gây lỗi bảo mật trình duyệt ("Unsafe attempt to load URL ... from frame with URL ...",
+  // do SDK cố dựng iframe giao tiếp nội bộ) và tải thêm 1 script mạng không cần thiết.
+  if (GOOGLE_CLIENT_ID === 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID') return;
   const s = document.createElement('script');
   s.src = 'https://accounts.google.com/gsi/client';
   s.async = true; s.defer = true;
@@ -1227,8 +1228,18 @@ function cloneHcState(){
     cat:{the:new Set(hcState.cat.the), dung:new Set(hcState.cat.dung), quick:new Map(hcState.cat.quick), chains:hcState.cat.chains}
   };
 }
+// Giới hạn độ dài actionLog (undo) - mỗi lần bấm Thể/Dụng/quick-fly/vẽ tay/xóa nét đều push thêm 1 mục (nhiều
+// mục còn kèm bản clone ĐẦY ĐỦ Set/Map), không giới hạn thì phiên làm việc càng lâu (mở app lâu, thao tác
+// nhiều) actionLog càng phình to vô hạn, ngốn bộ nhớ dần theo thời gian - cắt bớt các mục CŨ NHẤT khi vượt
+// ngưỡng, giữ hành vi undo gần đây (99% trường hợp thực tế không cần undo quá xa). Dùng CHUNG 1 hàm cho MỌI
+// nơi push vào actionLog để áp giới hạn đồng nhất, không riêng gì pushHcAction.
+const MAX_ACTION_LOG=200;
+function pushAction(entry){
+  actionLog.push(entry);
+  if(actionLog.length>MAX_ACTION_LOG) actionLog.splice(0, actionLog.length-MAX_ACTION_LOG);
+}
 function pushHcAction(before){
-  actionLog.push({type:'hc', before, after:cloneHcState()});
+  pushAction({type:'hc', before, after:cloneHcState()});
   actionRedoLog=[];
 }
 
@@ -1253,6 +1264,11 @@ function switchTopTab(name){
     initAtcPanelOnce();
   }else if(activeChartIdx>=0){
     document.getElementById('workspace').style.display='flex';
+    // Canvas có thể đã bị đo/gán kích thước SAI (0x0) nếu 1 hành động vẽ lại nào đó lỡ chạy trong lúc
+    // workspace đang display:none (getBoundingClientRect trả về 0 khi ẩn) - đo lại kích thước
+    // đúng ngay khi workspace hiện lại, tránh canvas bị "kẹt" ở kích thước sai khiến các thao tác sau đó
+    // (mũi tên, vẽ tay...) như không có tác dụng gì (thật ra vẫn chạy, chỉ là vẽ/định vị sai vào vùng 0x0).
+    sizeCanvas();
   }
 }
 // -- AN THỦ CÔNG: dựng lá số thủ công bằng cách chọn TỪNG PHẦN (Can, vị trí Tử Vi, Tháng, Giờ sinh, Mệnh)
@@ -1794,7 +1810,6 @@ function ingestResult(d, birthYear){
 
   selectedCungIdx=null; selectedDaiVanIdx=null; selectedLuuNienYear=null; tuHoaArrows=[]; resetHcState(); closeAllNav();
   document.getElementById('workspace').style.display='flex';
-  renderChartTabs();
   renderAll();
   selectCungByIdx(vM);
   // Mỗi lần lập lá số mới: tự động ẩn info ở ô trung tâm - chỉ hiện lại khi người dùng bấm nút Ẩn/Hiện Info.
@@ -1894,26 +1909,6 @@ function luuLaSo(){
     if(eb){ eb.textContent='Không xuất được ảnh: '+err.message; eb.style.display='block'; }
   });
 }
-function setActiveChart(i){
-  activeChartIdx=i;
-  restoreViewState(charts[i].viewState);
-  const wantDv=selectedDaiVanIdx, wantLn=selectedLuuNienYear, wantLg=selectedLuuNguyetMonth;
-  closeAllNav();
-  renderChartTabs();
-  renderAll();
-  selectCungByIdx(charts[i].vM);
-  // closeAllNav() ở trên xóa sạch b.vận/l.niên/l.nguyệt để dọn DOM cũ - áp lại đúng lựa chọn đã lưu (nếu có)
-  // bằng chính hàm pick* (vừa gán biến vừa vẽ lại nhãn/tô sáng), tránh trùng lặp logic vẽ.
-  if(wantDv!==null) pickDaiVan(wantDv);
-  if(wantLn!==null) pickLuuNien(wantLn);
-  if(wantLg!==null) pickLuuNguyet(wantLg);
-}
-function renderChartTabs(){
-  document.getElementById('chartTabs').innerHTML = charts.map((c,i)=>
-    `<button class="chart-tab ${i===activeChartIdx?'active':''}" onclick="setActiveChart(${i})">${i+1}<br>LÁ SỐ</button>`
-  ).join('');
-}
-
 // ═══════════════════════════════════
 // RENDER TOÀN BỘ
 // ═══════════════════════════════════
@@ -1929,7 +1924,14 @@ function renderAll(){
 }
 
 
+// Bọc ngoài KHÔNG BAO GIỜ ném lỗi, cùng lý do như computeKetCauStructures/renderHoaStructureBox - đây là hàm
+// vẽ lại lưới lá số, được gọi ở GIỮA rất nhiều handler (toggleTheCung, setActiveChart cũ, v.v...) TRƯỚC các
+// bước dọn dẹp/vẽ lại khác theo sau trong CÙNG handler đó - lỗi ở đây không được phép cắt đứt phần còn lại.
 function renderGrid(c){
+  try{ renderGridRaw(c); }
+  catch(e){ console.error('renderGrid lỗi:', e); }
+}
+function renderGridRaw(c){
   const d=c.data, vM=c.vM, vT=c.vT, thMap=c.thMap;
   const birthCan=(d.thongTin.canChiNam||'').trim().split(' ')[0];
   const phiTargets=phiHoaTargetSet();
@@ -2350,7 +2352,7 @@ function pickReverseLetter(idx,starName,letter){
     reverseFlightArrows=computeReverseFlights(idx,starName,letter);
   }
   starPickerFor=null;
-  actionLog.push({type:'reverse',before,after:cloneReverseState()});
+  pushAction({type:'reverse',before,after:cloneReverseState()});
   actionRedoLog=[];
   const c=chart(); if(c) renderGrid(c);
   redrawCanvas();
@@ -2511,7 +2513,14 @@ function extendNienKyQuickChain(ch){
   }
   return steps.length===ch.steps.length ? ch : {...ch, steps};
 }
+// Bọc ngoài KHÔNG BAO GIỜ ném lỗi, cùng lý do như renderGrid/redrawCanvas - hàm này luôn chạy TRƯỚC renderGrid/
+// redrawCanvas trong hầu hết mọi handler (toggleTheCung, flyNienHoa, quickFlyLetter...) - lỗi ở đây chắc chắn
+// cắt đứt toàn bộ phần vẽ lại phía sau nếu không bọc.
 function recomputePhiHoaChains(){
+  try{ recomputePhiHoaChainsRaw(); }
+  catch(e){ console.error('recomputePhiHoaChains lỗi:', e); }
+}
+function recomputePhiHoaChainsRaw(){
   const st=hcState[hcMode];
   const realAnchorSet=new Set([...st.the,...st.dung]);
   const theChains=[...st.the].map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
@@ -2574,7 +2583,12 @@ function visiblePhiHoaChains(){
   const s=computeKetCauStructures(hcMode)[isoIdx];
   if(!s) return [];
   const realAnchorSet=new Set([...hcState[hcMode].the,...hcState[hcMode].dung]);
-  return ketCauIsoMembers(s,realAnchorSet).map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
+  const isoChains=ketCauIsoMembers(s,realAnchorSet).map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
+  // Trùng đoạn chuyển Kị GIỮA CHÍNH các thành viên trong kết cấu đang cô lập (vd Phúc Đức và Tật Ách cùng
+  // đáp vào Phu Thê rồi cùng CK tiếp Tài Bạch - đoạn CK đó dùng chung 1 Can nên là 1 đoạn duy nhất) - dedup
+  // NGAY TRONG PHẠM VI nhóm cô lập này (không dùng lại mảng dedup toàn cục hcState.chains, vốn có thể đã gán
+  // "quyền sở hữu" đoạn dùng chung đó cho 1 cung KHÁC ngoài nhóm này, gây mất hẳn đoạn đó khi cô lập riêng).
+  return dedupSharedContinuations(isoChains);
 }
 function phiHoaTargetSet(){
   const set=new Set();
@@ -3140,7 +3154,7 @@ function undoDraw(){
 function redoDraw(){
   if(!actionRedoLog.length) return;
   const action=actionRedoLog.pop();
-  actionLog.push(action);
+  pushAction(action);
   selectedShapeIdx=null;
   if(action.type==='shape'){ shapes.push(action.shape); }
   else if(action.type==='shape-remove'){ const i=shapes.indexOf(action.shape); if(i>=0) shapes.splice(i,1); }
@@ -3186,7 +3200,13 @@ function quickFlyLetter(idx,letter){
   renderSidebarCungButtons();
   redrawCanvas();
 }
+// Bọc ngoài KHÔNG BAO GIỜ ném lỗi, cùng lý do như renderGrid - hàm vẽ lại canvas cũng nằm GIỮA rất nhiều
+// handler, thường là lệnh CUỐI cùng nhưng vẫn có thể có code chạy sau nó ở 1 vài nơi.
 function redrawCanvas(preview){
+  try{ redrawCanvasRaw(preview); }
+  catch(e){ console.error('redrawCanvas lỗi:', e); }
+}
+function redrawCanvasRaw(preview){
   const cv=document.getElementById('drawCanvas'); if(!cv) return;
   const ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cv.width,cv.height);
@@ -3523,7 +3543,7 @@ function deleteSelectedShape(){
   if(selectedShapeIdx===null) return;
   const shape=shapes[selectedShapeIdx]; if(!shape) return;
   shapes.splice(selectedShapeIdx,1);
-  actionLog.push({type:'shape-remove', shape});
+  pushAction({type:'shape-remove', shape});
   actionRedoLog=[];
   selectedShapeIdx=null;
   const c=chart(); if(c) renderGrid(c);
@@ -3776,7 +3796,7 @@ function startInlineTextInput(wrap,x,y,color,onCommit,fontSize){
 }
 function pushShapeAction(shape){
   shapes.push(shape);
-  actionLog.push({type:'shape', shape});
+  pushAction({type:'shape', shape});
   actionRedoLog=[];
 }
 (function initCanvasEvents(){
@@ -4490,6 +4510,11 @@ function computeKetCauStructuresRaw(mode){
         });
       }
       let flow='';
+      // Thành viên hội tụ CHÍNH LÀ cung niên A/D (nienIdx) - nhãn hiển thị phải ghi rõ "niên A/D" thay vì tên
+      // cung thật (vd "Giao Hữu"), và mũi tên phải là CK (chuyển Kị, vì bản thân niên đã "tọa" sẵn năng lượng)
+      // chứ không phải TL/TK (truy Lộc/Kị, vốn dành cho 1 cung THẬT SỰ tự phi riêng "chạy tới góp lực") - dù
+      // vẫn tính đủ điểm hội tụ như bình thường (đây là 1 nguồn ĐỘC LẬP, không phải trùng lặp/dư thừa).
+      const isNienMember = M===nienIdx;
       if(isSelfLoopHere){
         const tagStr = subTags[0].length ? ` (${subTags[0].join(', ')})` : '';
         flow = `: tự hóa ${letter} xuất${tagStr}`;
@@ -4500,14 +4525,15 @@ function computeKetCauStructuresRaw(mode){
           // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
           // thích tương tự ở mạch chính phía trên.
           if(i>0 && s.from===s.to) flow += `: tự hóa ${letter} xuất${tagStr}`;
-          else if(i===0) flow += (subSteps.length===1) ? ` —${convTag}→ ${label(s.to)}${tagStr}` : ` → ${label(s.to)}${tagStr}`;
+          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${label(s.to)}${tagStr}` : ` → ${label(s.to)}${tagStr}`;
           else flow += ` —CK→ ${label(s.to)}${tagStr}`;
         });
       }
+      const memberLabel = isNienMember ? `niên ${mode==='cat'?'A':'D'}` : label(M);
       if(info.onRoot){
-        lines.push(`<li class="hoa-sub">⤷ <b>${label(M)}</b>${flow}: đã tính trong nền</li>`);
+        lines.push(`<li class="hoa-sub">⤷ <b>${memberLabel}</b>${flow}: đã tính trong nền</li>`);
       }else{
-        lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${label(M)}</b>${flow}</li>`);
+        lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow}</li>`);
       }
       const spineIdx=resolveSpineIndex(M, new Set([M]));
       if(spineIdx!==null && spineIdx!==undefined) convergences.push({stepIndex:spineIdx, otherIdx:M});
@@ -4563,6 +4589,29 @@ function computeKetCauStructuresRaw(mode){
       const res=evalRoot(root, effectiveSelected, mainAnchorSet, mainSuppressed, trueSelectedSet);
       if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode});
     });
+    // Loại bỏ kết cấu "nhỏ" mà CHÍNH triệu nhân cung của nó đã xuất hiện như 1 thành viên hội tụ TL (truy Lộc)
+    // trong 1 kết cấu "lớn" khác - câu chuyện của nó đã được kể trọn vẹn trong kết cấu lớn kia rồi (cùng 1
+    // đường bay, cùng đích), đứng riêng thêm 1 lần nữa chỉ là lặp lại, không phải 1 kết cấu độc lập thật sự.
+    // "Lớn hơn" so bằng chainSteps.length (mạch dài hơn) trước, rồi total, để không bị loại nhầm 2 chiều.
+    // CHỈ áp dụng khi kết cấu "nhỏ" total===1 (tức TOÀN BỘ câu chuyện của nó chỉ là đúng cái "1" nền tảng, tự
+    // nó KHÔNG có thêm bất kỳ hội tụ/điểm cộng nào khác của riêng nó) - nếu nó CÒN có thêm nội dung riêng
+    // (total>1, tự nó cũng có hội tụ khác), thì CHỈ vì gốc của nó tình cờ chạm vào 1 kết cấu khác ở 1 điểm
+    // không có nghĩa TOÀN BỘ câu chuyện của nó đã được kể hết ở đó - không được loại cả kết cấu.
+    const subsumedIdx=new Set();
+    structures.forEach((big,bi)=>{
+      (big.convergences||[]).forEach(cv=>{
+        structures.forEach((small,si)=>{
+          if(si===bi || small.anchorIdx!==cv.otherIdx || small.total!==1) return;
+          const bigLonger = big.chainSteps.length>small.chainSteps.length ||
+            (big.chainSteps.length===small.chainSteps.length && big.total>=small.total);
+          if(bigLonger) subsumedIdx.add(si);
+        });
+      });
+    });
+    if(subsumedIdx.size){
+      const kept=structures.filter((s,i)=>!subsumedIdx.has(i));
+      structures.length=0; structures.push(...kept);
+    }
   }else{
     // Kị: gộp nhóm union-find như cũ - đáp thẳng vào nhau (khác tinh diệu vẫn được) hoặc trùng cung đích ở
     // bất kỳ điểm nào trong 2 chuỗi riêng. Thử lần lượt từng thành viên làm gốc, chọn gốc cho kết cấu DÀI
@@ -4596,7 +4645,11 @@ function computeKetCauStructuresRaw(mode){
     Object.values(groups).forEach(members=>{
       // Cô lập (không liên kết Thể/Dụng nào khác) - vẫn tính trước, vì có thể sẽ được "lưỡng đầu kiến Kị" cứu
       // lại (liên kết với 1 kết cấu cô lập khác qua đối cung) ở bước sau; nếu không được cứu thì mới loại.
-      const isolated = effectiveSelected.length>1 && members.length===1;
+      // NHƯNG: nếu chính cung cô lập đó là 1 cung Thể/Dụng THẬT SỰ đã bấm chọn tay (trueSelectedSet, không
+      // chỉ tự động gộp vào) thì KHÔNG loại - bản thân nó ĐÃ là 1 triệu nhân cung hợp lệ (người dùng chủ động
+      // chọn), phải luôn hiển thị như 1 kết cấu riêng dù không liên kết được với Thể/Dụng nào khác, giống hệt
+      // nguyên tắc "mỗi cung Thể/Dụng đã chọn LUÔN là 1 gốc kết cấu độc lập riêng" đã áp dụng cho kết cấu Lộc.
+      const isolated = effectiveSelected.length>1 && members.length===1 && !trueSelectedSet.has(members[0]);
       // So sánh để CHỌN gốc: "đường nào dài nhất thì ưu tiên làm nhánh chính" - so bằng ĐỘ DÀI CHUỖI TỰ NHIÊN
       // của CHÍNH root đó (chainSteps.length, chưa bơm lực - applyBomLuc=false) TRƯỚC TIÊN, không phải tổng
       // điểm (total) - vì total còn cộng dồn điểm hội tụ từ CÁC THÀNH VIÊN KHÁC đáp vào chuỗi của root này
@@ -5299,8 +5352,14 @@ function dualClearAll(side){
   dualRedrawCanvas(side);
   dualRenderKetCau(side);
 }
+// Cùng lý do giới hạn như MAX_ACTION_LOG ở lá số đơn - tránh dualActionLog phình vô hạn qua 1 phiên dài.
+function dualPushAction(side,entry){
+  const log=dualActionLog[side];
+  log.push(entry);
+  if(log.length>MAX_ACTION_LOG) log.splice(0, log.length-MAX_ACTION_LOG);
+}
 function dualPushHcAction(side,before){
-  dualActionLog[side].push({before, after:dualCloneHcState(side)});
+  dualPushAction(side, {before, after:dualCloneHcState(side)});
   dualActionRedoLog[side]=[];
 }
 function dualUndoDraw(side){
@@ -5312,7 +5371,7 @@ function dualUndoDraw(side){
 function dualRedoDraw(side){
   if(!dualActionRedoLog[side].length) return;
   const action=dualActionRedoLog[side].pop();
-  dualActionLog[side].push(action);
+  dualPushAction(side, action);
   dualApplySnapshot(side,action.after);
 }
 // -- Vẽ tay riêng từng bên (port gọn của bộ vẽ tay lá số đơn - mũi tên/ô vuông/chữ, dùng chung drawShape/
