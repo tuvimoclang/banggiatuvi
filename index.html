@@ -262,9 +262,9 @@ body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color
 .ln{position:absolute;bottom:3px;left:6px;font-size:.6rem;color:var(--muted);text-align:left;line-height:1.4}
 .ln-age{cursor:pointer}
 .ln-age:hover{color:var(--accent);text-decoration:underline}
-.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.66rem;font-weight:700;color:var(--red);line-height:1.3;z-index:3}
-.ln-chuc{position:absolute;bottom:13px;right:5px;font-size:.58rem;font-weight:700;color:#1e40af;line-height:1.3;z-index:3}
-.lg-chuc{position:absolute;bottom:25px;right:5px;font-size:.58rem;font-weight:700;color:#16a34a;line-height:1.3;z-index:3}
+.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.66rem;font-weight:600;color:#e63946;line-height:1.3;z-index:3}
+.ln-chuc{position:absolute;bottom:15px;right:5px;font-size:.58rem;font-weight:600;color:#2563eb;line-height:1.3;z-index:3}
+.lg-chuc{position:absolute;bottom:27px;right:5px;font-size:.58rem;font-weight:600;color:#16a34a;line-height:1.3;z-index:3}
 .cung.dv-menh-bg{background:#ffe1ec}
 body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-info{margin-top:2px}
@@ -382,9 +382,44 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-side .b-than{font-size:.5rem;padding:0 3px}
 .dual-side .center-title{font-size:.85rem}
 .dual-side .center-line{font-size:.62rem;line-height:1.35}
+.dual-side .dv-chuc{bottom:2px;font-size:.54rem}
+.dual-side .ln-chuc{bottom:12px;font-size:.48rem}
+.dual-side .lg-chuc{bottom:20px;font-size:.48rem}
 
 @media(max-width:1000px){.sidebar-left{display:none}.sidebar-right{display:none}}
-@media(max-width:640px){.ban-tuvi{grid-template-columns:repeat(3,1fr)}.cung.center{display:none}}
+
+/* ═══ Điện thoại (≤640px dọc, hoặc thấp+ngang): tạm ẩn "2 LÁ SỐ", xếp bàn cờ + tool phải + Thể/Dụng theo cột dọc ═══ */
+@media(max-width:640px), (max-height:500px) and (orientation:landscape){
+  .tab[data-tab="dual"]{display:none}
+
+  .workspace{flex-direction:column;align-items:stretch}
+  .chart-area{order:1;width:100%;padding:0 6px 8px 6px;flex-direction:column}
+  .sidebar-right{display:flex;order:2;width:100%;flex-direction:row;flex-wrap:wrap;align-items:center;
+    border-left:none;border-top:1px solid var(--border-lt);padding:8px 6px}
+  .sidebar-right>*{flex:1 1 auto}
+  .sidebar-right .tool-divider{display:none}
+  .sidebar-right .icon-grid{flex:0 0 auto;grid-template-columns:repeat(4,1fr);width:auto}
+  .sidebar-left{display:block;order:3;width:100%;border-right:none;border-top:1px solid var(--border-lt);min-height:0}
+
+  /* Bàn cờ + chữ trong cung thu nhỏ để vừa màn hình điện thoại */
+  .ban-wrap{padding:6px;max-width:100%}
+  .cung{padding:5px 3px 13px 3px;min-height:82px}
+  .cung-cc-top{font-size:.56rem;top:3px;left:4px}
+  .cung-chuc{font-size:.6rem;margin-bottom:2px}
+  .sao{font-size:.56rem;gap:1px}
+  .dv{font-size:.58rem;top:3px;right:4px}
+  .ln{font-size:.46rem;bottom:2px;left:4px}
+  .b-than{font-size:.44rem;padding:0 2px}
+  .center-title{font-size:.66rem}
+  .center-name{font-size:.62rem}
+  .center-line{font-size:.5rem;line-height:1.3}
+  .dv-chuc{font-size:.48rem;bottom:1px;right:3px}
+  .ln-chuc{font-size:.42rem;bottom:8px;right:3px}
+  .lg-chuc{font-size:.42rem;bottom:15px;right:3px}
+
+  .can-side-panel{top:6px;right:6px;width:92px;padding:4px}
+  .can-letter-btn{font-size:.56rem;padding:2px}
+}
 
 /* ═══ AUTH: đăng nhập + kích hoạt mã (dùng chung backend Apps Script với tool.html/admincode.html) ═══ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center}
@@ -804,7 +839,6 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 </div>
 
 <script src="phihoa_data.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // ============================================================
 // ⚙️ TỬ VI MỘC LANG — AUTH & PREMIUM VERIFICATION
@@ -1880,9 +1914,27 @@ async function saveBlobToDisk(blob,filename){
   document.body.appendChild(a); a.click(); a.remove();
   return 'download';
 }
+// Chỉ nạp html2canvas (thư viện ~200KB từ CDN) đúng lúc cần xuất ảnh, thay vì nạp chặn ngay lúc mở trang -
+// trước đây gắn thẳng bằng thẻ <script> ở đầu trang khiến TOÀN BỘ code của app phải chờ CDN này tải xong
+// mới bắt đầu chạy được, chỉ để phục vụ 1 tính năng ít dùng (xuất ảnh PNG).
+let _html2canvasLoading=null;
+function ensureHtml2Canvas(){
+  if(typeof html2canvas==='function') return Promise.resolve();
+  if(_html2canvasLoading) return _html2canvasLoading;
+  _html2canvasLoading=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>resolve();
+    s.onerror=()=>{ _html2canvasLoading=null; reject(new Error('load-failed')); };
+    document.head.appendChild(s);
+  });
+  return _html2canvasLoading;
+}
 async function taiAnhLaSo(){
   const wrap=document.getElementById('banWrap');
   if(!wrap) throw new Error('Chưa có lá số để xuất ảnh');
+  try{ await ensureHtml2Canvas(); }
+  catch(e){ throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.'); }
   if(typeof html2canvas!=='function') throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.');
   const cs=getComputedStyle(document.body);
   const canvas=await html2canvas(wrap,{backgroundColor:cs.getPropertyValue('--bg').trim()||'#fff', useCORS:true, scale:2});
