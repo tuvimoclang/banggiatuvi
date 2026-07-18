@@ -401,8 +401,10 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
   .sidebar-right .icon-grid{flex:0 0 auto;grid-template-columns:repeat(4,1fr);width:auto}
   .sidebar-left{display:block;order:3;width:100%;border-right:none;border-top:1px solid var(--border-lt);min-height:0}
 
-  /* Bàn cờ + chữ trong cung thu nhỏ để vừa màn hình điện thoại */
-  .ban-wrap{padding:6px;max-width:100%}
+  /* Bàn cờ + chữ trong cung thu nhỏ để vừa màn hình điện thoại - padding giữ tối thiểu 36px (không giảm sâu
+     như trước) vì mũi tên tự hóa ly tâm (drawTuHoaArrows) bắn ra NGOÀI viền lưới ~30px, nếu ban-wrap hẹp hơn
+     mức đó, canvas (được size đúng bằng ban-wrap) sẽ không đủ chỗ chứa nên mũi tên bị cắt cụt/mất hẳn. */
+  .ban-wrap{padding:36px;max-width:100%}
   .cung{padding:5px 3px 13px 3px;min-height:82px}
   .cung-cc-top{font-size:.56rem;top:3px;left:4px}
   .cung-chuc{font-size:.6rem;margin-bottom:2px}
@@ -2471,7 +2473,7 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
   // Bước chuyển Kị bắt buộc đầu tiên: tự hóa Lộc xuất / tự hóa Kị xuất theo sách vẫn phải chuyển Kị, không điều kiện.
   let step2=flyFrom(step1.to,'D');
   if(step2 && step2.to===step1.from && step2.letter===step1.letter && step2.star===step1.star) step2=null;
-  if(!step2) return {from:startIdx, steps};
+  if(!step2) return {from:startIdx, steps, structureLetter:firstLetter};
   step2.color=hoaArrowColor('D');
   steps.push(step2);
   // Từ đây trở đi: KHÔNG giới hạn chỉ 1 bước bổ sung - hễ điểm vừa đáp còn thỏa điều kiện (gặp niên cùng
@@ -2676,8 +2678,12 @@ function tuHoaGlowSet(){
     const ml=ch.structureLetter;
     if(ml!=='A' && ml!=='D') return;
     ch.steps.forEach(s=>{
+      // So khớp theo CHỮ THẬT SỰ của từng bước (s.letter), không phải chữ của cả kết cấu (ml) - đoạn chuyển
+      // Kị (CK) trong 1 kết cấu Lộc vẫn luôn dùng chữ D (xem flyFrom/computeSingleChain), nên phải tô đậm
+      // đúng mũi tên tự hóa D nó chạm qua, không phải tự hóa A (chữ gốc của cả kết cấu) - áp dụng chung cho
+      // phi Lộc, phi Kị lẫn chuyển Kị, miễn đúng ngôi sao.
       const selfHoa=computeTuHoaFor(s.to);
-      if(selfHoa.some(a=>a.type==='out' && a.letter===ml && a.star===s.star)) set.add(s.to+':'+ml);
+      if(selfHoa.some(a=>a.type==='out' && a.letter===s.letter && a.star===s.star)) set.add(s.to+':'+s.letter);
     });
   });
   return set;
@@ -3317,9 +3323,11 @@ function cellEdgeAnchor(idx, which){
 }
 function hoaArrowColor(letter){
   const st=getComputedStyle(document.body);
-  if(letter==='A') return st.getPropertyValue('--green').trim();
-  if(letter==='B') return st.getPropertyValue('--red').trim();
-  if(letter==='C') return st.getPropertyValue('--blue').trim();
+  // Dùng màu tươi/đậm riêng cho mũi tên (thay vì var(--green)/--red/--blue dùng chung toàn giao diện, vốn bị
+  // làm tối đi để dễ đọc trên nền chữ/badge - trên nét mũi tên thì cần đậm rõ nét hơn hẳn).
+  if(letter==='A') return '#16a34a';
+  if(letter==='B') return '#e63946';
+  if(letter==='C') return '#2563eb';
   return document.body.classList.contains('theme-dark') ? st.getPropertyValue('--gold').trim() : '#000';
 }
 // Riêng cho tự hóa: "Đổi màu" (plain-bw) chỉ áp dụng cho kí tự/mũi tên tự hóa, KHÔNG áp dụng cho mũi tên
@@ -3514,8 +3522,8 @@ function drawSkitchArrow(ctx,p1,p2,color,widthScale){
   const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
   const ux=dx/len, uy=dy/len, px=-uy, py=ux;
   const headLen=Math.min(12,len*0.6); // chiều dài đầu mũi tên (tam giác nhọn) - co lại khi mũi tên rất ngắn để không bị lật hình
-  const shaftHalfWidth=2.4*scale; // độ dày tối đa của thân (~1.2mm ở scale mặc định), ngay tại gốc đầu mũi tên
-  const headHalfWidth=4.5*scale;
+  const shaftHalfWidth=2.9*scale; // độ dày tối đa của thân (~1.2mm ở scale mặc định), ngay tại gốc đầu mũi tên
+  const headHalfWidth=5.2*scale;
   const baseX=p2.x-ux*headLen, baseY=p2.y-uy*headLen;
   ctx.fillStyle=color;
   // Thân: hình thang thon dần từ đuôi (độ dày 0) tới gốc đầu mũi tên (độ dày tối đa)
@@ -3850,15 +3858,27 @@ function pushShapeAction(shape){
   pushAction({type:'shape', shape});
   actionRedoLog=[];
 }
+// Lấy tọa độ chuột/ngón tay thống nhất cho cả MouseEvent lẫn TouchEvent (điện thoại/tablet không tự phát
+// sinh mousedown/mousemove/mouseup khi kéo trên canvas, nên mọi thao tác vẽ tay/kéo mũi tên phải nghe thêm
+// touchstart/touchmove/touchend, dùng đúng tọa độ ngón tay thay vì e.clientX/Y vốn chỉ có ở MouseEvent).
+function clientPointFrom(e){
+  const t=(e.touches&&e.touches[0])||(e.changedTouches&&e.changedTouches[0]);
+  return t ? {clientX:t.clientX, clientY:t.clientY} : {clientX:e.clientX, clientY:e.clientY};
+}
+function onOff(el,mouseType,touchType,handler,opts){
+  el.addEventListener(mouseType,handler,opts);
+  el.addEventListener(touchType,handler,opts);
+}
 (function initCanvasEvents(){
   document.addEventListener('DOMContentLoaded',()=>{
     const cv=document.getElementById('drawCanvas');
     let dragging=false, start=null;
-    cv.addEventListener('mousedown',e=>{
+    onOff(cv,'mousedown','touchstart',e=>{
       if(!drawTool) return;
       e.preventDefault(); // xem giải thích tương tự ở initAtcCanvasEvents - tránh browser blur() input chèn chữ
       const r=cv.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
       if(drawTool==='text'){
         startInlineTextInput(document.getElementById('banWrap'),x,y,drawColor,txt=>{
           pushShapeAction({type:'text',x1:x,y1:y,text:txt,color:drawColor,fontSize:drawFontSize}); redrawCanvas();
@@ -3867,18 +3887,21 @@ function pushShapeAction(shape){
       }
       dragging=true; start={x,y};
       if(drawTool==='arrow') updateArrowHoverUnderline(x,y);
-    });
-    cv.addEventListener('mousemove',e=>{
+    },{passive:false});
+    onOff(cv,'mousemove','touchmove',e=>{
       if(!dragging) return;
+      e.preventDefault();
       const r=cv.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
       redrawCanvas({type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawLineWidth});
       if(drawTool==='arrow') updateArrowHoverUnderline(x,y);
-    });
-    window.addEventListener('mouseup',e=>{
+    },{passive:false});
+    onOff(window,'mouseup','touchend',e=>{
       if(!dragging) return; dragging=false;
       const r=cv.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
       if(drawTool==='rect'||drawTool==='arrow'){
         const shape={type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawLineWidth};
         // Mũi tên vẽ tay chạm tới 1 sao lúc buông chuột - gạch dưới sao đó luôn (giữ tới khi xóa mũi tên này),
@@ -3896,22 +3919,25 @@ function pushShapeAction(shape){
     const wrap=document.getElementById('banWrap');
     let justDraggedArrow=false;
     // Kéo đầu/đuôi 1 mũi tên phi hóa để tự chỉnh vị trí theo ý muốn.
-    wrap.addEventListener('mousedown',e=>{
+    onOff(wrap,'mousedown','touchstart',e=>{
       if(drawTool) return;
       const r=cv.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
       const handle=hitTestArrowHandle(x,y);
       if(handle){ draggingArrowHandle=handle; e.preventDefault(); }
-    });
-    window.addEventListener('mousemove',e=>{
+    },{passive:false});
+    onOff(window,'mousemove','touchmove',e=>{
       if(!draggingArrowHandle) return;
+      e.preventDefault();
       const r=cv.getBoundingClientRect();
-      const x=e.clientX-r.left, y=e.clientY-r.top;
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
       const key=arrowKey(draggingArrowHandle.modeKey,draggingArrowHandle.from,draggingArrowHandle.to,draggingArrowHandle.letter);
       arrowOverrides[key]={p2:{x,y}};
       redrawCanvas();
-    });
-    window.addEventListener('mouseup',()=>{
+    },{passive:false});
+    onOff(window,'mouseup','touchend',()=>{
       if(draggingArrowHandle){ draggingArrowHandle=null; justDraggedArrow=true; }
     });
     // Bấm (đơn hoặc double-click) vào 1 mũi tên phi hóa HOẶC 1 nét vẽ tay (mũi tên/ô vuông/chữ, không ở chế
@@ -4478,7 +4504,13 @@ function computeKetCauStructuresRaw(mode){
         // KHÔNG tính vào cung thứ 2 (steps[0] = chính lượt hóa Lộc gốc của root, còn "của riêng root", chưa
         // chuyển Kị) - khác với truy Kị, được phép truy vào từ cung thứ 2 trở đi (xem nhánh letter==='D').
         const p0=pts[0];
-        if(p0){
+        // Cung niên A CHÍNH LÀ nienIdx và ĐÃ LÀ 1 điểm trung gian tự nhiên trên mạch chính của root rồi (root
+        // tự chuyển Kị đáp qua đúng cung này, dùng đúng Can của chính nó, rồi mới tiếp tục) - chuỗi riêng của
+        // nienIdx (cũng dùng lại đúng Can đó) chỉ tả lại Y HỆT đoạn root ĐÃ đi qua, không phải 1 nguồn hội tụ
+        // độc lập mới nên KHÔNG cộng thêm điểm (tránh đếm trùng lần 2 cùng 1 sự kiện) - vẫn ghi "đã tính trong
+        // nền" để không mất dấu, giống cách xử lý "đáp thẳng vào gốc" (onRoot) của kết cấu Kị.
+        if(p0 && M===nienIdx && spineTargets.has(M)) found={p:{to:p0.to,star:p0.star,i:0}, via:null, onRoot:true};
+        else if(p0){
           if(p0.to===root && p0.star===rootOwnStar) found={p:p0, via:null};
           // Cùng Can với root (2 cung khác nhau cùng 1 Thiên Can) - tự nhiên hóa Lộc RA CÙNG 1 SAO, đáp ĐÚNG
           // vào ĐÚNG điểm mà root cũng vừa hóa Lộc ra (steps[0]) - đây KHÔNG phải truy Lộc (không phải "chạy
