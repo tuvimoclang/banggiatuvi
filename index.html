@@ -1760,7 +1760,7 @@ async function lapLaSo(){
   document.getElementById('errorBox').style.display='none';
 
   try{
-    const res=await fetch('http://localhost:5000/api/lap-laso',{
+    const res=await fetch('/api/lap-laso',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         hoTen:document.getElementById('hoTen').value,
@@ -4151,9 +4151,28 @@ function isDungConnectedToThe(dungChain,theChains){
 // không có tác dụng" cho TẤT CẢ các nút gọi tới cùng pipeline vẽ lại này, chỉ hết khi tải lại trang (state
 // mới bắt đầu lại từ đầu, tránh đúng tổ hợp gây lỗi). Bọc try/catch để 1 trường hợp biên chưa lường hết chỉ
 // làm mất phần kết cấu hiển thị, không kéo sập toàn bộ phần vẽ lại phía sau.
+// Cache theo "chữ ký" (signature) gọn của TOÀN BỘ input ảnh hưởng kết quả (Thể/Dụng/quick/niên đang chọn) -
+// hàm này bị gọi LẶP LẠI NHIỀU LẦN redundant trong CÙNG 1 chu kỳ render (phiHoaTargetSet, phiHoaGlowSet,
+// drawPhiHoaChain, renderHoaStructureBox, countHoaAndShow đều tự gọi riêng khi đang cô lập 1 kết cấu), và
+// bản thân hàm càng nặng dần khi Thể/Dụng chọn càng nhiều (vòng lặp O(n²) union-find cho kết cấu Kị) - phiên
+// làm việc càng lâu, chọn càng nhiều Thể/Dụng qua bảng Tra Can/L.Lộc/Đ.Lộc thì chi phí TÍNH LẶP LẠI THỪA này
+// càng lớn, tạo cảm giác "chậm dần đi" dù mỗi thao tác riêng lẻ đều hợp lý. Dùng chữ ký SO SÁNH thay vì phải
+// nhớ gọi invalidate ở ĐÚNG MỌI nơi hcState/nienGlowTarget có thể đổi (undo/redo, đổi lá số...) - tự phát
+// hiện thay đổi, không có rủi ro hiển thị kết cấu CŨ do lỡ sót 1 điểm invalidate.
+let _ketCauCache={hung:{sig:null,result:null}, cat:{sig:null,result:null}};
 function computeKetCauStructures(mode){
-  try{ return computeKetCauStructuresRaw(mode); }
-  catch(e){ console.error('computeKetCauStructures lỗi:', e); return []; }
+  const st=hcState[mode];
+  const nien=nienGlowTarget[mode];
+  const c=chart();
+  const sig=(c?c.vM:'x')+'|'+[...st.the].sort((a,b)=>a-b).join(',')+'|'+[...st.dung].sort((a,b)=>a-b).join(',')+
+    '|'+[...st.quick.entries()].sort().join(',')+'|'+(nien?nien.idx+':'+nien.star:'');
+  const cache=_ketCauCache[mode];
+  if(cache.sig===sig) return cache.result;
+  let result;
+  try{ result=computeKetCauStructuresRaw(mode); }
+  catch(e){ console.error('computeKetCauStructures lỗi:', e); result=[]; }
+  cache.sig=sig; cache.result=result;
+  return result;
 }
 function computeKetCauStructuresRaw(mode){
   const c=chart(); const letter=mode==='cat'?'A':'D', letterName=mode==='cat'?'Lộc':'Kị';
@@ -5094,7 +5113,7 @@ async function dualLapLaSo(side){
   if(!dd||!mm||!yyyy||yyyy<1900){ alert('Nhập đúng Ngày / Tháng / Năm sinh!'); return; }
   const ngaySinh=`${yyyy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
   try{
-    const res=await fetch('http://localhost:5000/api/lap-laso',{
+    const res=await fetch('/api/lap-laso',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         hoTen:document.getElementById('dualHoTen_'+side).value,
