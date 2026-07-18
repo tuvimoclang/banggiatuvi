@@ -2601,8 +2601,8 @@ function recomputePhiHoaChainsRaw(){
     const isNienQuick = letter==='D' && nienGlowTarget[hcMode] && nienGlowTarget[hcMode].idx===idx;
     // Mũi tên niên (chuyển Kị từ chính năng lượng niên đang có sẵn) là 1 hiện tượng ĐỘC LẬP, dù cung đó
     // SAU ĐÓ cũng được bấm chọn thêm làm Thể/Dụng thật (phi Lộc/Kị riêng, khác hẳn) - không được vì vậy mà
-    // tự ý xóa mất mũi tên niên đang có. Chỉ bấm ABCD thường mới bỏ qua khi đã trùng Thể/Dụng.
-    if(!isNienQuick && (st.the.has(idx)||st.dung.has(idx))) return;
+    // tự ý xóa mất mũi tên niên đang có. ABCD thường vẫn tính chuỗi riêng dù cung đã là Thể/Dụng (cho phép
+    // xem thêm cả 4 chữ tại chính cung đó, không chặn theo yêu cầu).
     let ch = isNienQuick ? extendNienKyQuickChain(computeSingleChain(idx,letter,true)) : computeSingleChain(idx,letter,true);
     if(ch && isNienQuick){
       // Nếu đoạn (hoặc cả) chuỗi niên D vừa tính TRÙNG với 1 đoạn chuyển Kị đã có sẵn trong 1 chuỗi Thể/Dụng
@@ -3242,7 +3242,6 @@ function deleteSelectedPhiArrow(){
 function quickFlyLetter(idx,letter){
   const c=chart(); if(!c) return;
   const st=hcState[hcMode];
-  if(st.the.has(idx) || st.dung.has(idx)) return; // cung đã là Thể/Dụng thì bỏ qua, tránh trùng lặp
   const before=cloneHcState();
   if(st.quick.get(idx)===letter) st.quick.delete(idx); // bấm lại đúng chữ đó để bỏ chọn
   else st.quick.set(idx,letter);
@@ -5151,7 +5150,6 @@ function dualRecomputeChains(side){
   chains=dedupSharedContinuations(chains);
   st.quick.forEach((qLetter,idx)=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
-    if(!isNienQuick && (st.the.has(idx)||st.dung.has(idx))) return;
     const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true)) : dualComputeSingleChain(c,idx,qLetter,true);
     if(ch) chains.push(ch);
   });
@@ -5557,7 +5555,6 @@ let dualReverseFlightArrows={A:[],B:[]};
 function dualQuickFlyLetter(side,idx,letter){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
   const st=inst.hcState[inst.hcMode];
-  if(st.the.has(idx) || st.dung.has(idx)) return;
   const before=dualCloneHcState(side);
   if(st.quick.get(idx)===letter) st.quick.delete(idx);
   else st.quick.set(idx,letter);
