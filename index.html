@@ -190,15 +190,20 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .ph-meaning-list li{margin-bottom:6px}
 
 /* -- chart area -- */
-.chart-area{flex:1;min-width:0;padding:0 156px 12px 12px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:8px}
+.chart-area{flex:1;min-width:0;padding:0 130px 12px 12px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:8px}
 /* max-width +30px (~780->810) = mỗi cung trong lưới 4 cột rộng thêm ~7.5px (~2mm) theo chiều ngang. */
+/* Giảm padding (không phải tăng max-width) mới thật sự nới rộng được lưới 4 cột - .chart-area đang chừa sẵn
+   156px bên phải cho bảng An Can nổi nên ban-wrap hiếm khi chạm tới max-width để tăng có tác dụng. Giảm
+   48px -> 33px mỗi bên = +30px cho lưới = mỗi cung trong 4 cột rộng thêm ~7.5px (~2mm) thật sự nhìn thấy. */
 .ban-wrap{position:relative;max-width:810px;width:100%;padding:48px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .inline-text-input{position:absolute;z-index:20;border:1px dashed var(--accent);background:transparent;font:14px Segoe UI;padding:0 2px;outline:none;min-width:40px}
 #atcCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .ban-wrap.drawing #drawCanvas{pointer-events:auto;cursor:crosshair}
 .ban-wrap.drawing #atcCanvas{pointer-events:auto;cursor:crosshair}
-.can-side-panel{position:fixed;top:120px;right:90px;width:132px;z-index:200;padding:6px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);box-shadow:0 2px 10px rgba(0,0,0,.18)}
+/* width/right thu hẹp lại 1 chút so với trước - lá số vừa được nới rộng ra nên khoảng trống giữa lá số và
+   tool phải hẹp hơn, bảng Can cần gọn hơn để không đè lên cả 2 bên. */
+.can-side-panel{position:fixed;top:120px;right:127px;width:110px;z-index:200;padding:6px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);box-shadow:0 2px 10px rgba(0,0,0,.18)}
 .can-min-btn{position:absolute;top:3px;right:3px;width:16px;height:16px;border:1px solid var(--border-lt);background:var(--hover);color:var(--muted);border-radius:3px;font-size:.72rem;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;z-index:1}
 .can-min-btn:hover{background:var(--border-lt);color:var(--text)}
 /* Thu gọn: cả bảng An Can co lại thành 1 nút vuông duy nhất, bấm lại để mở ra như cũ. */
@@ -207,7 +212,11 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .can-side-panel.minimized .can-letter-toggle,
 .can-side-panel.minimized .can-grid{display:none}
 /* Thu gọn: chỉ còn 1 khối vuông trơn (không glyph chia ô), nằm sát viền tool phải. */
-.can-side-panel.minimized .can-min-btn{position:static;width:100%;height:100%;border:none;border-radius:8px;background:var(--accent)}
+/* Icon kiểu 4 ô vuông (Windows) thay cho ký tự chữ - vẽ bằng box-shadow (1 ô + 3 bản sao lệch vị trí),
+   không cần thêm ảnh/DOM con. */
+.can-side-panel.minimized .can-min-btn{position:static;width:100%;height:100%;border:none;border-radius:8px;background:#14b8a6;display:flex;align-items:center;justify-content:center}
+.can-side-panel.minimized .can-min-btn::before{content:'';width:7px;height:7px;background:#fff;border-radius:1.5px;
+  box-shadow:9px 0 0 #fff,0 9px 0 #fff,9px 9px 0 #fff;transform:translate(-4.5px,-4.5px)}
 .can-drag-handle{text-align:center;font-size:.6rem;letter-spacing:2px;color:var(--muted);cursor:grab;line-height:1;padding:2px 0 5px;user-select:none}
 .can-drag-handle:active{cursor:grabbing}
 .can-letter-toggle{display:flex;gap:3px;margin-bottom:6px}
@@ -222,8 +231,6 @@ body.theme-dark .can-letter-btn.active.can-letter-D{background:var(--gold);color
 .cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:132px;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
 .cung:hover{background:var(--hover)}
 .cung.sel-ring{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
-.cung.user-hl{background:#fff6cc}
-body.theme-dark .cung.user-hl{background:#221a00}
 .cung.hl-daivan{outline:2px solid var(--red);outline-offset:-2px}
 .cung.hl-luunien{outline:2px solid var(--green);outline-offset:-2px;background:#fdf6e3}
 body.theme-dark .cung.hl-luunien{background:#2a2410}
@@ -276,7 +283,10 @@ body.theme-dark .phb-D{border:1px solid var(--gold)}
 .star-picker{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:3px;display:flex;gap:3px;background:var(--panel);border:1px solid var(--border-lt);border-radius:10px;padding:3px 4px;box-shadow:0 2px 10px rgba(0,0,0,.3);z-index:20}
 .star-picker .phb{cursor:pointer}
 
-.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:700;line-height:1;flex-shrink:0}
+/* text-decoration:none tường minh - badge niên hóa nằm LỒNG bên trong span .sao, nếu .sao đang được gạch
+   dưới (phi-target/star-traced/ldkk/arrow-hover) thì không được để nét gạch "tràn" qua badge này - chỉ gạch
+   đúng phần chữ tên sao, không đụng tới badge. */
+.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none}
 .th-A{background:var(--green);color:#fff}
 .th-B{background:var(--red);color:#fff}
 .th-C{background:var(--blue);color:#fff}
@@ -287,7 +297,9 @@ body.theme-dark .th-D{background:var(--gold);color:#000;border-color:var(--gold)
 .th-C.th-glow{box-shadow:0 0 7px 3px var(--blue)}
 .th-D.th-glow{box-shadow:0 0 7px 3px #000}
 body.theme-dark .th-D.th-glow{box-shadow:0 0 7px 3px var(--gold)}
-body.plain-bw .th{background:#fff !important;color:#000 !important;border:1px solid #000}
+/* Đổi màu (trắng đen): niên ABCD to hơn hẳn, TẤT CẢ 4 chữ đều cùng 1 màu đỏ (viền đỏ + chữ đỏ, nền trắng),
+   không phân biệt theo từng chữ nữa. */
+body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:26px;height:26px;font-size:.86rem}
 .mth{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:.6rem;font-weight:700;line-height:1;flex-shrink:0;border:1.5px solid var(--text);background:var(--panel);color:var(--text)}
 body.show-menh-hoa .mth{display:inline-flex}
 body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color:#000 !important}
@@ -314,6 +326,8 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .tool-btn{padding:5px 2px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.58rem;font-weight:500;text-align:center}
 .tool-btn:hover{background:var(--hover)}
 .tool-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Riêng Ẩn/Hiện Tự Hóa và Lập Cực: chỉ viền màu khi bật, không tô nền đặc như các tool-btn khác. */
+#btnTuHoaCross.active,#btnLapCuc.active{background:var(--panel);color:var(--accent);border-color:var(--accent)}
 .tool-btn.orange{border-color:#c8790a;color:#c8790a}
 .topic-wrap{position:relative;width:100%}
 .topic-wrap .tool-btn{width:100%}
@@ -773,7 +787,6 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
     </div>
     <div class="btn-row">
       <button class="btn-outline" id="btnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
-      <button class="btn-outline" id="btnHighlight" onclick="toggleHighlightMode()">Highlight</button>
       <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
       <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
       <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
@@ -918,7 +931,11 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
 
     <aside class="sidebar-right">
       <button class="tool-btn" id="btnTuHoaCross" onclick="toggleTuHoaCrossVisible()">ẨN/HIỆN TỰ HÓA</button>
-      <button class="tool-btn" id="btnLapCuc" onclick="lapCuc()">LẬP CỰC</button>
+      <div class="stepper">
+        <button class="step-arrow" onclick="stepLapCuc(-1)">&lsaquo;</button>
+        <button class="step-label" id="btnLapCuc" onclick="lapCuc()">LẬP CỰC</button>
+        <button class="step-arrow" onclick="stepLapCuc(1)">&rsaquo;</button>
+      </div>
       <div class="topic-wrap">
         <button class="tool-btn orange" onclick="toggleChuDePopup()">CHỦ ĐỀ</button>
         <div class="topic-popup" id="topicPopup" hidden>
@@ -1280,7 +1297,7 @@ function xoaKhoItem(id) {
 // GOOGLE SIGN-IN — GOOGLE_CLIENT_ID chưa cấu hình → chạy chế độ nhập email (giống tool.html
 // hiện tại đang chạy live). Điền Client ID thật vào đây bất kỳ lúc nào để bật OAuth thật.
 // ============================================================
-const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
+const GOOGLE_CLIENT_ID = '401075526815-f6nq8nsnchinirp7qlkeonk40tob07g6.apps.googleusercontent.com';
 
 function initGoogleAuth() {
   // Đang ở demo mode (chưa điền GOOGLE_CLIENT_ID thật) - KHÔNG tải SDK Google Identity Services, vì:
@@ -1653,7 +1670,6 @@ let centerInfoHidden=false;
 let subTab='goc';
 let sbTab='thedung';
 let hcMode='hung';
-let highlightMode=false;
 let selectedDaiVanIdx=null;   // index into daiHan array
 let selectedLuuNienYear=null;
 let selectedLuuNguyetMonth=null;
@@ -1917,6 +1933,9 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
   let arrows=[];
   for(let idx=0;idx<12;idx++) arrows=arrows.concat(atcComputeTuHoaFor(idx,sc,tenCung));
   if(!arrows.length) return;
+  // Kích thước CSS thật (KHÔNG dùng cv.width/height - từ khi khớp devicePixelRatio, 2 giá trị đó đã bị nhân
+  // lên theo dpr, dùng nhầm để giới hạn/kẹp tọa độ sẽ khiến mũi tên tràn ra ngoài khung trên màn hình HiDPI).
+  const cvRect=cv.getBoundingClientRect();
   const outGroups={};
   arrows.filter(a=>a.type==='out').forEach(a=>{ (outGroups[a.from]=outGroups[a.from]||[]).push(a); });
   Object.keys(outGroups).forEach(fromKey=>{
@@ -1924,8 +1943,8 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
     const anchor=atcCellEdgeAnchor(from,'outer'); if(!anchor) return;
     let end={x:anchor.x+anchor.dir.x*30, y:anchor.y+anchor.dir.y*30}; // 30px ~ 8mm
     const margin=16;
-    end.x=Math.max(margin,Math.min(cv.width-margin,end.x));
-    end.y=Math.max(margin,Math.min(cv.height-margin,end.y));
+    end.x=Math.max(margin,Math.min(cvRect.width-margin,end.x));
+    end.y=Math.max(margin,Math.min(cvRect.height-margin,end.y));
     drawArrowLine(ctx,{x:anchor.x,y:anchor.y},end,tuHoaLetterColor(group[0].letter),1.6);
     const isHorizontal=anchor.dir.y===0;
     const midX=(anchor.x+end.x)/2, midY=(anchor.y+end.y)/2;
@@ -1933,7 +1952,7 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
     const spacing=11, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
-      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaLetterColor(a.letter),false);
+      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),false);
     });
   });
   const crossGroups={};
@@ -1971,7 +1990,7 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
       const c=pt(0.13);
       g.toA.forEach((L,i)=>{
         const along=(i-(g.toA.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaLetterColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
       });
     }
     if(hasB){
@@ -1979,7 +1998,7 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
         const along=(i-(g.toB.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaLetterColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
       });
     }
   });
@@ -1996,7 +2015,11 @@ function atcSizeCanvas(){
   const wrap=document.getElementById('atcBanWrap'), cv=document.getElementById('atcCanvas');
   if(!wrap||!cv) return;
   const r=wrap.getBoundingClientRect();
-  cv.width=r.width; cv.height=r.height;
+  // Khớp buffer canvas với mật độ điểm ảnh thật (devicePixelRatio) - nếu không, màn hình HiDPI/Retina sẽ
+  // vẽ mờ (buffer ít điểm ảnh hơn số điểm ảnh thật cần hiển thị, trình duyệt phải phóng to/nội suy).
+  const dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
   atcRedrawCanvas();
 }
 window.addEventListener('resize',atcSizeCanvas);
@@ -2108,7 +2131,16 @@ function toggleLich(){
 // ═══════════════════════════════════
 // THÀNH PHỐ / MÚI GIỜ
 // ═══════════════════════════════════
-function onCC(){document.getElementById('citySearch').value='';searchCity()}
+// Đổi Quốc gia phải tự đồng bộ luôn Thành phố/Múi giờ theo quốc gia đó - trước đây chỉ đổi Quốc gia thì
+// #muiGio/selCity vẫn giữ nguyên giá trị CŨ (phải tự bấm chọn thêm 1 thành phố mới cập nhật), khiến lập lá
+// số dùng nhầm múi giờ của quốc gia trước đó dù đã đổi Quốc gia.
+function onCC(){
+  document.getElementById('citySearch').value='';
+  searchCity();
+  const co=document.getElementById('quocGia').value;
+  const firstMatch=CITIES.find(c=>co==='OTHER'||c.c===co);
+  if(firstMatch) pickCity(firstMatch.n);
+}
 function searchCity(){
   const q=document.getElementById('citySearch').value.toLowerCase();
   const co=document.getElementById('quocGia').value;
@@ -3173,11 +3205,6 @@ function onCungClick(idx){
     const c=chart(); if(c) renderGrid(c);
     return;
   }
-  if(highlightMode){
-    const cell=document.querySelector(`#banWrap .cung[data-idx="${idx}"]`);
-    if(cell) cell.classList.toggle('user-hl');
-    return;
-  }
   selectCungByIdx(idx);
 }
 function switchSub(name){
@@ -3477,10 +3504,6 @@ function togglePlainBw(){
   // tự cập nhật pixel đã vẽ, phải chủ động vẽ lại thì mới thấy đen trắng ngay.
   redrawCanvas();
 }
-function toggleHighlightMode(){
-  highlightMode=!highlightMode;
-  document.getElementById('btnHighlight').classList.toggle('active',highlightMode);
-}
 function toggleInfoVisible(){
   centerInfoHidden=!centerInfoHidden;
   applyCenterInfoVisibility();
@@ -3523,6 +3546,15 @@ function updateLapCucBtn(){
   btn.textContent = lapCucPicking ? 'CHỌN 1 CUNG…' : 'LẬP CỰC';
   btn.title = lapCucPicking ? 'Bấm chọn 1 cung bất kỳ trên lá số để lập cực tại đó'
     : (lapCucAnchor!==null ? 'Bấm để tắt lập cực' : 'Lập cực: xem lá số như 1 cung bất kỳ là Mệnh');
+}
+// 2 mũi tên cạnh nút LẬP CỰC (giống Đại Vận) - dịch chuyển cung lập cực sang cung kế tiếp/trước đó, thay vì
+// phải bấm lại vào đúng 1 cung trên lá số mỗi lần muốn đổi.
+function stepLapCuc(dir){
+  const c=chart(); if(!c) return;
+  lapCucPicking=false;
+  lapCucAnchor = lapCucAnchor===null ? (c.vM+dir+12)%12 : (lapCucAnchor+dir+12)%12;
+  updateLapCucBtn();
+  renderGrid(c);
 }
 // ═══════════════════════════════════
 // CHỦ ĐỀ: nhóm Thể/Dụng theo từng chủ đề luận mệnh (trích Tử vi đẩu số Phi tinh - Độc môn tâm pháp)
@@ -3573,7 +3605,11 @@ function selectTopic(key){
 function sizeCanvas(){
   const wrap=document.getElementById('banWrap'), cv=document.getElementById('drawCanvas');
   const r=wrap.getBoundingClientRect();
-  cv.width=r.width; cv.height=r.height;
+  // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
+  // tương tự ở atcSizeCanvas).
+  const dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
   redrawCanvas();
 }
 function setDrawTool(t){
@@ -3788,6 +3824,12 @@ function tuHoaLetterColor(letter){
   if(letter==='C') return st.getPropertyValue('--blue').trim();
   return document.body.classList.contains('theme-dark') ? st.getPropertyValue('--gold').trim() : '#000';
 }
+// Riêng CHỮ ABCD trên mũi tên tự hóa: ở chế độ Đổi màu vẫn tô đỏ (giống hệt badge niên hóa .th HTML),
+// KHÔNG chuyển đen như đường kẻ mũi tên (tuHoaLetterColor) - đường kẻ vẫn đen/trắng như cũ.
+function tuHoaBadgeColor(letter){
+  if(document.body.classList.contains('plain-bw')) return getComputedStyle(document.body).getPropertyValue('--red').trim();
+  return tuHoaLetterColor(letter);
+}
 // Gộp các mũi tên hướng tâm đi trùng đường (cùng cặp cung) thành 1 đường.
 // toA = các ký tự bay tới cungA, toB = các ký tự bay tới cungB (2 chiều khác nhau trên cùng 1 đường thẳng).
 function prepareCrossGroups(){
@@ -3805,7 +3847,7 @@ function haloColor(){ return document.body.classList.contains('theme-dark')?'#00
 function drawLetterWithHalo(ctx,text,x,y,color,glow){
   ctx.font='bold 14px Segoe UI';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.lineWidth=3; ctx.strokeStyle=haloColor();
+  ctx.lineWidth=2; ctx.strokeStyle=haloColor();
   ctx.strokeText(text,x,y);
   if(glow){ ctx.shadowColor=color; ctx.shadowBlur=10; }
   ctx.fillStyle=color;
@@ -3816,6 +3858,8 @@ function drawLetterWithHalo(ctx,text,x,y,color,glow){
 function drawTuHoaArrows(ctx){
   if(!tuHoaArrows.length) return;
   const cv=document.getElementById('drawCanvas');
+  // Kích thước CSS thật, KHÔNG dùng cv.width/height trực tiếp (xem giải thích ở atcDrawTuHoaArrows).
+  const cvRect=cv.getBoundingClientRect();
   const tuGlow=tuHoaGlowSet();
   // Ly tâm: gộp theo cung nguồn (from) - 1 cung có thể tự hóa NHIỀU chữ cùng lúc (vd Can Kỷ: Vũ Khúc tự
   // hóa A + Tham Lang tự hóa B), tất cả đều bắn ra CÙNG 1 hướng nên chỉ vẽ 1 đường, ghi các ký tự sát nhau
@@ -3827,8 +3871,8 @@ function drawTuHoaArrows(ctx){
     const anchor=cellEdgeAnchor(from,'outer'); if(!anchor) return;
     let end={x:anchor.x+anchor.dir.x*30, y:anchor.y+anchor.dir.y*30}; // 30px ~ 8mm
     const margin=16; // chừa chỗ cho đầu mũi tên/ký tự, tránh bị lấn/cắt vào viền lưới
-    end.x=Math.max(margin,Math.min(cv.width-margin,end.x));
-    end.y=Math.max(margin,Math.min(cv.height-margin,end.y));
+    end.x=Math.max(margin,Math.min(cvRect.width-margin,end.x));
+    end.y=Math.max(margin,Math.min(cvRect.height-margin,end.y));
     const anyGlow=group.some(a=>tuGlow.has(a.from+':'+a.letter));
     drawArrowLine(ctx,{x:anchor.x,y:anchor.y},end,tuHoaLetterColor(group[0].letter),anyGlow?4.2:1.6);
     const isHorizontal=anchor.dir.y===0;
@@ -3839,7 +3883,7 @@ function drawTuHoaArrows(ctx){
     const spacing=11, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
-      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaLetterColor(a.letter),tuGlow.has(a.from+':'+a.letter));
+      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter));
     });
   });
   // Hướng tâm: gộp theo cặp cung, ký tự nằm ngang, đúng trên đường thẳng, nhưng đường KHÔNG vẽ xuyên qua chỗ có chữ.
@@ -3876,7 +3920,7 @@ function drawTuHoaArrows(ctx){
       const c=pt(0.13);
       g.toA.forEach((L,i)=>{
         const along=(i-(g.toA.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaLetterColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
       });
     }
     if(hasB){
@@ -3884,7 +3928,7 @@ function drawTuHoaArrows(ctx){
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
         const along=(i-(g.toB.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaLetterColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
       });
     }
   });
@@ -5712,7 +5756,11 @@ function dualSizeCanvas(side){
   const wrap=document.getElementById('dualBanWrap_'+side);
   const cv=document.getElementById('dualCanvas_'+side);
   if(!wrap||!cv) return;
-  cv.width=wrap.offsetWidth; cv.height=wrap.offsetHeight;
+  // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
+  // tương tự ở sizeCanvas/atcSizeCanvas).
+  const dpr=window.devicePixelRatio||1;
+  cv.width=wrap.offsetWidth*dpr; cv.height=wrap.offsetHeight*dpr;
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
 }
 function dualCellRect(side,idx){
   const cell=document.querySelector(`#dualBanWrap_${side} .cung[data-idx="${idx}"]`);
@@ -5757,6 +5805,8 @@ function dualCellEdgeAnchor(side,idx,which){
 // hướng tâm so với bản gốc (không cắt khoảng hở tinh vi theo độ rộng chữ), vẫn đủ thông tin để so sánh.
 function dualDrawTuHoaArrows(side,ctx,c){
   const cv=document.getElementById('dualCanvas_'+side); if(!cv) return;
+  // Kích thước CSS thật, KHÔNG dùng cv.width/height trực tiếp (xem giải thích ở atcDrawTuHoaArrows).
+  const cvRect=cv.getBoundingClientRect();
   const arrows=[];
   for(let idx=0;idx<12;idx++) arrows.push(...dualComputeTuHoaFor(c,idx));
   // Tô đậm/phát sáng đúng như bên lá số đơn: đường tự hóa ly tâm nào đáp đúng cung + chữ + tinh diệu mà 1
@@ -5772,8 +5822,8 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const anchor=dualCellEdgeAnchor(side,from,'outer'); if(!anchor) return;
     let end={x:anchor.x+anchor.dir.x*30, y:anchor.y+anchor.dir.y*30}; // 30px ~ 8mm
     const margin=16;
-    end.x=Math.max(margin,Math.min(cv.width-margin,end.x));
-    end.y=Math.max(margin,Math.min(cv.height-margin,end.y));
+    end.x=Math.max(margin,Math.min(cvRect.width-margin,end.x));
+    end.y=Math.max(margin,Math.min(cvRect.height-margin,end.y));
     const anyGlow=group.some(a=>tuGlow.has(a.from+':'+a.letter));
     drawArrowLine(ctx,{x:anchor.x,y:anchor.y},end,tuHoaLetterColor(group[0].letter),anyGlow?4.2:1.6);
     const isHorizontal=anchor.dir.y===0;
@@ -5782,7 +5832,7 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const spacing=10, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
-      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaLetterColor(a.letter),tuGlow.has(a.from+':'+a.letter));
+      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter));
     });
   });
   if(!dualInst[side].tuHoaCrossVisible) return; // "Ẩn/Hiện tự hóa" - chỉ ẩn nhánh hướng tâm, ly tâm vẫn giữ
