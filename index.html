@@ -19,9 +19,26 @@ body.theme-dark{
   --blue:#67e8f9; --green:#52b788; --gold:#f0c040; --accent:#c9a84c;
   --hover:#120e00;
 }
-body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Segoe UI',Arial,sans-serif;color:var(--text);min-height:100vh;
+  background:
+    radial-gradient(ellipse 100% 90% at 0% 0%, #e4eefc 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 100% 0%, #f3ecfb 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 0% 100%, #e6f1fa 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 100% 100%, #dfeafb 0%, transparent 72%),
+    var(--bg);
+  background-attachment:fixed;
+}
+body.theme-dark{
+  background:
+    radial-gradient(ellipse 100% 90% at 0% 0%, #14202c 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 100% 0%, #1c1526 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 0% 100%, #101c2a 0%, transparent 72%),
+    radial-gradient(ellipse 100% 90% at 100% 100%, #0e1c2c 0%, transparent 72%),
+    var(--bg);
+  background-attachment:fixed;
+}
 button{font-family:inherit;cursor:pointer}
-.app{max-width:1400px;margin:0 auto}
+.app{max-width:1400px;margin:0 auto;padding:14px}
 
 /* ═══ TOP BAR ═══ */
 .topbar{display:grid;grid-template-columns:1fr auto 1fr;column-gap:8px;align-items:flex-end;border-bottom:1px solid var(--border);padding:0 14px}
@@ -32,8 +49,10 @@ button{font-family:inherit;cursor:pointer}
 .tab.active{color:var(--red);border-bottom-color:var(--red)}
 
 /* ═══ FORM ROW ═══ */
-.panel-flat{padding:10px 14px;color:var(--muted);font-size:.82rem;border-bottom:1px solid var(--border-lt)}
-.form-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:6px;padding:6px 14px;border-bottom:1px solid var(--border-lt)}
+.panel-flat{padding:10px 14px;color:var(--muted);font-size:.82rem;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06);margin-bottom:14px}
+/* width cố định (không dùng fit-content) - .btn-row bên trong có flex-basis:100% nên fit-content bị "ăn theo"
+   kích thước cha, khiến khung dãn hết cỡ thay vì ôm sát nội dung. */
+.form-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:8px 10px;padding:16px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06);margin:0 auto 14px;width:900px;max-width:100%}
 .f-group{display:flex;flex-direction:column;gap:2px}
 .f-group label{font-size:.6rem;color:var(--muted);font-weight:500;text-transform:uppercase}
 .f-group input,.f-group select{padding:5px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.78rem;outline:none;min-width:78px}
@@ -45,8 +64,9 @@ button{font-family:inherit;cursor:pointer}
 #panelForm{margin-top:8px}
 .pill-btn{padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text);font-size:.7rem;font-weight:500;letter-spacing:.3px}
 #lichBtn{flex:0 0 92px;width:92px;text-align:center;font-size:.6rem;white-space:nowrap;overflow:hidden}
-#lichBtn[data-val="duong"]{background:var(--accent);border-color:var(--accent);color:#fff}
+#lichBtn[data-val="duong"]{background:linear-gradient(135deg,#1e40af,#7cb0fb);border-color:#1e40af;color:#fff}
 #lichBtn[data-val="am"]{background:#9ca3af;border-color:#9ca3af;color:#fff}
+body.theme-dark #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a6d1d,#f0c040);border-color:#f0c040;color:#000}
 .pill-btn:hover{background:var(--hover)}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:center;margin-top:6px}
 .btn-outline{padding:5px 10px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.68rem;font-weight:500}
@@ -54,9 +74,13 @@ button{font-family:inherit;cursor:pointer}
 .btn-outline.orange{border-color:#c8790a;color:#c8790a}
 .btn-dark{padding:5px 14px;border:none;border-radius:5px;background:#16a34a;color:#fff;font-size:.74rem;font-weight:500;letter-spacing:.8px}
 body.theme-dark .btn-dark{background:var(--gold);color:#000}
-.btn-blue{padding:5px 13px;border:none;border-radius:5px;background:var(--accent);color:#fff;font-size:.74rem;font-weight:500}
+.btn-blue{padding:5px 13px;border:none;border-radius:5px;background:linear-gradient(135deg,#1e40af,#7cb0fb);color:#fff;font-size:.74rem;font-weight:500}
+body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);color:#000}
 .btn-dark:disabled,.btn-blue:disabled{opacity:.4;cursor:not-allowed}
 .btn-dark.not-done,.btn-blue.not-done{background:#d1d5db;color:#4b5563}
+.btn-purple{padding:5px 13px;border:none;border-radius:5px;background:linear-gradient(135deg,#6d28d9,#c4b5fd);color:#fff;font-size:.74rem;font-weight:500}
+.btn-brown{padding:5px 13px;border:none;border-radius:5px;background:linear-gradient(135deg,#7c4a1e,#d8a86a);color:#fff;font-size:.74rem;font-weight:500}
+.btn-purple:hover,.btn-brown:hover{filter:brightness(1.05)}
 .atc-flat{padding:14px}
 .atc-layout{display:flex;gap:12px;align-items:flex-start}
 .atc-tools-col{flex:0 0 46px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
@@ -87,10 +111,10 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 
 
 /* ═══ WORKSPACE (3 columns) ═══ */
-.workspace{display:flex;align-items:flex-start;gap:0;border-bottom:1px solid var(--border-lt)}
+.workspace{display:flex;align-items:flex-start;gap:14px;border:none;margin-bottom:14px}
 
 /* -- left sidebar -- */
-.sidebar-left{width:290px;flex-shrink:0;border-right:1px solid var(--border-lt);min-height:520px}
+.sidebar-left{width:290px;flex-shrink:0;min-height:520px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06);overflow:hidden}
 .sb-tabs{display:flex;border-bottom:1px solid var(--border-lt)}
 .sb-tab{flex:1;background:none;border:none;padding:10px 8px;font-size:.64rem;font-weight:400;color:var(--muted);border-bottom:2px solid transparent}
 .sb-tab.active{color:var(--red);border-bottom-color:var(--red)}
@@ -167,13 +191,23 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 
 /* -- chart area -- */
 .chart-area{flex:1;min-width:0;padding:0 156px 12px 12px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:8px}
-.ban-wrap{position:relative;max-width:780px;width:100%;padding:48px}
+/* max-width +30px (~780->810) = mỗi cung trong lưới 4 cột rộng thêm ~7.5px (~2mm) theo chiều ngang. */
+.ban-wrap{position:relative;max-width:810px;width:100%;padding:48px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .inline-text-input{position:absolute;z-index:20;border:1px dashed var(--accent);background:transparent;font:14px Segoe UI;padding:0 2px;outline:none;min-width:40px}
 #atcCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .ban-wrap.drawing #drawCanvas{pointer-events:auto;cursor:crosshair}
 .ban-wrap.drawing #atcCanvas{pointer-events:auto;cursor:crosshair}
 .can-side-panel{position:fixed;top:120px;right:90px;width:132px;z-index:200;padding:6px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.can-min-btn{position:absolute;top:3px;right:3px;width:16px;height:16px;border:1px solid var(--border-lt);background:var(--hover);color:var(--muted);border-radius:3px;font-size:.72rem;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;z-index:1}
+.can-min-btn:hover{background:var(--border-lt);color:var(--text)}
+/* Thu gọn: cả bảng An Can co lại thành 1 nút vuông duy nhất, bấm lại để mở ra như cũ. */
+.can-side-panel.minimized{width:32px;height:32px;padding:0;border-radius:8px;overflow:hidden}
+.can-side-panel.minimized .can-drag-handle,
+.can-side-panel.minimized .can-letter-toggle,
+.can-side-panel.minimized .can-grid{display:none}
+/* Thu gọn: chỉ còn 1 khối vuông trơn (không glyph chia ô), nằm sát viền tool phải. */
+.can-side-panel.minimized .can-min-btn{position:static;width:100%;height:100%;border:none;border-radius:8px;background:var(--accent)}
 .can-drag-handle{text-align:center;font-size:.6rem;letter-spacing:2px;color:var(--muted);cursor:grab;line-height:1;padding:2px 0 5px;user-select:none}
 .can-drag-handle:active{cursor:grabbing}
 .can-letter-toggle{display:flex;gap:3px;margin-bottom:6px}
@@ -276,7 +310,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-year-input{width:56px;padding:1px 4px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.72rem;text-align:center}
 
 /* -- right toolbar -- */
-.sidebar-right{width:88px;flex-shrink:0;border-left:1px solid var(--border-lt);padding:48px 5px 6px;display:flex;flex-direction:column;gap:5px;align-items:stretch}
+.sidebar-right{width:88px;flex-shrink:0;padding:16px 5px 6px;display:flex;flex-direction:column;gap:5px;align-items:stretch;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 .tool-btn{padding:5px 2px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.58rem;font-weight:500;text-align:center}
 .tool-btn:hover{background:var(--hover)}
 .tool-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -430,6 +464,94 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .auth-error{min-height:20px;font-size:.85rem;color:#f87171;text-align:center;margin-top:10px}
 .modal-close{position:absolute;top:12px;right:14px;background:#f5f0e8;border:none;color:#a07830;font-size:1rem;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
 .modal-close:hover{background:#e8d49a;color:#5a3a00}
+/* ═══ THƯ VIỆN LÁ SỐ (Kho) ═══ */
+/* Tiêu đề nền gradient (đồng bộ tông màu nền trang), phần thân bên dưới giữ nền trắng/panel bình thường. */
+.kho-gradient-head{background:linear-gradient(120deg,#dce8fb 0%,#f3ecfb 45%,#fbeee0 100%)}
+body.theme-dark .kho-gradient-head{background:linear-gradient(120deg,#14202c 0%,#1c1526 45%,#241a10 100%)}
+/* Kích cỡ CỐ ĐỊNH theo % màn hình (không co giãn theo số lượng lá số đã lưu) - danh sách bên trong tự
+   cuộn riêng (.kho-list) khi nội dung vượt quá khung. */
+.kho-modal-box{background:var(--panel);color:var(--text);border:1px solid var(--border-lt);border-radius:20px;padding:0;width:92vw;max-width:1400px;height:88vh;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative;display:flex;flex-direction:column;overflow:hidden}
+.kho-modal-head{display:flex;align-items:center;gap:14px;padding:20px 56px 20px 24px}
+.kho-modal-head b{color:#1e2a3a}
+body.theme-dark .kho-modal-head b{color:var(--text)}
+.kho-modal-head b{font-size:1.15rem;white-space:nowrap}
+.kho-search{flex:1;padding:9px 16px;border:1px solid var(--border-lt);border-radius:20px;background:var(--hover);color:var(--text);font-size:.82rem;outline:none;min-width:0}
+.kho-search:focus{border-color:var(--accent)}
+.kho-total-badge{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--hover);color:var(--muted);font-size:.72rem;font-weight:600;white-space:nowrap}
+.kho-body{display:flex;gap:18px;min-height:0;flex:1;overflow:hidden;padding:16px 24px 24px}
+.kho-sidebar{width:230px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding-right:4px}
+.kho-sidebar-head{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;font-weight:700;letter-spacing:.5px;color:var(--muted);margin-bottom:8px}
+.kho-add-cat-btn{width:22px;height:22px;border-radius:50%;border:none;background:linear-gradient(135deg,#0d9488,#2dd4bf);color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+.kho-cat-row{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-radius:8px;border:1px solid transparent;font-size:.78rem;cursor:pointer;margin-bottom:2px}
+.kho-cat-row:hover{background:var(--hover)}
+.kho-cat-row.active{background:#eaf2ff;border-color:#bcd6ff;color:#1e40af;font-weight:700}
+body.theme-dark .kho-cat-row.active{background:#12233a;border-color:#3a5a8a;color:#8ab6f5}
+.kho-cat-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.kho-cat-count{font-size:.7rem;color:var(--muted);flex-shrink:0}
+.kho-cat-row.active .kho-cat-count{color:inherit}
+.kho-cat-actions{display:none;gap:4px;flex-shrink:0}
+.kho-cat-row:hover .kho-cat-actions{display:flex}
+.kho-cat-actions button{border:none;background:none;font-size:.72rem;color:var(--muted);padding:0 2px;cursor:pointer}
+.kho-cat-actions button:hover{color:var(--text)}
+.kho-list{flex:1;overflow-y:auto;min-width:0}
+/* Mỗi lá số 1 khung thẻ riêng, bấm bất kỳ đâu trong khung (trừ vùng điều khiển bên phải/ghi chú) đều mở
+   lá số đó luôn - không cần bấm đúng nút "Mở". */
+.kho-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:1px solid var(--border-lt);border-radius:12px;margin-bottom:10px;background:var(--panel);
+  box-shadow:0 1px 4px rgba(0,0,0,.05);cursor:pointer}
+.kho-item:hover{border-color:var(--accent);box-shadow:0 3px 10px rgba(0,0,0,.09)}
+.kho-item:last-child{margin-bottom:0}
+.kho-item-info{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.kho-item-title-row{display:flex;align-items:center;gap:8px}
+.kho-item-name{font-weight:700;font-size:.9rem;color:#1e40af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.theme-dark .kho-item-name{color:#8ab6f5}
+.kho-cat-tag{padding:2px 9px;border-radius:10px;background:var(--hover);color:var(--muted);font-size:.66rem;font-weight:600;white-space:nowrap}
+.kho-item-meta{font-size:.74rem;color:var(--text)}
+.kho-item-saved{font-size:.68rem;color:var(--muted)}
+/* Nút icon hồ sơ: ẩn/hiện khối ghi chú, không lộ nội dung ra ngoài mặc định. */
+.kho-note-toggle{width:22px;height:22px;border:1px solid var(--border-lt);border-radius:6px;background:var(--hover);color:var(--muted);font-size:.72rem;display:flex;align-items:center;justify-content:center;padding:0}
+.kho-note-toggle.active{background:#dbeafe;border-color:#93c5fd;color:#1e40af}
+body.theme-dark .kho-note-toggle.active{background:#12233a;border-color:#3a5a8a;color:#8ab6f5}
+.kho-note-box{margin-top:8px;padding:10px 12px;border:1px solid var(--border-lt);border-radius:10px;background:var(--hover);cursor:default}
+.kho-note-box-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.kho-note-box-head span{font-size:.62rem;font-weight:700;letter-spacing:.5px;color:var(--muted)}
+.kho-note-edit-btn{border:1px solid var(--border-lt);background:var(--panel);color:var(--text);border-radius:6px;padding:2px 9px;font-size:.68rem}
+.kho-note-text{font-size:.78rem;color:var(--text);white-space:pre-wrap;line-height:1.5}
+.kho-note-edit-area{width:100%;min-height:60px;padding:8px 10px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel);color:var(--text);font-size:.78rem;font-family:inherit;resize:vertical;outline:none}
+.kho-note-edit-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.kho-note-cancel-btn{padding:5px 14px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);color:var(--text);font-size:.72rem}
+.kho-note-save-btn{padding:5px 14px;border:none;border-radius:6px;background:linear-gradient(135deg,#1e40af,#7cb0fb);color:#fff;font-size:.72rem;font-weight:600}
+.kho-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;cursor:default}
+.kho-item-cat-row{display:flex;align-items:center;gap:6px}
+.kho-item-cat-label{font-size:.62rem;color:var(--muted);font-weight:700;letter-spacing:.4px}
+.kho-item-cat-select{padding:4px 8px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);color:var(--text);font-size:.7rem}
+.kho-item-actions{display:flex;gap:6px}
+.kho-item-btn{padding:5px 14px;border:none;border-radius:6px;background:linear-gradient(135deg,#1e40af,#7cb0fb);color:#fff;font-size:.72rem;font-weight:600}
+.kho-item-btn:hover{filter:brightness(1.05)}
+.kho-item-del{width:28px;height:28px;border:1px solid #f3c9c9;border-radius:6px;background:#fff5f5;color:#c0392b;font-size:.78rem;display:flex;align-items:center;justify-content:center}
+body.theme-dark .kho-item-del{background:#2a1414;border-color:#5a2a2a}
+.kho-item-del:hover{background:#fde0e0}
+.kho-empty{color:var(--muted);text-align:center;padding:40px 0;font-size:.82rem;width:100%}
+/* ═══ LƯU VÀO THƯ VIỆN (modal chọn danh mục + ghi chú lúc lưu) ═══ */
+.lk-modal-box{background:var(--panel);color:var(--text);border:1px solid var(--border-lt);border-radius:20px;width:480px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);position:relative}
+.lk-modal-head{padding:22px 40px 20px 24px}
+.lk-modal-head b{font-size:1.1rem;display:block;margin-bottom:5px;color:#1e2a3a}
+body.theme-dark .lk-modal-head b{color:var(--text)}
+.lk-modal-head p{font-size:.78rem;color:#5b6472;margin:0}
+body.theme-dark .lk-modal-head p{color:var(--muted)}
+.lk-modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.lk-field label{display:block;font-size:.66rem;font-weight:700;letter-spacing:.4px;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+.lk-name-display{padding:9px 12px;border:1px solid var(--border-lt);border-radius:8px;background:var(--hover);font-size:.86rem;font-weight:600}
+.lk-modal-body textarea{width:100%;min-height:70px;padding:9px 12px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel);color:var(--text);font-size:.8rem;font-family:inherit;resize:vertical;outline:none}
+.lk-modal-body textarea:focus,.lk-modal-body select:focus,.lk-modal-body input:focus{border-color:var(--accent)}
+.lk-modal-body select{width:100%;padding:9px 12px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel);color:var(--text);font-size:.82rem;outline:none}
+.lk-quick-cat-row{display:flex;gap:8px}
+.lk-quick-cat-row input{flex:1;min-width:0;padding:9px 12px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel);color:var(--text);font-size:.8rem;outline:none}
+.lk-quick-cat-btn{padding:9px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#0d9488,#2dd4bf);color:#fff;font-size:.76rem;font-weight:700;white-space:nowrap}
+.lk-modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px 22px;border-top:1px solid var(--border-lt)}
+.lk-btn-cancel{padding:9px 20px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel);color:var(--text);font-size:.8rem;font-weight:600}
+.lk-btn-save{padding:9px 22px;border:none;border-radius:8px;background:linear-gradient(135deg,#1e40af,#7cb0fb);color:#fff;font-size:.8rem;font-weight:700}
+body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);color:#000}
 .btn-action{padding:6px 12px;border:1px solid var(--border-lt);border-radius:6px;background:none;font-size:.72rem;font-weight:600}
 #userInfo{position:relative;align-items:center;gap:5px;padding:5px 11px;background:#0d9488;border:none;border-radius:20px;font-size:.74rem;color:#fff;font-weight:700;cursor:pointer;user-select:none}
 #userInfo:hover{background:#0f766e}
@@ -491,6 +613,59 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
     <p style="margin-top:16px;font-size:.75rem;color:#b8a88a;text-align:center">
       Chỉ dùng để xác thực · Không đăng thứ gì thay bạn
     </p>
+  </div>
+</div>
+<!-- ── Thư viện lá số: danh sách lá số đã lưu (localStorage, riêng theo từng tài khoản Gmail) ── -->
+<div id="khoModal" class="modal-overlay" onclick="if(event.target===this)closeKhoLaSo()">
+  <div class="kho-modal-box">
+    <div class="kho-modal-head kho-gradient-head">
+      <b>Thư viện lá số</b>
+      <input type="text" id="khoSearchInput" class="kho-search" placeholder="Tìm tên lá số trên toàn bộ thư viện..." oninput="khoSearchInputChange(this.value)">
+      <span class="kho-total-badge" id="khoTotalBadge"></span>
+      <button class="modal-close" onclick="closeKhoLaSo()">✕</button>
+    </div>
+    <div class="kho-body">
+      <div class="kho-sidebar">
+        <div class="kho-sidebar-head"><span>DANH MỤC</span><button class="kho-add-cat-btn" title="Thêm danh mục" onclick="khoAddCategory()">+</button></div>
+        <div id="khoCatList"></div>
+      </div>
+      <div class="kho-list" id="khoListBody"></div>
+    </div>
+  </div>
+</div>
+<!-- ── Lưu vào thư viện lá số: chọn danh mục + ghi chú trước khi lưu ── -->
+<div id="luuKhoModal" class="modal-overlay" onclick="if(event.target===this)closeLuuKhoModal()">
+  <div class="lk-modal-box">
+    <div class="lk-modal-head kho-gradient-head">
+      <button class="modal-close" onclick="closeLuuKhoModal()">✕</button>
+      <b>Lưu vào thư viện lá số</b>
+      <p>Chọn danh mục trước khi lưu để thư viện luôn gọn và dễ tìm.</p>
+    </div>
+    <div class="lk-modal-body">
+      <div class="lk-field">
+        <label>Lá số đang lưu</label>
+        <div class="lk-name-display" id="lkNameDisplay"></div>
+      </div>
+      <div class="lk-field">
+        <label>Ghi chú</label>
+        <textarea id="lkGhiChu" placeholder="Thêm vài ghi chú để tiện tra cứu về sau..."></textarea>
+      </div>
+      <div class="lk-field">
+        <label>Danh mục</label>
+        <select id="lkCategorySelect"></select>
+      </div>
+      <div class="lk-field">
+        <label>Tạo nhanh danh mục mới</label>
+        <div class="lk-quick-cat-row">
+          <input type="text" id="lkNewCatInput" placeholder="Ví dụ: Khách VIP, Gia đình...">
+          <button class="lk-quick-cat-btn" onclick="lkQuickCreateCategory()">Tạo và chọn</button>
+        </div>
+      </div>
+    </div>
+    <div class="lk-modal-actions">
+      <button class="lk-btn-cancel" onclick="closeLuuKhoModal()">Hủy</button>
+      <button class="lk-btn-save" onclick="confirmLuuKho()">Lưu vào thư viện</button>
+    </div>
   </div>
 </div>
 <div class="app">
@@ -603,6 +778,8 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
       <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
       <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
       <button class="btn-blue not-done" id="btnLuuLaSo" onclick="luuLaSo()">Lưu lá số</button>
+      <button class="btn-purple" id="btnLuuKho" onclick="luuKhoLaSo()">Lưu Kho</button>
+      <button class="btn-brown" id="btnMoKho" onclick="openKhoLaSo()">Kho LS</button>
     </div>
     <div id="codeBar">
       <span class="code-msg">🔑 Nhập mã để mở đầy đủ tính năng</span>
@@ -727,6 +904,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
         <div class="ban-tuvi" id="banTuvi"></div>
       </div>
       <div class="can-side-panel" id="canSidePanel">
+        <button class="can-min-btn" id="canMinBtn" title="Thu nhỏ" onclick="toggleCanPanelMinimize()">−</button>
         <div class="can-drag-handle" id="canDragHandle" title="Kéo để di chuyển">⠿⠿⠿</div>
         <div class="can-letter-toggle">
           <button class="can-letter-btn can-letter-A" data-letter="A" onclick="setCanPanelLetter('A')">A</button>
@@ -863,6 +1041,240 @@ function simpleHash(str) {
   return Math.abs(h).toString(36).toUpperCase().padStart(6,'0').slice(0,6);
 }
 function getStoreKey(email) { return STORE_KEY + '_' + simpleHash(email); }
+
+// ============================================================
+// KHO LÁ SỐ — lưu danh sách thông tin lá số (họ tên + ngày giờ sinh) vào localStorage, tách riêng theo
+// từng tài khoản Gmail (dùng chung cơ chế getStoreKey/simpleHash ở trên) - dùng chung máy/trình duyệt
+// nhưng khác tài khoản đăng nhập vẫn ra đúng kho riêng của từng người, không lẫn vào nhau.
+// ============================================================
+const KHOLASO_KEY = 'tuvi_kholaso';
+const KHOLASO_CAT_KEY = 'tuvi_kholaso_cat';
+function getKhoLaSoKey(email) { return KHOLASO_KEY + '_' + simpleHash(email); }
+function getKhoCatKey(email) { return KHOLASO_CAT_KEY + '_' + simpleHash(email); }
+function khoLoadList() { return JSON.parse(localStorage.getItem(getKhoLaSoKey(currentUser.email)) || '[]'); }
+function khoSaveList(list) { localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(list)); }
+function khoLoadCategories() { return JSON.parse(localStorage.getItem(getKhoCatKey(currentUser.email)) || '[]'); }
+function khoSaveCategories(cats) { localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(cats)); }
+let khoActiveCategory = 'ALL'; // 'ALL' | 'UNASSIGNED' | tên danh mục
+let khoSearchQuery = '';
+// Bấm "Lưu Kho" chỉ MỞ hộp thoại chọn danh mục/ghi chú trước - việc lưu thật sự nằm ở confirmLuuKho(),
+// bấm "Lưu vào thư viện" trong hộp thoại đó mới ghi vào localStorage.
+function luuKhoLaSo() {
+  if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập Google để lưu vào Kho.'); return; }
+  const hoTen = document.getElementById('hoTen').value.trim();
+  const ngayDD = document.getElementById('ngayDD').value;
+  const ngayMM = document.getElementById('ngayMM').value;
+  const ngayYYYY = document.getElementById('ngayYYYY').value;
+  if (!hoTen || !ngayDD || !ngayMM || !ngayYYYY) { alert('Nhập đủ họ tên và ngày sinh trước khi lưu vào Kho.'); return; }
+  document.getElementById('lkNameDisplay').textContent = hoTen;
+  document.getElementById('lkGhiChu').value = '';
+  document.getElementById('lkNewCatInput').value = '';
+  renderLkCategorySelect();
+  const m = document.getElementById('luuKhoModal'); if (m) m.style.display = 'flex';
+}
+function renderLkCategorySelect(selected) {
+  const sel = document.getElementById('lkCategorySelect'); if (!sel) return;
+  const cats = khoLoadCategories();
+  sel.innerHTML = `<option value="">Chưa phân loại</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  sel.value = selected || '';
+}
+function closeLuuKhoModal() {
+  const m = document.getElementById('luuKhoModal'); if (m) m.style.display = 'none';
+}
+function lkQuickCreateCategory() {
+  const input = document.getElementById('lkNewCatInput');
+  const name = input.value.trim(); if (!name) return;
+  const cats = khoLoadCategories();
+  if (!cats.includes(name)) { cats.push(name); khoSaveCategories(cats); }
+  renderLkCategorySelect(name);
+  input.value = '';
+}
+function confirmLuuKho() {
+  const hoTen = document.getElementById('hoTen').value.trim();
+  const ngayDD = document.getElementById('ngayDD').value;
+  const ngayMM = document.getElementById('ngayMM').value;
+  const ngayYYYY = document.getElementById('ngayYYYY').value;
+  if (!hoTen || !ngayDD || !ngayMM || !ngayYYYY) { closeLuuKhoModal(); return; }
+  const record = {
+    id: Date.now(),
+    hoTen,
+    lichLoai: document.getElementById('lichBtn').dataset.val,
+    ngayDD, ngayMM, ngayYYYY,
+    gioSinh: document.getElementById('gioSinh').value,
+    gioiTinh: document.getElementById('gioiTinh').value,
+    savedAt: new Date().toISOString(),
+    category: document.getElementById('lkCategorySelect').value || null, // '' = "Chưa phân loại"
+    ghiChu: document.getElementById('lkGhiChu').value.trim(),
+  };
+  const list = khoLoadList();
+  list.unshift(record);
+  khoSaveList(list);
+  closeLuuKhoModal();
+}
+function khoGioLabel(v) {
+  const m = { '23:30':'Tý trước 0h','00:30':'Tý sau 0h','02:30':'Sửu','04:30':'Dần','06:30':'Mão','08:30':'Thìn',
+    '10:30':'Tỵ','12:30':'Ngọ','14:30':'Mùi','16:30':'Thân','18:30':'Dậu','20:30':'Tuất','22:30':'Hợi' };
+  const [h1,h2] = { 'Tý trước 0h':[23,24],'Tý sau 0h':[0,1],'Sửu':[1,3],'Dần':[3,5],'Mão':[5,7],'Thìn':[7,9],
+    'Tỵ':[9,11],'Ngọ':[11,13],'Mùi':[13,15],'Thân':[15,17],'Dậu':[17,19],'Tuất':[19,21],'Hợi':[21,23] }[m[v]] || ['',''];
+  return `${m[v]||v} (${h1}h - ${h2}h)`;
+}
+function khoFmtSavedAt(iso) {
+  const d = new Date(iso);
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function khoSearchInputChange(v) { khoSearchQuery = v.trim().toLowerCase(); renderKhoLaSoList(); }
+function khoSelectCategory(cat) { khoActiveCategory = cat; renderKhoLaSoList(); }
+function khoAddCategory() {
+  const name = prompt('Tên danh mục mới:'); if (!name || !name.trim()) return;
+  const cats = khoLoadCategories();
+  if (cats.includes(name.trim())) { alert('Danh mục này đã có rồi.'); return; }
+  cats.push(name.trim());
+  khoSaveCategories(cats);
+  renderKhoLaSoList();
+}
+function khoRenameCategory(oldName, ev) {
+  if (ev) ev.stopPropagation();
+  const name = prompt('Đổi tên danh mục:', oldName); if (!name || !name.trim() || name.trim() === oldName) return;
+  const cats = khoLoadCategories().map(c => c === oldName ? name.trim() : c);
+  khoSaveCategories(cats);
+  const list = khoLoadList().map(r => r.category === oldName ? { ...r, category: name.trim() } : r);
+  khoSaveList(list);
+  if (khoActiveCategory === oldName) khoActiveCategory = name.trim();
+  renderKhoLaSoList();
+}
+function khoDeleteCategory(name, ev) {
+  if (ev) ev.stopPropagation();
+  if (!confirm(`Xóa danh mục "${name}"? Các lá số trong danh mục này sẽ chuyển về "Chưa phân loại".`)) return;
+  khoSaveCategories(khoLoadCategories().filter(c => c !== name));
+  khoSaveList(khoLoadList().map(r => r.category === name ? { ...r, category: null } : r));
+  if (khoActiveCategory === name) khoActiveCategory = 'ALL';
+  renderKhoLaSoList();
+}
+function khoSetItemCategory(id, cat) {
+  khoSaveList(khoLoadList().map(r => r.id === id ? { ...r, category: cat || null } : r));
+  renderKhoLaSoList();
+}
+function renderKhoLaSoList() {
+  const body = document.getElementById('khoListBody'), catBody = document.getElementById('khoCatList'),
+    totalBadge = document.getElementById('khoTotalBadge');
+  if (!body || !catBody) return;
+  const list = khoLoadList();
+  const cats = khoLoadCategories();
+  if (totalBadge) totalBadge.textContent = `Toàn bộ thư viện: ${list.length} lá số`;
+
+  // -- Sidebar danh mục --
+  const unassignedCount = list.filter(r => !r.category).length;
+  const rows = [
+    { key:'ALL', label:'Tất cả', count:list.length, fixed:true },
+    { key:'UNASSIGNED', label:'Chưa phân loại', count:unassignedCount, fixed:true },
+    ...cats.map(c => ({ key:c, label:c, count:list.filter(r => r.category===c).length, fixed:false })),
+  ];
+  catBody.innerHTML = rows.map(r => `
+    <div class="kho-cat-row${khoActiveCategory===r.key?' active':''}" onclick="khoSelectCategory('${r.key.replace(/'/g,"\\'")}')">
+      <span class="kho-cat-name">${r.label}</span>
+      <span class="kho-cat-count">${r.count}</span>
+      ${r.fixed?'':`<span class="kho-cat-actions">
+        <button title="Đổi tên" onclick="khoRenameCategory('${r.key.replace(/'/g,"\\'")}',event)">✎</button>
+        <button title="Xóa" onclick="khoDeleteCategory('${r.key.replace(/'/g,"\\'")}',event)">🗑</button>
+      </span>`}
+    </div>`).join('');
+
+  // -- Danh sách lá số (lọc theo danh mục đang chọn + từ khóa tìm kiếm) --
+  let filtered = list;
+  if (khoActiveCategory === 'UNASSIGNED') filtered = filtered.filter(r => !r.category);
+  else if (khoActiveCategory !== 'ALL') filtered = filtered.filter(r => r.category === khoActiveCategory);
+  if (khoSearchQuery) filtered = filtered.filter(r => r.hoTen.toLowerCase().includes(khoSearchQuery));
+
+  if (!filtered.length) { body.innerHTML = '<div class="kho-empty">Chưa có lá số nào phù hợp.</div>'; return; }
+  body.innerHTML = filtered.map(r => {
+    const noteOpen = khoExpandedNotes.has(r.id), editing = khoEditingNotes.has(r.id);
+    const noteBox = !noteOpen ? '' : editing ? `
+      <div class="kho-note-box" onclick="event.stopPropagation()">
+        <div class="kho-note-box-head"><span>GHI CHÚ</span></div>
+        <textarea class="kho-note-edit-area" id="khoNoteEdit_${r.id}">${r.ghiChu||''}</textarea>
+        <div class="kho-note-edit-actions">
+          <button class="kho-note-cancel-btn" onclick="cancelKhoNoteEdit(${r.id})">Hủy</button>
+          <button class="kho-note-save-btn" onclick="saveKhoNoteEdit(${r.id})">Lưu</button>
+        </div>
+      </div>` : `
+      <div class="kho-note-box" onclick="event.stopPropagation()">
+        <div class="kho-note-box-head"><span>GHI CHÚ</span><button class="kho-note-edit-btn" onclick="startKhoNoteEdit(${r.id})">✎ Sửa</button></div>
+        <div class="kho-note-text">${r.ghiChu ? r.ghiChu.replace(/</g,'&lt;') : '<i>Chưa có ghi chú</i>'}</div>
+      </div>`;
+    return `
+    <div class="kho-item" onclick="moKhoItem(${r.id})">
+      <div class="kho-item-info">
+        <div class="kho-item-title-row">
+          <span class="kho-item-name">${r.hoTen}</span>
+          <span class="kho-cat-tag">${r.category || 'Chưa phân loại'}</span>
+          <button class="kho-note-toggle${noteOpen?' active':''}" title="Ghi chú" onclick="event.stopPropagation();toggleKhoNoteBox(${r.id})">📄</button>
+        </div>
+        <div class="kho-item-meta">${r.gioiTinh==='nam'?'Nam':'Nữ'} | Sinh: ${r.ngayDD}/${r.ngayMM}/${r.ngayYYYY} ${r.lichLoai==='am'?'Âm':'Dương'} | Giờ: ${khoGioLabel(r.gioSinh)}</div>
+        <div class="kho-item-saved">Lưu lúc: ${khoFmtSavedAt(r.savedAt)}</div>
+        ${noteBox}
+      </div>
+      <div class="kho-item-right" onclick="event.stopPropagation()">
+        <div class="kho-item-cat-row">
+          <span class="kho-item-cat-label">DANH MỤC</span>
+          <select class="kho-item-cat-select" onclick="event.stopPropagation()" onchange="khoSetItemCategory(${r.id},this.value)">
+            <option value=""${!r.category?' selected':''}>Chưa phân loại</option>
+            ${cats.map(c => `<option value="${c}"${r.category===c?' selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="kho-item-actions">
+          <button class="kho-item-btn" onclick="event.stopPropagation();moKhoItem(${r.id})">Mở</button>
+          <button class="kho-item-del" title="Xóa" onclick="event.stopPropagation();xoaKhoItem(${r.id})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+let khoExpandedNotes = new Set();
+let khoEditingNotes = new Set();
+function toggleKhoNoteBox(id) {
+  if (khoExpandedNotes.has(id)) khoExpandedNotes.delete(id);
+  else khoExpandedNotes.add(id);
+  khoEditingNotes.delete(id);
+  renderKhoLaSoList();
+}
+function startKhoNoteEdit(id) { khoEditingNotes.add(id); renderKhoLaSoList(); }
+function cancelKhoNoteEdit(id) { khoEditingNotes.delete(id); renderKhoLaSoList(); }
+function saveKhoNoteEdit(id) {
+  const ta = document.getElementById('khoNoteEdit_' + id);
+  const val = ta ? ta.value.trim() : '';
+  khoSaveList(khoLoadList().map(r => r.id === id ? { ...r, ghiChu: val } : r));
+  khoEditingNotes.delete(id);
+  renderKhoLaSoList();
+}
+function openKhoLaSo() {
+  if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập Google để xem Kho.'); return; }
+  khoActiveCategory = 'ALL'; khoSearchQuery = '';
+  const si = document.getElementById('khoSearchInput'); if (si) si.value = '';
+  renderKhoLaSoList();
+  const m = document.getElementById('khoModal'); if (m) m.style.display = 'flex';
+}
+function closeKhoLaSo() {
+  const m = document.getElementById('khoModal'); if (m) m.style.display = 'none';
+}
+function moKhoItem(id) {
+  const list = khoLoadList();
+  const r = list.find(x => x.id === id); if (!r) return;
+  document.getElementById('hoTen').value = r.hoTen;
+  document.getElementById('ngayDD').value = r.ngayDD;
+  document.getElementById('ngayMM').value = r.ngayMM;
+  document.getElementById('ngayYYYY').value = r.ngayYYYY;
+  document.getElementById('gioSinh').value = r.gioSinh;
+  document.getElementById('gioiTinh').value = r.gioiTinh;
+  const lichBtn = document.getElementById('lichBtn');
+  if (lichBtn.dataset.val !== r.lichLoai) toggleLich();
+  closeKhoLaSo();
+  if (!isActivated) { flashCodeBar(); return; }
+  lapLaSo();
+}
+function xoaKhoItem(id) {
+  khoSaveList(khoLoadList().filter(x => x.id !== id));
+  renderKhoLaSoList();
+}
 
 // ============================================================
 // GOOGLE SIGN-IN — GOOGLE_CLIENT_ID chưa cấu hình → chạy chế độ nhập email (giống tool.html
@@ -2123,6 +2535,36 @@ function switchSbTab(name){
 // A/D dùng chung cơ chế Thể/Dụng thật sự (có kết cấu, chuyển Kị) như Hung/Cát; B/C (Quyền/Khoa) chưa có
 // khái niệm "kết cấu" riêng (sách: "Phi Quyền/Khoa không tự chuyển Kị được") nên dùng cơ chế quick-fly
 // (1 nhịp, giống bấm nhanh ABCD trên 1 cung) - chỉ khác là tự tìm đúng cung mang Can đó.
+// Thu gọn bảng An Can thành 1 nút vuông (bấm lại để mở ra) - đỡ chiếm chỗ khi không cần tra Can liên tục.
+// Lúc thu gọn, nút vuông LUÔN đậu sát viền trái nút "Ẩn/Hiện Tự Hóa" - dùng position:fixed nên phải tự
+// canh lại theo scroll (viền trái nút đó là tọa độ VIEWPORT, đổi theo cuộn trang), không thì cuộn lên/xuống
+// nút vuông sẽ "trôi" khỏi đúng vị trí cạnh nút kia.
+let canPanelMinimized=false;
+function dockCanPanelToToolBtn(){
+  const panel=document.getElementById('canSidePanel'), anchorBtn=document.getElementById('btnTuHoaCross');
+  if(!panel||!anchorBtn) return;
+  const r=anchorBtn.getBoundingClientRect();
+  panel.style.left='auto';
+  panel.style.right=(window.innerWidth-r.left+8)+'px';
+  panel.style.top=r.top+'px';
+}
+function toggleCanPanelMinimize(){
+  canPanelMinimized=!canPanelMinimized;
+  const panel=document.getElementById('canSidePanel'), btn=document.getElementById('canMinBtn');
+  if(!panel||!btn) return;
+  panel.classList.toggle('minimized',canPanelMinimized);
+  if(canPanelMinimized){
+    dockCanPanelToToolBtn();
+    window.addEventListener('scroll',dockCanPanelToToolBtn,{passive:true});
+    window.addEventListener('resize',dockCanPanelToToolBtn);
+    btn.textContent='';
+  }else{
+    window.removeEventListener('scroll',dockCanPanelToToolBtn);
+    window.removeEventListener('resize',dockCanPanelToToolBtn);
+    btn.textContent='−';
+  }
+  btn.title = canPanelMinimized ? 'Mở bảng An Can' : 'Thu nhỏ';
+}
 let canPanelLetter='D';
 function setCanPanelLetter(letter){
   canPanelLetter=letter;
@@ -2678,12 +3120,15 @@ function tuHoaGlowSet(){
     const ml=ch.structureLetter;
     if(ml!=='A' && ml!=='D') return;
     ch.steps.forEach(s=>{
-      // So khớp theo CHỮ THẬT SỰ của từng bước (s.letter), không phải chữ của cả kết cấu (ml) - đoạn chuyển
-      // Kị (CK) trong 1 kết cấu Lộc vẫn luôn dùng chữ D (xem flyFrom/computeSingleChain), nên phải tô đậm
-      // đúng mũi tên tự hóa D nó chạm qua, không phải tự hóa A (chữ gốc của cả kết cấu) - áp dụng chung cho
-      // phi Lộc, phi Kị lẫn chuyển Kị, miễn đúng ngôi sao.
+      // Tô đậm tự hóa ly tâm nếu khớp 1 trong 2 cách: (1) đúng chữ THẬT SỰ của riêng bước này (s.letter) -
+      // đoạn chuyển Kị (CK) trong 1 kết cấu Lộc vẫn luôn dùng chữ D (xem flyFrom/computeSingleChain), nên
+      // chạm tự hóa D vẫn phải sáng dù cả kết cấu là Lộc; HOẶC (2) đúng chữ GỐC của cả kết cấu (ml) - kết
+      // cấu Lộc (dù đang ở bước hóa Lộc hay bước chuyển Kị từ Lộc) đi ngang 1 cung có tự hóa A vẫn phải sáng,
+      // vì bản chất cả mạch vẫn đang mang năng lượng Lộc. Áp dụng chung cho phi Lộc, phi Kị lẫn chuyển Kị,
+      // miễn đúng ngôi sao.
       const selfHoa=computeTuHoaFor(s.to);
-      if(selfHoa.some(a=>a.type==='out' && a.letter===s.letter && a.star===s.star)) set.add(s.to+':'+s.letter);
+      const hit=selfHoa.find(a=>a.type==='out' && a.star===s.star && (a.letter===s.letter || a.letter===ml));
+      if(hit) set.add(s.to+':'+hit.letter);
     });
   });
   return set;
@@ -3335,7 +3780,13 @@ function hoaArrowColor(letter){
 // đường chuyển Kị vẫn luôn đen, không đổi theo "Đổi màu".
 function tuHoaLetterColor(letter){
   if(document.body.classList.contains('plain-bw')) return document.body.classList.contains('theme-dark') ? '#fff' : '#000';
-  return hoaArrowColor(letter);
+  // Giữ nguyên bảng màu CŨ (var(--green)/--red/--blue) riêng cho tự hóa - màu tươi/đậm mới (hoaArrowColor)
+  // chỉ áp dụng cho mũi tên phi Thể/Dụng theo đúng yêu cầu, không lan sang tự hóa.
+  const st=getComputedStyle(document.body);
+  if(letter==='A') return st.getPropertyValue('--green').trim();
+  if(letter==='B') return st.getPropertyValue('--red').trim();
+  if(letter==='C') return st.getPropertyValue('--blue').trim();
+  return document.body.classList.contains('theme-dark') ? st.getPropertyValue('--gold').trim() : '#000';
 }
 // Gộp các mũi tên hướng tâm đi trùng đường (cùng cặp cung) thành 1 đường.
 // toA = các ký tự bay tới cungA, toB = các ký tự bay tới cungB (2 chiều khác nhau trên cùng 1 đường thẳng).
@@ -4547,12 +4998,31 @@ function computeKetCauStructuresRaw(mode){
       if(found && found.via!=null && suppressed.has(found.via)) found={...found, suppressed:true};
       touchInfo[M]=found;
     });
+    // M chỉ "đi nhờ" hợp lệ qua 1 cung trung gian (via) nếu điểm via chạm vào mạch chính KHÔNG PHẢI là bước
+    // hóa Kị GỐC của chính via (i=0, "via hóa Kị đi") - đó là via tự bay Kị từ Can của riêng nó, một sự kiện
+    // ĐỘC LẬP, không phải via đang "tọa Kị" (nhận năng lượng từ nơi khác rồi mới truyền tiếp tiếp cho M) - vd
+    // Điền đáp thẳng vào Phúc Đức, trong khi Phúc Đức lại ĐỘC LẬP tự hóa Kị đi nơi khác (Phúc không thực tọa
+    // Kị) - 2 việc không liên quan nên KHÔNG được gộp Điền vào chung kết cấu qua ngả Phúc Đức này - loại bỏ
+    // touchInfo hẳn (không tính điểm/không ghi dòng riêng), không chỉ bỏ lúc gắn nhánh trực quan.
+    members.forEach(M=>{
+      const info=touchInfo[M];
+      if(!info || info.suppressed || info.onRoot || info.via==null) return;
+      const viaInfo=touchInfo[info.via];
+      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0) touchInfo[M]=null;
+    });
     function resolveSpineIndex(M, guard){
       const info=touchInfo[M];
       if(!info || info.suppressed) return null;
       if(info.onRoot) return -1;
       if(info.via==null) return spineIndexOf.has(info.p.to) ? spineIndexOf.get(info.p.to) : null;
       if(guard.has(info.via)) return null;
+      // M chỉ "đi nhờ" hợp lệ qua 1 cung trung gian (via) nếu điểm via chạm vào mạch chính KHÔNG PHẢI là
+      // bước hóa Kị GỐC của chính via (i=0, "via hóa Kị đi") - đó là via tự bay Kị từ Can của riêng nó, một
+      // sự kiện ĐỘC LẬP, không phải via đang "tọa Kị" (nhận năng lượng từ nơi khác rồi mới truyền tiếp) - vd
+      // Điền đáp thẳng vào Phúc Đức, trong khi Phúc Đức lại ĐỘC LẬP tự hóa Kị đi nơi khác (Phúc không thực
+      // tọa Kị) - 2 việc không liên quan nên KHÔNG được gộp Điền vào chung kết cấu qua ngả Phúc Đức này.
+      const viaInfo=touchInfo[info.via];
+      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0) return null;
       guard.add(info.via);
       return resolveSpineIndex(info.via, guard);
     }
@@ -4736,7 +5206,13 @@ function computeKetCauStructuresRaw(mode){
           (chX && chX.steps.some(s=>s.from===Y && s.to!==Y) && !mainSuppressed.has(Y));
         if(selfEdgeReused) continue;
         const px=pointsFor(X,mainAnchorSet), py=pointsFor(Y,mainAnchorSet);
-        let touched = px.some(p=>p.to===Y) || py.some(p=>p.to===X);
+        // "X đáp thẳng vào Y" CHỈ tính khi đó là bước hóa Kị GỐC của chính X (i=0, X thật sự "nhắm" vào Y ngay
+        // từ đầu) - nếu X đáp vào Y ở 1 bước chuyển Kị SAU đó (i>=1, sau khi đã "hết lực" bay tiếp từ 1 cung
+        // trung gian khác), đó chỉ là điểm dừng TỰ NHIÊN cuối chuỗi của X (X hết lực chuyển tiếp tại đó),
+        // KHÔNG phải X "tọa Kị vào Y" - Y ở đây có thể lại đang đóng vai trò khác hẳn (vd Y tự hóa Kị đi nơi
+        // khác, "hóa Kị đi" chứ không thực tọa Kị) trong 1 kết cấu khác, nên không được gộp chung nhóm chỉ vì
+        // tình cờ X dừng chân đúng tại Y. Hội tụ "chạm điểm chung thứ 3" (Z) vẫn giữ nguyên, không đổi.
+        let touched = px.some(p=>p.to===Y && p.i===0) || py.some(p=>p.to===X && p.i===0);
         if(!touched) touched = px.some(p=>py.some(q=>p.to===q.to));
         if(touched) union(X,Y);
       }
@@ -4866,10 +5342,15 @@ function computeKetCauStructuresRaw(mode){
     });
   }
 
+  // Thể là bắt buộc phải có trong 1 kết cấu chuẩn, Dụng chỉ là phụ trợ (có thể có hoặc không) - 1 kết cấu mà
+  // TOÀN BỘ thành viên (gốc + hội tụ + gộp Lưỡng đầu kiến Kị) đều chỉ là Dụng, không dính dáng gì tới Thể,
+  // thì không được coi là 1 kết cấu hợp lệ - loại hẳn, không ghi vào danh sách.
+  const hasThe=s=>{ const members=realMembersOfKetCau(s); return [...members].some(idx=>st.the.has(idx)); };
+
   // Cô lập mà vẫn không được "lưỡng đầu kiến Kị" nào cứu -> loại hẳn, như hành vi gốc.
   // Ưu tiên kết cấu DÀI và NHIỀU Lộc/Kị nhất đứng trước (Kết cấu 1, 2...) - so bằng tổng điểm (total) trước
   // (càng nhiều Lộc/Kị càng ưu tiên), rồi tới số bước của mạch chính (chainSteps.length) khi hòa điểm.
-  return structures.filter(s=>!s.isolated || s.merged).sort((a,b)=>{
+  return structures.filter(s=>(!s.isolated || s.merged) && hasThe(s)).sort((a,b)=>{
     if(b.total!==a.total) return b.total-a.total;
     return (b.chainSteps?b.chainSteps.length:0) - (a.chainSteps?a.chainSteps.length:0);
   });
