@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import math, datetime, os, requests
+import math, datetime, os, requests, gzip, io
 
 app = Flask(__name__)
 CORS(app)
@@ -11,13 +11,43 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ═══════════════════════════════════════════════════════════
 # SERVE STATIC FILES
 # ═══════════════════════════════════════════════════════════
+# index.html/JS/CSS đều là file text khá lớn (index.html ~450KB, phihoa_data.js ~850KB) và Flask không tự nén
+# gzip - mỗi lần tải trang là gửi nguyên văn chưa nén, rất tốn băng thông trên Render free tier. Nén gzip ở
+# đây giảm ~70-80% dung lượng cho các loại text mà hầu như không tốn CPU đáng kể.
+_COMPRESSIBLE = {'text/html','text/css','application/javascript','text/javascript','application/json'}
+@app.after_request
+def _compress_response(resp):
+    accepts_gzip = 'gzip' in request.headers.get('Accept-Encoding', '')
+    mimetype = (resp.mimetype or '').split(';')[0]
+    if accepts_gzip and mimetype in _COMPRESSIBLE and resp.direct_passthrough is False \
+            and 'Content-Encoding' not in resp.headers and len(resp.get_data()) > 500:
+        buf = io.BytesIO()
+        with gzip.GzipFile(fileobj=buf, mode='wb', compresslevel=6) as gz:
+            gz.write(resp.get_data())
+        resp.set_data(buf.getvalue())
+        resp.headers['Content-Encoding'] = 'gzip'
+        resp.headers['Content-Length'] = len(resp.get_data())
+        resp.headers['Vary'] = 'Accept-Encoding'
+    return resp
+
+# Ảnh/CSS/JS tĩnh cho cache ngắn hạn (1h) để lần tải lại trong cùng phiên không phải tải lại toàn bộ - không
+# đặt quá dài vì code vẫn đang chỉnh sửa thường xuyên, cache quá lâu sẽ khiến người dùng thấy bản cũ.
+_STATIC_CACHE_EXT = {'.css', '.js', '.png', '.jpg', '.jpeg', '.svg', '.ico', '.woff', '.woff2'}
+_STATIC_MAX_AGE = 3600
+
 @app.route('/')
 def index():
-    return send_from_directory(BASE_DIR, 'index.html')
+    resp = send_from_directory(BASE_DIR, 'index.html')
+    resp.direct_passthrough = False  # cần đọc lại được data() ở _compress_response để nén gzip
+    return resp
 
 @app.route('/<path:filename>')
 def static_files(filename):
-    return send_from_directory(BASE_DIR, filename)
+    ext = os.path.splitext(filename)[1].lower()
+    max_age = _STATIC_MAX_AGE if ext in _STATIC_CACHE_EXT else 0
+    resp = send_from_directory(BASE_DIR, filename, max_age=max_age)
+    resp.direct_passthrough = False
+    return resp
 
 # ═══════════════════════════════════════════════════════════
 # HẰNG SỐ
@@ -464,11 +494,16 @@ def gemini_proxy():
     if not key or not prompt:
         return jsonify({"error": "Thiếu key hoặc prompt"}), 400
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
-    res = requests.post(url, json={
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}
-    })
-    return jsonify(res.json())
+    try:
+        # Thiếu timeout trước đây - nếu Gemini treo, request này chờ vô thời hạn, chiếm luôn worker/thread xử
+        # lý và làm ĐƠ toàn bộ trang cho MỌI người dùng khác (server không đa luồng thật sự).
+        res = requests.post(url, json={
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.7, "maxOutputTokens": 1000}
+        }, timeout=60)
+        return jsonify(res.json())
+    except Exception as e:
+        return jsonify({"error": {"message": str(e)}}), 500
 
 
 # ═══════════════════════════════════════════════════════════
@@ -530,4 +565,9 @@ if __name__ == '__main__':
         _run_tests()
     else:
         port = int(os.environ.get('PORT', 5000))
-        app.run(debug=False, host='0.0.0.0', port=port)
+        # threaded=True chỉ là lưới an toàn khi chạy trực tiếp `python app.py` (vd. Render chưa đổi sang
+        # gunicorn) - mặc định Werkzeug dev server xử lý TUẦN TỰ từng request 1, nên 1 request gọi AI proxy
+        # (Gemini/OpenRouter, có thể mất vài chục giây) sẽ chặn đứng luôn mọi request khác (kể cả tải trang)
+        # cho TẤT CẢ người dùng cùng lúc - đây là nguyên nhân chính gây "đơ" khi có ai đó đang dùng tính năng
+        # AI. Production thật sự nên chạy qua Procfile/gunicorn (đa worker/thread) thay vì dev server này.
+        app.run(debug=False, host='0.0.0.0', port=port, threaded=True)

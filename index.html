@@ -67,6 +67,12 @@ button{font-family:inherit;cursor:pointer}
 #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#1e40af,#7cb0fb);border-color:#1e40af;color:#fff}
 #lichBtn[data-val="am"]{background:#9ca3af;border-color:#9ca3af;color:#fff}
 body.theme-dark #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a6d1d,#f0c040);border-color:#f0c040;color:#000}
+/* Nút Lịch bên "Lập Lá Số" (An Thủ Công) - kích cỡ cố định + màu y hệt #lichBtn bên tab lá số đơn, không đổi
+   kích cỡ khi đổi Dương/Âm (trước đây rộng hẹp khác nhau theo độ dài chữ "DƯƠNG LỊCH"/"ÂM LỊCH"). */
+#tlsLichBtn{width:100%;height:30px;box-sizing:border-box;text-align:center;font-size:.6rem;white-space:nowrap;overflow:hidden}
+#tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,#1e40af,#7cb0fb);border-color:#1e40af;color:#fff}
+#tlsLichBtn[data-val="am"]{background:#9ca3af;border-color:#9ca3af;color:#fff}
+body.theme-dark #tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a6d1d,#f0c040);border-color:#f0c040;color:#000}
 .pill-btn:hover{background:var(--hover)}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;margin-top:8px}
 .btn-row button{width:118px;height:30px;padding:2px 6px;text-align:center;font-size:.68rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1.15}
@@ -89,7 +95,7 @@ body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);col
 .atc-layout{display:flex;gap:12px;align-items:flex-start}
 .atc-tools-col{flex:0 0 46px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
 .atc-chart-col{flex:0 0 780px;max-width:780px}
-.atc-panel-col{flex:1;min-width:320px;border-left:1px solid var(--border-lt);padding-left:14px;padding-top:48px}
+.atc-panel-col{flex:1;min-width:320px;border-left:1px solid var(--border-lt);padding-left:14px}
 #atcBanWrap{padding:48px}
 #atcBanWrap .ban-tuvi{border:1px solid var(--border-lt);background:var(--border-lt)}
 .atc-wrap{display:flex;flex-direction:column;gap:6px}
@@ -106,6 +112,65 @@ body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);col
 .atc-select{padding:4px 5px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.64rem;flex:1;min-width:0}
 .atc-result{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--hover);color:var(--text);font-size:.64rem;font-weight:700;white-space:nowrap}
 @media(max-width:1000px){.atc-layout{flex-direction:column}.atc-tools-col{display:none}.atc-chart-col{flex:1 1 auto;max-width:100%}.atc-panel-col{border-left:none;padding-left:0;border-top:1px solid var(--border-lt);padding-top:14px}}
+
+/* ═══ Sub-tab "LẬP LÁ SỐ" / "AN THỦ CÔNG" (trong tab AN THỦ CÔNG) - sát mép trên (ngang viền khung lá số bên
+   trái, không còn padding-top:48px thừa kế từ atc-panel-col cũ), 2 nút bằng nhau (flex:1) và canh giữa. ═══ */
+.atc-subtabs{display:flex;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--border-lt);padding-bottom:10px}
+.atc-subtab{flex:1;text-align:center;padding:9px 12px;border:1px solid var(--border-lt);border-radius:10px;background:var(--panel);color:var(--muted);font-weight:600;font-size:.86rem;cursor:pointer}
+.atc-subtab.active{background:linear-gradient(135deg,#f0d9a8,#f6e7c8);border-color:#e0bd7a;color:#7a5a1e}
+body.theme-dark .atc-subtab.active{background:linear-gradient(135deg,#3a2f14,#4a3c1a);border-color:#8a6d1d;color:#f0c040}
+/* 3 dòng CỐ ĐỊNH theo đúng nhóm (họ tên+ngày/tháng/năm - giờ sinh+giới tính+lịch - quốc gia+thành phố+múi
+   giờ), field co giãn theo nội dung (không kéo giãn đều theo cột grid như trước, đỡ dư khoảng trống với các
+   ô ngắn như Ngày/Tháng/Giới tính), riêng field .tls-grow (Họ tên/Giờ sinh/Thành phố) giãn nở lấp đầy phần
+   dư của dòng. */
+.tls-form-box{padding:12px;background:var(--hover);border:1px solid var(--border-lt);border-radius:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.tls-form-line{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end}
+.tls-form-line .f-group{flex:0 0 auto;min-width:80px}
+.tls-form-line .f-group.tls-grow{flex:1 1 110px}
+/* Họ tên thu nhỏ hẳn (không giãn nở chiếm hết chỗ trống như .tls-grow nữa) - nhường chỗ cho khoảng cách rõ
+   ràng giữa Ngày/Tháng/Năm sinh (trước đó ép sát gần như dính liền nhau). Đặt placeholder Năm sinh ngắn lại
+   ("Năm" thay vì "Năm sinh") để không bị cắt chữ dù ô đã thu nhỏ. */
+.tls-form-line .f-group.tls-name{flex:0 1 100px;min-width:70px}
+.tls-form-line .f-group.tls-narrow{flex:0 0 48px;min-width:0}
+.tls-form-line .f-group.tls-year{flex:0 0 58px;min-width:0}
+/* Giờ sinh trước dùng chung .tls-grow với Thành phố nên giãn nở khá rộng - rút ngắn lại, không cần chiếm hết
+   khoảng trống dòng 2 (Giờ sinh/Giới tính/Lịch) nữa. */
+.tls-form-line .f-group.tls-gio{flex:0 1 140px;min-width:90px}
+/* Nút Lịch cố định kích cỡ như #lichBtn bên tab lá số đơn - không đổi bề rộng khi đổi Dương/Âm. */
+.tls-form-line .f-group.tls-lich{flex:0 0 96px;min-width:0}
+/* min-width:0 là mấu chốt thật sự - .f-group là flex container (column), select/input bên trong mặc định
+   có min-width:auto (co theo nội dung, vd option "31" hay mũi tên dropdown), khiến width:100% bị "auto" đè,
+   ép select rộng hơn hẳn khung 48-58px đã định (đo thực tế: select rộng 78px dù .f-group chỉ rộng 48px) -
+   đây là nguyên nhân THẬT của việc 2 ô cạnh nhau bị đè/dính viền, không phải do gap. */
+.tls-form-line .f-group input,.tls-form-line .f-group select,.tls-form-line .f-group button{width:100%;min-width:0;box-sizing:border-box}
+.tls-control-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+/* Nút Đ.VẬN/L.NIÊN riêng cho hàng điều khiển này to hơn bản dùng chung .stepper (yêu cầu "to thêm xíu"),
+   không đụng tới .step-label/.step-arrow gốc vì các nơi khác (lá số đơn, dual-tab) vẫn cần giữ kích cỡ cũ. */
+.tls-control-row .step-arrow{flex:0 0 20px;font-size:.85rem;padding:3px 0}
+.tls-control-row .step-label{font-size:.72rem;padding:6px 10px;min-width:64px}
+.tls-hide-panel{display:flex;gap:18px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap}
+/* Thu nhỏ lưới 12 cung lại để chiều cao tổng khớp với cột Lộc/Quyền/Khoa/Kỵ bên cạnh (trước đây cao hơn hẳn,
+   nhìn lệch/mất cân đối 2 bên). */
+.tls-cung-grid{display:grid;grid-template-columns:repeat(4,50px);grid-auto-rows:27px;gap:4px;flex-shrink:0}
+.tls-cung-btn{border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);color:var(--text);font-size:.66rem;font-weight:600;cursor:pointer}
+.tls-cung-btn:hover{border-color:var(--accent)}
+.tls-cung-btn.active{background:#dbeafe;border-color:#60a5fa;color:#1e40af}
+body.theme-dark .tls-cung-btn.active{background:#12233a;border-color:#3a5a8a;color:#8ab6f5}
+.tls-cung-all{grid-column:2/4;grid-row:2/4;border:1px solid #f3b8b8;border-radius:6px;background:#fbdede;color:#a03434;font-weight:700;font-size:.66rem;cursor:pointer}
+.tls-cung-all:hover{background:#f7c9c9}
+body.theme-dark .tls-cung-all{background:#3a1a1a;border-color:#7a3a3a;color:#f0a0a0}
+.tls-hoa-legend{display:flex;flex-direction:column;gap:4px;justify-content:center}
+/* Lộc/Quyền/Khoa/Kỵ giờ là NÚT bấm (trước đây là checkbox) - khi lá số/cung đang bị ẩn, bấm nút sẽ "xuyên
+   qua" trạng thái ẩn để lộ riêng niên hóa + tự hóa (ly tâm/hướng tâm) của đúng loại hóa đó; bấm lại để ẩn. */
+.tls-hoa-btn{display:flex;align-items:center;gap:6px;font-size:.74rem;font-weight:600;color:var(--text);cursor:pointer;padding:4px 10px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel)}
+.tls-hoa-btn:hover{border-color:var(--accent)}
+.tls-hoa-btn.active{background:#dbeafe;border-color:#60a5fa;color:#1e40af}
+body.theme-dark .tls-hoa-btn.active{background:#12233a;border-color:#3a5a8a;color:#8ab6f5}
+.tls-hoa-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+.tls-grid-wrap .ban-tuvi{border:1px solid var(--border-lt);background:var(--border-lt);max-width:780px;margin:0 auto}
+.tls-hidden-mark{color:var(--muted);font-size:.7rem;font-style:italic;text-align:center;padding:10px 0}
+/* Ô cung bị ẩn giữ nguyên nền trắng/đen trung tính mặc định của .cung (var(--panel)) - không tô màu riêng
+   (trước đây dùng var(--hover) làm nền hơi ngả vàng, gây cảm giác khác biệt không cần thiết). */
 
 #loader{display:none;text-align:center;padding:26px;color:var(--muted)}
 .spinner{width:38px;height:38px;border:3px solid var(--border-lt);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
@@ -377,6 +442,11 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 #navBVan.active{background:var(--red);color:#fff;border-color:var(--red)}
 #navLNien.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 #navLNguyet.active{background:var(--green);color:#fff;border-color:var(--green)}
+/* Đ.VẬN/L.NIÊN bên "Lập Lá Số" (An Thủ Công) - đúng màu như tab lá số đơn (đỏ/xanh dương). */
+#tlsNavDv{color:var(--red)}
+#tlsNavLn{color:var(--blue)}
+#tlsNavDv.active{background:var(--red);color:#fff;border-color:var(--red)}
+#tlsNavLn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .ln-year-info{text-align:center;font-size:.62rem;font-weight:700;color:var(--text);line-height:1.4}
 .hoa-pair{display:flex;gap:4px}
 .hoa-pair .tool-btn{flex:1}
@@ -517,19 +587,26 @@ body.theme-dark .kho-modal-head b{color:var(--text)}
 .kho-search:focus{border-color:var(--accent)}
 .kho-total-badge{flex-shrink:0;padding:6px 14px;border-radius:20px;background:var(--hover);color:var(--muted);font-size:.72rem;font-weight:600;white-space:nowrap}
 .kho-body{display:flex;gap:18px;min-height:0;flex:1;overflow:hidden;padding:16px 24px 24px}
-.kho-sidebar{width:230px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding-right:4px}
-.kho-sidebar-head{display:flex;justify-content:space-between;align-items:center;font-size:.68rem;font-weight:700;letter-spacing:.5px;color:var(--muted);margin-bottom:8px}
-.kho-add-cat-btn{width:22px;height:22px;border-radius:50%;border:none;background:linear-gradient(135deg,#0d9488,#2dd4bf);color:#fff;font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
-.kho-cat-row{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 10px;border-radius:8px;border:1px solid transparent;font-size:.78rem;cursor:pointer;margin-bottom:2px}
-.kho-cat-row:hover{background:var(--hover)}
-.kho-cat-row.active{background:#eaf2ff;border-color:#bcd6ff;color:#1e40af;font-weight:700}
+/* Khu vực danh mục: nền panel riêng sáng sủa (tách khỏi nền trắng của danh sách lá số bên phải), phóng to
+   toàn bộ (icon thư mục màu riêng từng mục, chữ to hơn, khoảng cách rộng hơn) để dễ nhận diện nhanh từng
+   thư mục thay vì 1 dòng chữ nhỏ phẳng lì như trước. */
+.kho-sidebar{width:270px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;padding:14px 10px;
+  background:linear-gradient(180deg,#f8fafc 0%,#eef2f9 100%);border:1px solid var(--border-lt);border-radius:14px}
+body.theme-dark .kho-sidebar{background:linear-gradient(180deg,#111a24 0%,#0d151e 100%)}
+.kho-sidebar-head{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;font-weight:700;letter-spacing:.6px;color:var(--muted);margin-bottom:12px;padding:0 4px}
+.kho-add-cat-btn{width:26px;height:26px;border-radius:50%;border:none;background:linear-gradient(135deg,#0d9488,#2dd4bf);color:#fff;font-size:1.05rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;box-shadow:0 2px 6px rgba(13,148,136,.35)}
+.kho-cat-row{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:11px;border:1px solid transparent;font-size:.86rem;cursor:pointer;margin-bottom:6px;background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.kho-cat-row:hover{border-color:var(--accent)}
+.kho-cat-row.active{background:#eaf2ff;border-color:#bcd6ff;color:#1e40af;font-weight:700;box-shadow:0 2px 8px rgba(37,99,235,.15)}
 body.theme-dark .kho-cat-row.active{background:#12233a;border-color:#3a5a8a;color:#8ab6f5}
+.kho-cat-icon{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.kho-cat-icon svg{width:15px;height:15px}
 .kho-cat-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.kho-cat-count{font-size:.7rem;color:var(--muted);flex-shrink:0}
+.kho-cat-count{font-size:.76rem;font-weight:700;color:var(--muted);flex-shrink:0;min-width:18px;text-align:center}
 .kho-cat-row.active .kho-cat-count{color:inherit}
-.kho-cat-actions{display:none;gap:4px;flex-shrink:0}
+.kho-cat-actions{display:none;gap:6px;flex-shrink:0}
 .kho-cat-row:hover .kho-cat-actions{display:flex}
-.kho-cat-actions button{border:none;background:none;font-size:.72rem;color:var(--muted);padding:0 2px;cursor:pointer}
+.kho-cat-actions button{border:none;background:none;font-size:.8rem;color:var(--muted);padding:0 2px;cursor:pointer}
 .kho-cat-actions button:hover{color:var(--text)}
 .kho-list{flex:1;overflow-y:auto;min-width:0}
 /* Mỗi lá số 1 khung thẻ riêng, bấm bất kỳ đâu trong khung (trừ vùng điều khiển bên phải/ghi chú) đều mở
@@ -752,28 +829,132 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
         </div>
       </div>
       <div class="atc-panel-col">
-        <div class="atc-wrap">
-          <div class="atc-row"><div class="atc-label">CAN</div><div class="atc-grid atc-grid-10" id="atcCan"></div></div>
-          <div class="atc-row"><div class="atc-label">TỬ VI</div><div class="atc-grid atc-grid-12" id="atcTuVi"></div></div>
-          <div class="atc-row"><div class="atc-label">THÁNG</div><div class="atc-grid atc-grid-12" id="atcThang"></div></div>
-          <div class="atc-row"><div class="atc-label">G.SINH</div><div class="atc-grid atc-grid-12" id="atcGioSinh"></div></div>
-          <div class="atc-row"><div class="atc-label">MỆNH</div><div class="atc-grid atc-grid-12" id="atcMenh"></div></div>
-          <div class="atc-row">
-            <div class="atc-label">GIỚI TÍNH</div>
-            <button class="pill-btn" id="atcGioiTinhBtn" onclick="atcToggleGioiTinh()">Nam</button>
+        <div class="atc-subtabs">
+          <button class="atc-subtab active" data-atcsub="lls" onclick="switchAtcSubTab('lls')">Lập Lá Số</button>
+          <button class="atc-subtab" data-atcsub="thucong" onclick="switchAtcSubTab('thucong')">An Thủ Công</button>
+        </div>
+
+        <!-- 2 khối trên cùng đổi qua lại theo sub-tab; khung lá số bên trái (atcPreviewGrid/atcCanvas) và
+             toàn bộ khối Đại Vận/Lưu Niên/ẩn cung/lọc niên hóa bên dưới LUÔN dùng CHUNG, không đổi theo tab -
+             dù lập lá số bằng ngày sinh thật hay bằng An Thủ Công đều đổ vào cùng 1 khung lá số ở giữa. -->
+        <div id="atcPanelLls">
+          <div class="tls-form-box">
+            <div class="tls-form-line">
+              <div class="f-group tls-name"><label>Họ tên</label><input type="text" id="tlsHoTen" placeholder="Tên"></div>
+              <div class="f-group tls-narrow"><label>Ngày</label><select id="tlsNgayDD"></select></div>
+              <div class="f-group tls-narrow"><label>Tháng</label><select id="tlsNgayMM"></select></div>
+              <div class="f-group tls-year"><label>Năm sinh</label><input type="number" id="tlsNgayYYYY" min="1900" max="2100" placeholder="Năm"></div>
+            </div>
+            <div class="tls-form-line">
+              <div class="f-group tls-gio">
+                <label>Giờ sinh</label>
+                <select id="tlsGioSinh">
+                  <option value="23:30">Tý trước 0h (23h-24h)</option>
+                  <option value="00:30">Tý sau 0h (0h-1h)</option>
+                  <option value="02:30">Sửu (1h-3h)</option>
+                  <option value="04:30">Dần (3h-5h)</option>
+                  <option value="06:30">Mão (5h-7h)</option>
+                  <option value="08:30">Thìn (7h-9h)</option>
+                  <option value="10:30">Tỵ (9h-11h)</option>
+                  <option value="12:30">Ngọ (11h-13h)</option>
+                  <option value="14:30">Mùi (13h-15h)</option>
+                  <option value="16:30">Thân (15h-17h)</option>
+                  <option value="18:30" selected>Dậu (17h-19h)</option>
+                  <option value="20:30">Tuất (19h-21h)</option>
+                  <option value="22:30">Hợi (21h-23h)</option>
+                </select>
+              </div>
+              <div class="f-group"><label>Giới tính</label><select id="tlsGioiTinh"><option value="nam">Nam</option><option value="nu">Nữ</option></select></div>
+              <div class="f-group tls-lich"><label>Lịch</label><button class="pill-btn" id="tlsLichBtn" data-val="duong" onclick="tlsToggleLich()">DƯƠNG LỊCH</button></div>
+            </div>
+            <div class="tls-form-line">
+              <div class="f-group"><label>Quốc gia</label>
+                <select id="tlsQuocGia" onchange="tlsOnCC()">
+                  <option value="VN">Việt Nam</option><option value="US">Hoa Kỳ</option>
+                  <option value="CN">Trung Quốc</option><option value="JP">Nhật Bản</option>
+                  <option value="KR">Hàn Quốc</option><option value="FR">Pháp</option>
+                  <option value="DE">Đức</option><option value="AU">Úc</option>
+                  <option value="GB">Anh</option><option value="CA">Canada</option>
+                  <option value="TH">Thái Lan</option><option value="SG">Singapore</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </div>
+              <div class="f-group tls-grow"><label>Thành phố</label>
+                <div class="sw">
+                  <input type="text" id="tlsCitySearch" placeholder="Tìm thành phố..." oninput="tlsSearchCity()" onblur="tlsHideDD()" autocomplete="off">
+                  <div class="dd" id="tlsCityDD"></div>
+                </div>
+              </div>
+              <div class="f-group"><label>Múi giờ</label>
+                <select id="tlsMuiGio" onchange="tlsUpdateTz()">
+                  <option value="-12">UTC-12</option><option value="-11">UTC-11</option><option value="-10">UTC-10</option>
+                  <option value="-9">UTC-9</option><option value="-8">UTC-8</option><option value="-7">UTC-7</option>
+                  <option value="-6">UTC-6</option><option value="-5">UTC-5</option>
+                  <option value="-4">UTC-4</option><option value="-3">UTC-3</option><option value="-2">UTC-2</option>
+                  <option value="-1">UTC-1</option><option value="0">UTC+0</option>
+                  <option value="1">UTC+1</option><option value="2">UTC+2</option><option value="3">UTC+3</option>
+                  <option value="4">UTC+4</option><option value="5">UTC+5</option><option value="5.5">UTC+5:30</option>
+                  <option value="6">UTC+6</option><option value="7" selected>UTC+7 (VN)</option>
+                  <option value="8">UTC+8</option><option value="9">UTC+9</option>
+                  <option value="9.5">UTC+9:30</option><option value="10">UTC+10</option>
+                  <option value="11">UTC+11</option><option value="12">UTC+12</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn-dark" style="width:100%" onclick="tlsLapLaSo()">Lập lá số</button>
           </div>
-          <div class="atc-row">
-            <div class="atc-label">TÌM TV</div>
-            <select class="atc-select" id="atcTimSao"></select>
-            <select class="atc-select" id="atcTimCung"></select>
-            <button class="pill-btn" onclick="atcTimTuVi()">Tìm</button>
-            <span class="atc-result" id="atcTimResult">Tử Vi: --</span>
+          <div id="tlsError" class="atc-error"></div>
+        </div>
+
+        <div id="atcPanelThuCong" hidden>
+          <div class="atc-wrap">
+            <div class="atc-row"><div class="atc-label">CAN</div><div class="atc-grid atc-grid-10" id="atcCan"></div></div>
+            <div class="atc-row"><div class="atc-label">TỬ VI</div><div class="atc-grid atc-grid-12" id="atcTuVi"></div></div>
+            <div class="atc-row"><div class="atc-label">THÁNG</div><div class="atc-grid atc-grid-12" id="atcThang"></div></div>
+            <div class="atc-row"><div class="atc-label">G.SINH</div><div class="atc-grid atc-grid-12" id="atcGioSinh"></div></div>
+            <div class="atc-row"><div class="atc-label">MỆNH</div><div class="atc-grid atc-grid-12" id="atcMenh"></div></div>
+            <div class="atc-row">
+              <div class="atc-label">GIỚI TÍNH</div>
+              <button class="pill-btn" id="atcGioiTinhBtn" onclick="atcToggleGioiTinh()">Nam</button>
+            </div>
+            <div class="atc-row">
+              <div class="atc-label">TÌM TV</div>
+              <select class="atc-select" id="atcTimSao"></select>
+              <select class="atc-select" id="atcTimCung"></select>
+              <button class="pill-btn" onclick="atcTimTuVi()">Tìm</button>
+              <span class="atc-result" id="atcTimResult">Tử Vi: --</span>
+            </div>
+            <div class="atc-row atc-actions">
+              <button class="btn-dark" onclick="atcExportToLapLaSo()">Xuất qua Lập Lá Số</button>
+              <button class="btn-outline" onclick="atcReset()">Xóa hết</button>
+            </div>
+            <div class="atc-row"><span id="atcError" class="atc-error"></span></div>
           </div>
-          <div class="atc-row atc-actions">
-            <button class="btn-dark" onclick="atcExportToLapLaSo()">Xuất qua Lập Lá Số</button>
-            <button class="btn-outline" onclick="atcReset()">Xóa hết</button>
+        </div>
+
+        <div class="tls-control-row">
+          <div class="stepper">
+            <button class="step-arrow" onclick="tlsStepDaiVan(-1)">&lsaquo;</button>
+            <button class="step-label" id="tlsNavDv" onclick="tlsToggleDaiVanActive()">Đ.VẬN</button>
+            <button class="step-arrow" onclick="tlsStepDaiVan(1)">&rsaquo;</button>
           </div>
-          <div class="atc-row"><span id="atcError" class="atc-error"></span></div>
+          <div class="stepper">
+            <button class="step-arrow" onclick="tlsStepLuuNien(-1)">&lsaquo;</button>
+            <button class="step-label" id="tlsNavLn" onclick="tlsToggleLuuNienActive()">L.NIÊN</button>
+            <button class="step-arrow" onclick="tlsStepLuuNien(1)">&rsaquo;</button>
+          </div>
+          <button class="btn-outline" onclick="tlsShowAllCung()">Hiện đủ</button>
+          <button class="btn-outline" onclick="tlsExportToSingle()" title="Chuyển lá số này sang tab Nhập Thông Tin">Xuất</button>
+        </div>
+
+        <div class="tls-hide-panel">
+          <div class="tls-cung-grid" id="tlsCungGrid"></div>
+          <div class="tls-hoa-legend">
+            <button class="tls-hoa-btn" data-letter="A" onclick="tlsToggleHoaFilter('A')"><span class="tls-hoa-dot" style="background:#16a34a"></span>Lộc</button>
+            <button class="tls-hoa-btn" data-letter="B" onclick="tlsToggleHoaFilter('B')"><span class="tls-hoa-dot" style="background:#e63946"></span>Quyền</button>
+            <button class="tls-hoa-btn" data-letter="C" onclick="tlsToggleHoaFilter('C')"><span class="tls-hoa-dot" style="background:#2563eb"></span>Khoa</button>
+            <button class="tls-hoa-btn" data-letter="D" onclick="tlsToggleHoaFilter('D')"><span class="tls-hoa-dot" style="background:#000"></span>Kỵ</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1127,6 +1308,19 @@ function getStoreKey(email) { return STORE_KEY + '_' + simpleHash(email); }
 // ============================================================
 const KHOLASO_KEY = 'tuvi_kholaso';
 const KHOLASO_CAT_KEY = 'tuvi_kholaso_cat';
+// Mỗi thư mục (danh mục người dùng tự tạo) được gán 1 màu riêng theo thứ tự tạo (xoay vòng bảng màu), để
+// phân biệt nhanh bằng mắt thay vì phải đọc chữ - "Tất cả"/"Chưa phân loại" là 2 mục CỐ ĐỊNH nên dùng icon
+// riêng, không nằm trong bảng xoay vòng này.
+const KHO_CAT_PALETTE = ['#2563eb','#7c3aed','#0d9488','#ea580c','#db2777','#16a34a','#4f46e5','#c2410c','#0891b2','#be123c'];
+function khoCatIconSvg(){
+  return '<svg viewBox="0 0 24 24" fill="#fff"><path d="M3 6a2 2 0 0 1 2-2h4.5l2 2H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z"/></svg>';
+}
+function khoCatIconHtml(key,idx){
+  if(key==='ALL') return `<span class="kho-cat-icon" style="background:linear-gradient(135deg,#0d9488,#2dd4bf)">${khoCatIconSvg()}</span>`;
+  if(key==='UNASSIGNED') return `<span class="kho-cat-icon" style="background:#94a3b8">${khoCatIconSvg()}</span>`;
+  const color = KHO_CAT_PALETTE[idx % KHO_CAT_PALETTE.length];
+  return `<span class="kho-cat-icon" style="background:${color}">${khoCatIconSvg()}</span>`;
+}
 function getKhoLaSoKey(email) { return KHOLASO_KEY + '_' + simpleHash(email); }
 function getKhoCatKey(email) { return KHOLASO_CAT_KEY + '_' + simpleHash(email); }
 function khoLoadList() { return JSON.parse(localStorage.getItem(getKhoLaSoKey(currentUser.email)) || '[]'); }
@@ -1247,15 +1441,20 @@ function renderKhoLaSoList() {
     { key:'UNASSIGNED', label:'Chưa phân loại', count:unassignedCount, fixed:true },
     ...cats.map(c => ({ key:c, label:c, count:list.filter(r => r.category===c).length, fixed:false })),
   ];
-  catBody.innerHTML = rows.map(r => `
+  let catIdx = -1;
+  catBody.innerHTML = rows.map(r => {
+    if(!r.fixed) catIdx++;
+    return `
     <div class="kho-cat-row${khoActiveCategory===r.key?' active':''}" onclick="khoSelectCategory('${r.key.replace(/'/g,"\\'")}')">
+      ${khoCatIconHtml(r.key,catIdx)}
       <span class="kho-cat-name">${r.label}</span>
       <span class="kho-cat-count">${r.count}</span>
       ${r.fixed?'':`<span class="kho-cat-actions">
         <button title="Đổi tên" onclick="khoRenameCategory('${r.key.replace(/'/g,"\\'")}',event)">✎</button>
         <button title="Xóa" onclick="khoDeleteCategory('${r.key.replace(/'/g,"\\'")}',event)">🗑</button>
       </span>`}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // -- Danh sách lá số (lọc theo danh mục đang chọn + từ khóa tìm kiếm) --
   let filtered = list;
@@ -1800,7 +1999,12 @@ function switchTopTab(name){
     sides.forEach(side=>{ if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); } });
   }else if(name==='gio'){
     document.getElementById('workspace').style.display='none';
+    initTlsPanelOnce();
+    // Khung lá số (atcPreviewGrid/atcCanvas) dùng CHUNG cho cả 2 sub-tab "Lập Lá Số"/"An Thủ Công" (không
+    // ẩn/hiện theo sub-tab nữa), nên luôn hiện cùng lúc với tab "gio" - đo lại kích thước canvas mỗi lần vào
+    // tab này (đề phòng bị đo sai lúc còn ẩn), giống hệt cách sizeCanvas() làm ở nhánh workspace bên dưới.
     initAtcPanelOnce();
+    atcSizeCanvas();
   }else if(activeChartIdx>=0){
     document.getElementById('workspace').style.display='flex';
     // Canvas có thể đã bị đo/gán kích thước SAI (0x0) nếu 1 hành động vẽ lại nào đó lỡ chạy trong lúc
@@ -1809,6 +2013,16 @@ function switchTopTab(name){
     // (mũi tên, vẽ tay...) như không có tác dụng gì (thật ra vẫn chạy, chỉ là vẽ/định vị sai vào vùng 0x0).
     sizeCanvas();
   }
+}
+// Tab "AN THỦ CÔNG" (top) chia 2 sub-tab bên panel-col PHẢI: "Lập Lá Số" (form ngày/tháng/năm sinh thật, gọi
+// đúng /api/lap-laso như tab lá số đơn) và "An Thủ Công" (công cụ chọn Can/Tử Vi/Tháng/Giờ/Mệnh thủ công CŨ).
+// Khung lá số + canvas (atcPreviewGrid/atcCanvas, chart-col bên trái) và toàn bộ khối Đại Vận/Lưu Niên/ẩn
+// cung phía dưới LUÔN hiện, dùng CHUNG cho cả 2 sub-tab - chỉ có phần TRÊN CÙNG của panel-col đổi qua lại.
+function switchAtcSubTab(name){
+  document.querySelectorAll('.atc-subtab').forEach(t=>t.classList.toggle('active',t.dataset.atcsub===name));
+  document.getElementById('atcPanelLls').hidden = name!=='lls';
+  document.getElementById('atcPanelThuCong').hidden = name!=='thucong';
+  if(name==='thucong') initAtcPanelOnce();
 }
 // -- AN THỦ CÔNG: dựng lá số thủ công bằng cách chọn TỪNG PHẦN (Can, vị trí Tử Vi, Tháng, Giờ sinh, Mệnh)
 // - không cần biết ngày/năm sinh thật, và không cần chọn đủ hết mới ra hình - mỗi mục chọn được là an ngay
@@ -1880,7 +2094,7 @@ function atcCompute(){
   return {sc,tenCung,vT,thMap,vM};
 }
 function initAtcPanelOnce(){
-  if(atcInited){ atcRenderPreview(); return; }
+  if(atcInited) return;
   atcInited=true;
   const mk=(boxId,items,field)=>{
     const box=document.getElementById(boxId);
@@ -1927,6 +2141,7 @@ function atcPick(field,val){
 function atcToggleGioiTinh(){
   atcSel.gioiTinh = atcSel.gioiTinh==='nam' ? 'nu' : 'nam';
   document.getElementById('atcGioiTinhBtn').textContent = atcSel.gioiTinh==='nam'?'Nam':'Nữ';
+  atcRenderPreview(); // Giới tính đổi chiều thuận/nghịch Đại Vận, phải tính lại
 }
 function atcReset(){
   atcSel.can=null; atcSel.tuVi=null; atcSel.thang=null; atcSel.gioSinh=null; atcSel.menh=null; atcSel.gioiTinh='nam';
@@ -1935,36 +2150,29 @@ function atcReset(){
   document.getElementById('atcError').textContent='';
   atcRenderPreview();
 }
+// Đồng bộ lựa chọn An Thủ Công (atcSel) vào state DÙNG CHUNG (atcCurChart) rồi vẽ ra đúng khung lá số chung
+// (atcPreviewGrid/atcCanvas) - dùng lại y hệt cơ chế Đại Vận (atcTinhCuc/atcTinhDaiHan) đã có sẵn ở
+// atcExportToLapLaSo, chỉ cần đủ Can+Mệnh là tính được (không cần đợi chọn hết Tử Vi/Tháng/Giờ sinh).
 function atcRenderPreview(){
-  const box=document.getElementById('atcPreviewGrid'); if(!box) return;
   const {sc,tenCung,vT,thMap,vM}=atcCompute();
-  let h='';
-  for(let r=0;r<4;r++){
-    for(let col=0;col<4;col++){
-      const idx=LAYOUT[r][col];
-      if(idx===-1){
-        if(r===1&&col===1) h+=`<div class="cung center"></div>`;
-        continue;
-      }
-      const stars=sc[idx]||[];
-      const canPart=tenCung? tenCung[idx].split(' ')[0] : '';
-      const chiPart=DC[idx];
-      const chuc=vM!==null? cungChucOf(idx,vM) : '';
-      const iT=idx===vT;
-      const chinhs=stars.filter(s=>s.loai==='chinh');
-      const phus=stars.filter(s=>s.loai==='phu');
-      const starSpan=(s,cls)=>`<span class="sao ${cls}">${s.ten}${thMap?renderTuHoa(thMap[s.ten]):''}</span>`;
-      h+=`<div class="cung" data-idx="${idx}">
-        <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
-        ${chuc?`<div class="cung-chuc">${chuc}${iT?' <span class="b-than">THÂN</span>':''}</div>`:''}
-        <div class="sao-chinh-wrap">${chinhs.map(s=>starSpan(s,'chinh')).join('')}</div>
-        <div class="sao-phu-wrap">${phus.map(s=>starSpan(s,'phu')).join('')}</div>
-        <div class="ln">${luuNienList(idx,0).join(',')}</div>
-      </div>`;
-    }
+  let daiHan=null, chiNamSinh=null, birthYear=null;
+  if(atcSel.can && vM!==null && vM!==undefined){
+    const cn=CAN.indexOf(atcSel.can);
+    const namGiaDinh=new Date().getFullYear();
+    daiHan=atcTinhDaiHan(vM,cn,atcSel.gioiTinh,atcTinhCuc(cn,vM),namGiaDinh);
+    birthYear=namGiaDinh;
+    chiNamSinh=chiOfYear(namGiaDinh);
   }
-  box.innerHTML=h;
-  atcSizeCanvas();
+  atcCurChart = (tenCung || (vM!==null&&vM!==undefined)) ? {
+    sc, tenCung, vM, vT, thMap, daiHan, chiNamSinh, birthYear,
+    hoTen:'', gioiTinh:atcSel.gioiTinh, ngayAm:'', ngayDuong:'',
+    gioSinhLabel: atcSel.gioSinh?`${atcSel.gioSinh} thời`:'',
+    canChiNam: atcSel.can ? `${atcSel.can} ${chiNamSinh!==null?DC[chiNamSinh]:''}`.trim() : '',
+    rawApiData:null,
+  } : null;
+  tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null;
+  tlsRenderAll();
+  atcRedrawCanvas();
 }
 function atcCellEdgeAnchor(idx,which){
   const pos=CELL_POS[idx]; if(!pos) return null;
@@ -2012,6 +2220,16 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
   const cv=document.getElementById('atcCanvas'); if(!cv) return;
   let arrows=[];
   for(let idx=0;idx<12;idx++) arrows=arrows.concat(atcComputeTuHoaFor(idx,sc,tenCung));
+  // Cung đang bị "ẩn cung" (tlsHiddenCung) thì ẩn LUÔN mũi tên/chữ tự hóa xuất phát từ hoặc đáp vào đúng cung
+  // đó - TRỪ KHI nút Lộc/Quyền/Khoa/Kỵ của đúng loại hóa đó đang được bấm "lộ" (tlsHoaFilter[letter]===true),
+  // lúc đó mũi tên loại này được vẽ xuyên qua lớp ẩn. Cung không bị ẩn thì luôn vẽ đủ, không phụ thuộc nút này
+  // (nút Lộc/Quyền/Khoa/Kỵ giờ chỉ có tác dụng "lộ xuyên qua ẩn", không còn là bộ lọc ẩn/hiện chung nữa).
+  arrows=arrows.filter(a=>{
+    const fromHidden=tlsHiddenCung.has(a.from);
+    const toHidden=a.to!==undefined && tlsHiddenCung.has(a.to);
+    if(!fromHidden && !toHidden) return true;
+    return !!tlsHoaFilter[a.letter];
+  });
   if(!arrows.length) return;
   // Kích thước CSS thật (KHÔNG dùng cv.width/height - từ khi khớp devicePixelRatio, 2 giá trị đó đã bị nhân
   // lên theo dpr, dùng nhầm để giới hạn/kẹp tọa độ sẽ khiến mũi tên tràn ra ngoài khung trên màn hình HiDPI).
@@ -2086,9 +2304,14 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
 function atcRedrawCanvas(preview){
   const cv=document.getElementById('atcCanvas'); if(!cv) return;
   const ctx=cv.getContext('2d');
+  // Reset tường minh mọi thuộc tính vẽ có thể còn sót lại từ lần vẽ trước (shadowBlur/globalAlpha...) -
+  // clearRect() chỉ xóa PIXEL, KHÔNG reset các thuộc tính context, nên nếu có chỗ nào lỡ set rồi quên trả lại
+  // (vd shadowBlur khi vẽ chữ có glow) thì vẫn còn dính sang lần vẽ kế tiếp dù đã clear sạch pixel.
+  ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
   ctx.clearRect(0,0,cv.width,cv.height);
-  const {sc,tenCung}=atcCompute();
-  atcDrawTuHoaArrows(ctx,sc,tenCung);
+  // Vẽ mũi tên tự hóa theo state DÙNG CHUNG (atcCurChart) - khớp với đúng lá số đang hiển thị trong
+  // atcPreviewGrid, bất kể lập bằng Lập Lá Số (ngày sinh thật) hay An Thủ Công (chọn thủ công).
+  if(atcCurChart && atcCurChart.tenCung) atcDrawTuHoaArrows(ctx, atcCurChart.sc, atcCurChart.tenCung);
   [...atcShapes, ...(preview?[preview]:[])].forEach(sh=>drawShape(ctx,sh));
 }
 function atcSizeCanvas(){
@@ -2203,6 +2426,322 @@ async function atcExportToLapLaSo(){
   ingestResult(d, namGiaDinh);
   switchTopTab('form');
 }
+
+// ═══════════════════════════════════
+// KHUNG LÁ SỐ DÙNG CHUNG cho 2 sub-tab "Lập Lá Số"/"An Thủ Công" (tab "AN THỦ CÔNG") - dù lập bằng ngày sinh
+// thật (gọi /api/lap-laso) hay bằng An Thủ Công (chọn Can/Tử Vi/Tháng/Giờ/Mệnh thủ công), kết quả đều đổ
+// vào CÙNG 1 state (atcCurChart) rồi vẽ ra CÙNG 1 khung (#atcPreviewGrid + #atcCanvas cho mũi tên tự hóa).
+// Thêm bộ điều khiển riêng dùng chung cho cả 2 tab: Đại Vận/Lưu Niên, ẩn/hiện từng cung (luyện trí nhớ), lọc
+// hiển thị theo từng loại niên hóa Lộc/Quyền/Khoa/Kỵ.
+// ═══════════════════════════════════
+let tlsInited=false;
+let atcCurChart=null; // {sc,tenCung,vM,vT,thMap,daiHan,chiNamSinh,birthYear,hoTen,gioiTinh,ngayAm,ngayDuong,gioSinhLabel}
+let tlsSelectedDaiVanIdx=null, tlsSelectedLuuNienYear=null;
+let tlsHiddenCung=new Set();
+// tlsHoaFilter giờ không còn là "bộ lọc ẩn/hiện chung" nữa (nút bấm, không phải checkbox) - mặc định TẮT hết,
+// chỉ có tác dụng "xuyên thấu" khi CHÍNH cung đó đang bị ẩn: bấm nút loại hóa nào thì lộ riêng niên hóa +
+// tự hóa (ly tâm/hướng tâm) của loại đó qua lớp ẩn; cung đang hiện thì luôn hiện đủ, không bị lọc bởi nút này.
+let tlsHoaFilter={A:false,B:false,C:false,D:false};
+let tlsSelCity=null;
+
+function initTlsPanelOnce(){
+  if(tlsInited) return;
+  tlsInited=true;
+  const dd=document.getElementById('tlsNgayDD'), mm=document.getElementById('tlsNgayMM');
+  for(let i=1;i<=31;i++) dd.innerHTML+=`<option value="${i}">${i}</option>`;
+  for(let i=1;i<=12;i++) mm.innerHTML+=`<option value="${i}">${i}</option>`;
+  dd.value=2; mm.value=11;
+  tlsSelCity=CITIES[1];
+  tlsRenderCungGrid();
+}
+function tlsToggleLich(){
+  const b=document.getElementById('tlsLichBtn');
+  const isAm=b.dataset.val==='am';
+  b.dataset.val=isAm?'duong':'am';
+  b.textContent=isAm?'DƯƠNG LỊCH':'ÂM LỊCH';
+}
+// Quốc gia/Thành phố/Múi giờ - port của onCC/searchCity/pickCity/hideDD/updateTz bên tab lá số đơn.
+function tlsOnCC(){
+  document.getElementById('tlsCitySearch').value='';
+  tlsSearchCity();
+  const co=document.getElementById('tlsQuocGia').value;
+  const firstMatch=CITIES.find(c=>co==='OTHER'||c.c===co);
+  if(firstMatch) tlsPickCity(firstMatch.n);
+}
+function tlsSearchCity(){
+  const q=document.getElementById('tlsCitySearch').value.toLowerCase();
+  const co=document.getElementById('tlsQuocGia').value;
+  const res=CITIES.filter(c=>(co==='OTHER'||c.c===co)&&(q===''||c.n.toLowerCase().includes(q)));
+  const dd=document.getElementById('tlsCityDD');
+  if(!res.length){dd.classList.remove('show');return}
+  dd.innerHTML=res.map(c=>`<div class="dd-item" onmousedown="tlsPickCity('${c.n}')">${c.n}<span class="dd-tz">UTC${c.tz>=0?'+':''}${c.tz}</span></div>`).join('');
+  dd.classList.add('show');
+}
+function tlsPickCity(name){
+  tlsSelCity=CITIES.find(c=>c.n===name)||tlsSelCity;
+  document.getElementById('tlsCitySearch').value=tlsSelCity.n;
+  document.getElementById('tlsMuiGio').value=String(tlsSelCity.tz);
+  tlsUpdateTz();
+  document.getElementById('tlsCityDD').classList.remove('show');
+}
+function tlsHideDD(){setTimeout(()=>{const dd=document.getElementById('tlsCityDD'); if(dd) dd.classList.remove('show');},200)}
+function tlsUpdateTz(){}
+async function tlsLapLaSo(){
+  const err=document.getElementById('tlsError'); err.textContent='';
+  const dd=parseInt(document.getElementById('tlsNgayDD').value);
+  const mmv=parseInt(document.getElementById('tlsNgayMM').value);
+  const yyyy=parseInt(document.getElementById('tlsNgayYYYY').value);
+  if(!dd||!mmv||!yyyy||yyyy<1900){ err.textContent='Nhập đúng Ngày / Tháng / Năm sinh!'; return; }
+  const ngaySinh=`${yyyy}-${String(mmv).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+  const lichLoai=document.getElementById('tlsLichBtn').dataset.val==='am'?'am':'duong';
+  try{
+    const res=await fetch('/api/lap-laso',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        hoTen:document.getElementById('tlsHoTen').value,
+        gioiTinh:document.getElementById('tlsGioiTinh').value,
+        lichLoai, ngaySinh, gioSinh:document.getElementById('tlsGioSinh').value,
+        muiGio:parseFloat(document.getElementById('tlsMuiGio').value),
+        thanhPho:tlsSelCity?.n||'', quocGia:document.getElementById('tlsQuocGia').value,
+      })
+    });
+    const d=await res.json();
+    if(d.status!=='success'){ err.textContent=d.message; return; }
+    const vM=d.cung.menh.viTri, vT=d.cung.than.viTri;
+    const canTen=d.thongTin.canChiNam.trim().split(' ')[0];
+    const canIdx=CAN.indexOf(canTen);
+    const thMap=buildTuHoaMap(canIdx);
+    const namAm=parseInt(d.thongTin.ngayAm.split('/')[2]);
+    atcCurChart={
+      sc:d.saoCung, tenCung:d.tenCung, vM, vT, thMap, daiHan:d.daiHan, chiNamSinh:(namAm+8)%12, birthYear:yyyy,
+      hoTen:d.thongTin.hoTen, gioiTinh:d.thongTin.gioiTinh, ngayAm:d.thongTin.ngayAm, ngayDuong:d.thongTin.ngayDuong,
+      gioSinhLabel:d.thongTin.gioSinh, canChiNam:d.thongTin.canChiNam, rawApiData:d,
+    };
+    tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsHiddenCung=new Set();
+    tlsHoaFilter={A:false,B:false,C:false,D:false};
+    tlsRenderAll();
+    atcRedrawCanvas();
+  }catch(e){
+    err.textContent='Không kết nối được server. Hãy chạy: python app.py';
+  }
+}
+// Nút "Xuất" - đẩy lá số đang hiển thị (dù lập bằng Lập Lá Số hay An Thủ Công) sang tab lá số đơn. Có sẵn
+// rawApiData (đúng response gốc từ /api/lap-laso) thì dùng thẳng cho chuẩn tuyệt đối; còn lập bằng An Thủ
+// Công (không gọi API) thì tự dựng lại đúng hình dạng ingestResult() cần, giống hệt atcExportToLapLaSo().
+function tlsExportToSingle(){
+  const c=atcCurChart;
+  if(!c || c.vM===null || c.vM===undefined){ alert('Chưa có lá số để xuất!'); return; }
+  const birthYear=c.birthYear||new Date().getFullYear();
+  if(c.rawApiData){
+    ingestResult(c.rawApiData, birthYear);
+  }else{
+    const d={
+      thongTin:{
+        hoTen:c.hoTen||'', gioiTinh:c.gioiTinh, ngayAm:c.ngayAm||`??/??/${birthYear}`, ngayDuong:c.ngayDuong||'',
+        gioSinh:c.gioSinhLabel||'', canChiNam:c.canChiNam||'', thangNhuan:false,
+      },
+      cung:{
+        menh:{viTri:c.vM, tenCung:(c.tenCung&&(c.tenCung[c.vM]||c.tenCung[String(c.vM)]))||'', diaChi:DC[c.vM]},
+        than:{viTri:c.vT, tenCung:(c.tenCung&&(c.tenCung[c.vT]||c.tenCung[String(c.vT)]))||'', diaChi:DC[c.vT]},
+      },
+      saoCung:c.sc, tenCung:c.tenCung, daiHan:c.daiHan||[], tieuHan:[],
+    };
+    ingestResult(d, birthYear);
+  }
+  switchTopTab('form');
+}
+function tlsRenderTuHoa(ky,hidden){
+  if(!ky) return '';
+  if(hidden && !tlsHoaFilter[ky]) return ''; // cung đang ẩn: chỉ lộ badge nếu loại hóa đó đang được bấm "lộ"
+  return `<span class="th th-${ky}">${ky}</span>`;
+}
+function tlsRenderGrid(){
+  const wrap=document.getElementById('atcPreviewGrid'); if(!wrap) return;
+  const c=atcCurChart;
+  let h='';
+  for(let r=0;r<4;r++){
+    for(let col=0;col<4;col++){
+      const idx=LAYOUT[r][col];
+      if(idx===-1){
+        // Ô giữa để trống, không cần chữ thông tin (tên/ngày sinh/tuổi...) - chỉ cần khung lá số.
+        if(r===1&&col===1) h+=`<div class="cung center"></div>`;
+        continue;
+      }
+      if(!c){ h+=`<div class="cung" data-idx="${idx}"><div class="cung-cc-top"><div></div><div>${DC[idx]}</div></div></div>`; continue; }
+      const stars=(c.sc&&c.sc[idx])||(c.sc&&c.sc[String(idx)])||[];
+      const cc=(c.tenCung&&(c.tenCung[idx]||c.tenCung[String(idx)]))||DC[idx];
+      const [canPart,chiPart]=cc.split(' ');
+      const chuc=c.vM!==null&&c.vM!==undefined? cungChucOf(idx,c.vM) : '';
+      const iT=idx===c.vT;
+      const dh=c.daiHan? c.daiHan.find(x=>x.cung===idx) : null;
+      const dvTuoi=dh? dh.tuoiBatDau : '';
+      const ln=c.daiHan&&c.chiNamSinh!==undefined&&c.chiNamSinh!==null? luuNienList(idx,c.chiNamSinh).join(',') : '';
+      const hidden=tlsHiddenCung.has(idx);
+      let bgs=''; if(iT) bgs+='<span class="b-than">THÂN</span>';
+      const chinhs=stars.filter(s=>s.loai==='chinh');
+      const phus=stars.filter(s=>s.loai==='phu');
+      const starSpan=(s,cls)=>`<span class="sao ${cls}">${s.ten}${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden):''}</span>`;
+      const hlCls=(tlsSelectedDaiVanIdx!==null && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx] && c.daiHan[tlsSelectedDaiVanIdx].cung===idx)?' hl-daivan':'';
+      const hlLnCls=(tlsSelectedLuuNienYear!==null && chiOfYear(tlsSelectedLuuNienYear)===idx)?' hl-luunien':'';
+      if(hidden){
+        // Ẩn cung: ẩn TOÀN BỘ nội dung ô đó (Can-Chi, tên cung, đại vận, lưu niên...) - CHỈ TRỪ những sao đang
+        // mang loại hóa mà nút Lộc/Quyền/Khoa/Kỵ tương ứng đang bấm "lộ" (tlsHoaFilter[letter]===true), lộ ra
+        // đúng badge niên hóa của sao đó (mũi tên tự hóa ly tâm/hướng tâm xử lý riêng trong atcDrawTuHoaArrows).
+        const revealChinh=(c.thMap? chinhs.filter(s=>c.thMap[s.ten] && tlsHoaFilter[c.thMap[s.ten]]) : []);
+        const revealPhu=(c.thMap? phus.filter(s=>c.thMap[s.ten] && tlsHoaFilter[c.thMap[s.ten]]) : []);
+        h+= (revealChinh.length||revealPhu.length) ? `
+      <div class="cung tls-cung-hidden" data-idx="${idx}">
+        <div class="sao-chinh-wrap">${revealChinh.map(s=>starSpan(s,'chinh')).join('')}</div>
+        <div class="sao-phu-wrap">${revealPhu.map(s=>starSpan(s,'phu')).join('')}</div>
+      </div>` : `<div class="cung tls-cung-hidden" data-idx="${idx}"></div>`;
+        continue;
+      }
+      h+= `
+      <div class="cung${hlCls}${hlLnCls}" data-idx="${idx}">
+        <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
+        ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
+        ${chuc?`<div class="cung-chuc">${chuc}${bgs}</div>`:''}
+        <div class="sao-chinh-wrap">${chinhs.map(s=>starSpan(s,'chinh')).join('')}</div>
+        <div class="sao-phu-wrap">${phus.map(s=>starSpan(s,'phu')).join('')}</div>
+        <div class="ln">${ln}</div>
+        <div class="dv-chuc" data-idx="${idx}"></div>
+        <div class="ln-chuc" data-idx="${idx}"></div>
+      </div>`;
+    }
+  }
+  wrap.innerHTML=h;
+  if(tlsSelectedDaiVanIdx!==null && c && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx]) tlsRenderDaiVanChuc(c.daiHan[tlsSelectedDaiVanIdx].cung);
+  if(tlsSelectedLuuNienYear!==null) tlsRenderLuuNienChuc(chiOfYear(tlsSelectedLuuNienYear));
+}
+function tlsRenderCungGrid(){
+  const wrap=document.getElementById('tlsCungGrid'); if(!wrap) return;
+  let h='';
+  for(let r=0;r<4;r++){
+    for(let col=0;col<4;col++){
+      const idx=LAYOUT[r][col];
+      if(idx===-1){
+        if(r===1&&col===1) h+=`<button class="tls-cung-all" onclick="tlsToggleAllCung()">Ẩn tất cả</button>`;
+        continue;
+      }
+      h+=`<button class="tls-cung-btn" data-idx="${idx}" onclick="tlsToggleCung(${idx})">${DC[idx]}</button>`;
+    }
+  }
+  wrap.innerHTML=h;
+}
+function tlsUpdateCungGridUI(){
+  document.querySelectorAll('.tls-cung-btn').forEach(b=>{
+    b.classList.toggle('active', tlsHiddenCung.has(parseInt(b.dataset.idx,10)));
+  });
+}
+// Cả 4 hàm ẩn/hiện cung bên dưới đều phải gọi thêm atcRedrawCanvas() - trước đây chỉ render lại HTML
+// (tlsRenderGrid) nên mũi tên tự hóa (ly tâm/hướng tâm) vẽ trên canvas không hề bị ẩn theo dù cung đã ẩn.
+function tlsToggleCung(idx){
+  if(tlsHiddenCung.has(idx)) tlsHiddenCung.delete(idx); else tlsHiddenCung.add(idx);
+  tlsUpdateCungGridUI();
+  tlsRenderGrid();
+  atcRedrawCanvas();
+}
+// Ô giữa "Ẩn tất cả" - bấm sẽ TOGGLE: đang có cung nào hiện thì ẩn hết, đã ẩn hết rồi thì mở lại hết.
+function tlsToggleAllCung(){
+  if(tlsHiddenCung.size>=12) tlsHiddenCung=new Set();
+  else tlsHiddenCung=new Set(Array.from({length:12},(_,i)=>i));
+  tlsUpdateCungGridUI();
+  tlsRenderGrid();
+  atcRedrawCanvas();
+}
+function tlsShowAllCung(){ tlsHiddenCung=new Set(); tlsUpdateCungGridUI(); tlsRenderGrid(); atcRedrawCanvas(); }
+function tlsUpdateHoaFilterUI(){
+  document.querySelectorAll('.tls-hoa-btn').forEach(b=>{
+    b.classList.toggle('active', !!tlsHoaFilter[b.dataset.letter]);
+  });
+}
+function tlsToggleHoaFilter(letter){
+  tlsHoaFilter[letter]=!tlsHoaFilter[letter];
+  tlsUpdateHoaFilterUI();
+  tlsRenderGrid(); // badge niên hóa (HTML)
+  atcRedrawCanvas(); // mũi tên tự hóa ly tâm/hướng tâm (canvas) - trước đây quên gọi nên checkbox không ăn
+}
+function tlsUpdateStepperUI(){
+  const bv=document.getElementById('tlsNavDv'), ln=document.getElementById('tlsNavLn');
+  const c=atcCurChart;
+  if(bv){
+    bv.classList.toggle('active', tlsSelectedDaiVanIdx!==null);
+    bv.textContent=(tlsSelectedDaiVanIdx!==null && c && c.daiHan)?
+      `Đ.VẬN ${c.daiHan[tlsSelectedDaiVanIdx].tuoiBatDau}-${c.daiHan[tlsSelectedDaiVanIdx].tuoiKetThuc}`:'Đ.VẬN';
+  }
+  if(ln){
+    ln.classList.toggle('active', tlsSelectedLuuNienYear!==null);
+    ln.textContent=tlsSelectedLuuNienYear!==null?('L.NIÊN '+tlsSelectedLuuNienYear):'L.NIÊN';
+  }
+}
+function tlsRenderDaiVanChuc(dvCungIdx){
+  for(let idx=0;idx<12;idx++){
+    const el=document.querySelector(`#atcPreviewGrid .dv-chuc[data-idx="${idx}"]`);
+    const off=(idx-dvCungIdx+12)%12;
+    if(el) el.textContent = off===0?'MỆNH ĐV':SHORT_CHUC[off].toUpperCase()+' ĐV';
+  }
+}
+function tlsRenderLuuNienChuc(lnCungIdx){
+  for(let idx=0;idx<12;idx++){
+    const el=document.querySelector(`#atcPreviewGrid .ln-chuc[data-idx="${idx}"]`);
+    const off=(idx-lnCungIdx+12)%12;
+    if(el) el.textContent = off===0?'MỆNH LN':SHORT_CHUC[off].toUpperCase()+' LN';
+  }
+}
+function tlsPickDaiVan(i){
+  if(!atcCurChart||!atcCurChart.daiHan) return;
+  tlsSelectedDaiVanIdx=i;
+  tlsRenderGrid();
+  tlsUpdateStepperUI();
+}
+function tlsToggleDaiVanActive(){
+  const c=atcCurChart;
+  if(!c||!c.daiHan) return;
+  if(tlsSelectedDaiVanIdx===null){
+    const age=currentAge(c);
+    let idx=c.daiHan.findIndex(dh=>age>=dh.tuoiBatDau&&age<=dh.tuoiKetThuc);
+    if(idx<0) idx=0;
+    tlsPickDaiVan(idx);
+  }else{
+    tlsSelectedDaiVanIdx=null;
+    tlsRenderGrid();
+    tlsUpdateStepperUI();
+  }
+}
+function tlsStepDaiVan(dir){
+  const c=atcCurChart;
+  if(!c||!c.daiHan) return;
+  if(tlsSelectedDaiVanIdx===null){ tlsToggleDaiVanActive(); return; }
+  const idx=Math.max(0,Math.min(c.daiHan.length-1,tlsSelectedDaiVanIdx+dir));
+  tlsPickDaiVan(idx);
+}
+function tlsPickLuuNien(y){
+  if(!atcCurChart) return;
+  tlsSelectedLuuNienYear=y;
+  tlsRenderGrid();
+  tlsUpdateStepperUI();
+}
+function tlsToggleLuuNienActive(){
+  if(!atcCurChart) return;
+  if(tlsSelectedLuuNienYear===null) tlsPickLuuNien(new Date().getFullYear());
+  else{
+    tlsSelectedLuuNienYear=null;
+    tlsRenderGrid();
+    tlsUpdateStepperUI();
+  }
+}
+function tlsStepLuuNien(dir){
+  if(!atcCurChart) return;
+  if(tlsSelectedLuuNienYear===null){ tlsToggleLuuNienActive(); return; }
+  tlsPickLuuNien(tlsSelectedLuuNienYear+dir);
+}
+function tlsRenderAll(){
+  tlsRenderGrid();
+  tlsUpdateStepperUI();
+  tlsUpdateCungGridUI();
+  tlsUpdateHoaFilterUI();
+}
+
 function toggleLich(){
   const b=document.getElementById('lichBtn');
   const isAm = b.dataset.val==='am';
@@ -3853,6 +4392,9 @@ function redrawCanvas(preview){
 function redrawCanvasRaw(preview){
   const cv=document.getElementById('drawCanvas'); if(!cv) return;
   const ctx=cv.getContext('2d');
+  // Reset tường minh - clearRect() chỉ xóa pixel, không reset thuộc tính context (shadowBlur/globalAlpha...);
+  // phòng hờ rò rỉ trạng thái từ 1 thao tác vẽ dở dang trước đó (xem giải thích tương tự ở atcRedrawCanvas).
+  ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
   ctx.clearRect(0,0,cv.width,cv.height);
   drawTuHoaArrows(ctx);
   drawPhiHoaChain(ctx);
@@ -5670,6 +6212,7 @@ function buildDualSideHtml(side){
       <input type="number" id="dualYYYY_${side}" class="dual-input-year" placeholder="Năm" min="1900" max="2100">
       <select id="dualGioSinh_${side}" class="dual-input-gio">${gioOpts}</select>
       <select id="dualGioiTinh_${side}" class="dual-input-sm"><option value="nam">Nam</option><option value="nu">Nữ</option></select>
+      <button class="pill-btn dual-btn-sm" id="dualLichBtn_${side}" data-val="duong" onclick="dualToggleLich('${side}')">DL</button>
       <button class="btn-dark dual-btn-sm" onclick="dualLapLaSo('${side}')">Lập</button>
       <button class="btn-outline dual-btn-sm" onclick="dualExportToSingle('${side}')" title="Chuyển lá số bên này sang tab Nhập Thông Tin">Chuyển</button>
     </div>
@@ -5893,6 +6436,13 @@ function dualRecomputeChains(side){
   inst.chains[inst.hcMode]=chains;
 }
 
+function dualToggleLich(side){
+  const b=document.getElementById('dualLichBtn_'+side);
+  const isAm=b.dataset.val==='am';
+  b.dataset.val=isAm?'duong':'am';
+  b.textContent=isAm?'DL':'AL';
+  b.title=isAm?'Dương lịch':'Âm lịch';
+}
 async function dualLapLaSo(side){
   const dd=parseInt(document.getElementById('dualDD_'+side).value);
   const mm=parseInt(document.getElementById('dualMM_'+side).value);
@@ -5905,7 +6455,7 @@ async function dualLapLaSo(side){
       body:JSON.stringify({
         hoTen:document.getElementById('dualHoTen_'+side).value,
         gioiTinh:document.getElementById('dualGioiTinh_'+side).value,
-        lichLoai:'duong',
+        lichLoai: document.getElementById('dualLichBtn_'+side).dataset.val==='am' ? 'am' : 'duong',
         ngaySinh, gioSinh:document.getElementById('dualGioSinh_'+side).value,
         muiGio:parseFloat(document.getElementById('dualMuiGio_'+side).value),
         thanhPho:dualSelCity[side]?.n||'', quocGia:document.getElementById('dualQuocGia_'+side).value,
@@ -5948,10 +6498,11 @@ function dualExportToSingle(side){
   document.getElementById('ngayYYYY').value = document.getElementById('dualYYYY_'+side).value;
   document.getElementById('gioSinh').value = document.getElementById('dualGioSinh_'+side).value;
   document.getElementById('gioiTinh').value = document.getElementById('dualGioiTinh_'+side).value;
-  // dualLapLaSo luôn gửi lichLoai:'duong' (mini-form bên dual không có tùy chọn Âm lịch) nên chuyển qua
-  // cũng phải để đúng trạng thái Dương lịch, khớp với dữ liệu thật đã lập.
+  // Đồng bộ đúng trạng thái Dương/Âm lịch đã dùng để lập lá số bên này.
+  const isAmDual = document.getElementById('dualLichBtn_'+side).dataset.val==='am';
   const lichBtn=document.getElementById('lichBtn');
-  lichBtn.dataset.val='duong'; lichBtn.textContent='DƯƠNG LỊCH';
+  lichBtn.dataset.val = isAmDual?'am':'duong';
+  lichBtn.textContent = isAmDual?'ÂM LỊCH':'DƯƠNG LỊCH';
   document.getElementById('quocGia').value = document.getElementById('dualQuocGia_'+side).value;
   document.getElementById('citySearch').value = document.getElementById('dualCitySearch_'+side).value;
   document.getElementById('muiGio').value = document.getElementById('dualMuiGio_'+side).value;
@@ -6128,6 +6679,7 @@ function dualVisibleChains(side,mode){
 function dualRedrawCanvas(side,preview){
   const cv=document.getElementById('dualCanvas_'+side); if(!cv) return;
   const ctx=cv.getContext('2d');
+  ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
   ctx.clearRect(0,0,cv.width,cv.height);
   const inst=dualInst[side]; if(!inst.c) return;
   dualDrawTuHoaArrows(side,ctx,inst.c);
