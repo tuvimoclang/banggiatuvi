@@ -55,7 +55,7 @@ button{font-family:inherit;cursor:pointer}
 .form-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:8px 10px;padding:16px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06);margin:0 auto 14px;width:900px;max-width:100%}
 .f-group{display:flex;flex-direction:column;gap:2px}
 .f-group label{font-size:.6rem;color:var(--muted);font-weight:500;text-transform:uppercase}
-.f-group input,.f-group select{padding:5px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.78rem;outline:none;min-width:78px}
+.f-group input,.f-group select{padding:5px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.78rem;outline:none;min-width:78px;height:30px;box-sizing:border-box}
 .f-group input:focus,.f-group select:focus{border-color:var(--accent)}
 .f-name input{min-width:140px}
 .f-date{flex-direction:row;gap:4px;align-items:flex-end}
@@ -63,12 +63,16 @@ button{font-family:inherit;cursor:pointer}
 .f-date label{margin-right:8px}
 #panelForm{margin-top:8px}
 .pill-btn{padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text);font-size:.7rem;font-weight:500;letter-spacing:.3px}
-#lichBtn{flex:0 0 92px;width:92px;text-align:center;font-size:.6rem;white-space:nowrap;overflow:hidden}
+#lichBtn{flex:0 0 92px;width:92px;height:30px;box-sizing:border-box;text-align:center;font-size:.6rem;white-space:nowrap;overflow:hidden}
 #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#1e40af,#7cb0fb);border-color:#1e40af;color:#fff}
 #lichBtn[data-val="am"]{background:#9ca3af;border-color:#9ca3af;color:#fff}
 body.theme-dark #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a6d1d,#f0c040);border-color:#f0c040;color:#000}
 .pill-btn:hover{background:var(--hover)}
-.btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:center;margin-top:6px}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;margin-top:8px}
+.btn-row button{width:118px;height:30px;padding:2px 6px;text-align:center;font-size:.68rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1.15}
+.btn-row button.locked-text{font-size:.56rem;line-height:1.05}
+.loc-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:flex-start;align-items:flex-end;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border-lt)}
+.info-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;align-items:flex-end}
 .btn-outline{padding:5px 10px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.68rem;font-weight:500}
 .btn-outline.active{border-color:var(--accent);color:var(--accent);background:var(--hover)}
 .btn-outline.orange{border-color:#c8790a;color:#c8790a}
@@ -260,11 +264,20 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 .sao{font-size:.74rem;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;color:var(--text);cursor:pointer;position:relative}
 .sao.chinh{font-weight:500;font-size:.86rem}
 .sao.phu{color:var(--muted);font-weight:500}
-.sao.phi-target{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;font-weight:700;color:var(--text) !important}
-.sao.star-traced{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent);font-weight:700}
-.sao.ldkk{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:red;font-weight:700}
-.sao.arrow-hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent);font-weight:700}
-.sao.arrow-hover-ldkk{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:red;font-weight:700}
+/* Gạch dưới đặt trên .sao-name (span CHỈ bọc riêng tên sao) thay vì cả .sao - trước đây gạch trên .sao khiến
+   nét tràn qua badge niên hóa/tứ hóa mệnh (.th/.mth, nằm cùng cấp SAU .sao-name) dù đã thử text-decoration:
+   none + position:relative+z-index trên badge (không đủ, vì ancestor vẽ line cùng layer text, không phải
+   theo box con). Tách hẳn ra span riêng thì badge là SIBLING, không còn là mục tiêu bị "tràn" gạch nữa. */
+.sao.phi-target{font-weight:700;color:var(--text) !important}
+.sao.phi-target .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px}
+.sao.star-traced{font-weight:700}
+.sao.star-traced .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent)}
+.sao.ldkk{font-weight:700}
+.sao.ldkk .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:red}
+.sao.arrow-hover{font-weight:700}
+.sao.arrow-hover .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent)}
+.sao.arrow-hover-ldkk{font-weight:700}
+.sao.arrow-hover-ldkk .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:red}
 body.plain-bw .sao,body.plain-bw .cung-chuc{color:#111 !important}
 body.plain-bw .can-hl{background:#fff !important;color:#000 !important;border:1px solid #000}
 body.plain-bw .b-than,body.plain-bw .b-menh{background:#fff !important;color:#000 !important;border:1px solid #000}
@@ -285,8 +298,13 @@ body.theme-dark .phb-D{border:1px solid var(--gold)}
 
 /* text-decoration:none tường minh - badge niên hóa nằm LỒNG bên trong span .sao, nếu .sao đang được gạch
    dưới (phi-target/star-traced/ldkk/arrow-hover) thì không được để nét gạch "tràn" qua badge này - chỉ gạch
-   đúng phần chữ tên sao, không đụng tới badge. */
-.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none}
+   đúng phần chữ tên sao, không đụng tới badge. display:inline-flex vẫn không đủ ngăn hẳn 1 số trình duyệt vẽ
+   đường gạch của .sao tràn xuống dưới badge (do gạch chân của ancestor vẽ theo cùng layer text, không tính
+   theo box con) - phải thêm position:relative + z-index để badge chắc chắn vẽ ĐÈ LÊN trên đường gạch đó.*/
+.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
+/* Lá số đơn giữ nguyên kích cỡ gốc (đẹp rồi, không đổi) - CHỈ thu nhỏ riêng cho lá số mini bên tab "2 Lá Số"
+   cho gọn với lưới cung vốn đã nhỏ hơn ở đó. */
+.dual-side .th{width:16px;height:16px;font-size:.58rem}
 .th-A{background:var(--green);color:#fff}
 .th-B{background:var(--red);color:#fff}
 .th-C{background:var(--blue);color:#fff}
@@ -300,6 +318,7 @@ body.theme-dark .th-D.th-glow{box-shadow:0 0 7px 3px var(--gold)}
 /* Đổi màu (trắng đen): niên ABCD to hơn hẳn, TẤT CẢ 4 chữ đều cùng 1 màu đỏ (viền đỏ + chữ đỏ, nền trắng),
    không phân biệt theo từng chữ nữa. */
 body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:26px;height:26px;font-size:.86rem}
+body.plain-bw .dual-side .th{width:20px;height:20px;font-size:.68rem}
 .mth{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:.6rem;font-weight:700;line-height:1;flex-shrink:0;border:1.5px solid var(--text);background:var(--panel);color:var(--text)}
 body.show-menh-hoa .mth{display:inline-flex}
 body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color:#000 !important}
@@ -376,7 +395,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-wrap{display:flex;flex-direction:column;gap:8px;padding:6px 10px}
 .dual-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
 .dual-col{flex:1 1 0;min-width:340px;display:flex;flex-direction:column;gap:8px}
-.dual-shared-tools{display:flex;gap:6px}
+.dual-shared-tools{display:flex;gap:6px;flex-wrap:wrap}
 .dual-phihoa-box{position:relative;border:1px solid var(--border-lt);border-radius:8px;padding:10px 26px 10px 10px;background:var(--panel);flex-wrap:wrap;max-height:260px;overflow-y:auto}
 .dual-phihoa-box #dualPhiHoaResult{flex-basis:100%;width:100%}
 .dual-phihoa-box .ph-title{font-size:.74rem;margin-bottom:5px}
@@ -395,6 +414,11 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-input-year{width:58px}
 .dual-input-gio{width:66px}
 .dual-btn-sm{padding:4px 10px;font-size:.64rem;border-radius:4px}
+.dual-input-country{width:88px}
+.dual-input-city{width:104px}
+.dual-input-tz{width:92px}
+.dual-tz-badge{font-size:.62rem;white-space:nowrap}
+.dual-loc-form{padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--border-lt)}
 .dual-toolbar{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
 .dual-toolbar .hc-toggle{margin-bottom:0}
 .dual-toolbar .hc-btn{padding:3px 8px;font-size:.6rem}
@@ -438,7 +462,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 
 /* ═══ Điện thoại (≤640px dọc, hoặc thấp+ngang): tạm ẩn "2 LÁ SỐ", xếp bàn cờ + tool phải + Thể/Dụng theo cột dọc ═══ */
 @media(max-width:640px), (max-height:500px) and (orientation:landscape){
-  .tab[data-tab="dual"]{display:none}
+  .tab[data-tab="dual"],.tab[data-tab="plus"]{display:none}
 
   .workspace{flex-direction:column;align-items:stretch}
   .chart-area{order:1;width:100%;padding:0 6px 8px 6px;flex-direction:column}
@@ -688,8 +712,8 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
     <div class="tabs">
       <button class="tab" data-tab="gio" onclick="switchTopTab('gio')">AN THỦ CÔNG</button>
       <button class="tab active" data-tab="form" onclick="switchTopTab('form')">NHẬP THÔNG TIN</button>
-      <button class="tab" data-tab="toado" onclick="switchTopTab('toado')">TỌA ĐỘ ĐỊA ĐIỂM SINH</button>
       <button class="tab" data-tab="dual" onclick="switchTopTab('dual')">2 LÁ SỐ</button>
+      <button class="tab" data-tab="plus" onclick="switchTopTab('plus')">PLUS</button>
     </div>
     <div class="topbar-auth" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0">
       <span id="userInfo" style="display:none"></span>
@@ -756,61 +780,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
   </div>
 
   <div class="form-row" id="panelForm">
-    <div class="f-group f-name">
-      <input type="text" id="hoTen" placeholder="Nguyễn Văn A">
-    </div>
-    <button class="pill-btn" id="lichBtn" data-val="duong" onclick="toggleLich()">DƯƠNG LỊCH</button>
-    <div class="f-group f-date">
-      <div><label>Ngày</label><select id="ngayDD"></select></div>
-      <div><label>Tháng</label><select id="ngayMM"></select></div>
-      <div><label>Năm</label><input type="number" id="ngayYYYY" min="1900" max="2100" style="width:80px"></div>
-    </div>
-    <div class="f-group">
-      <select id="gioSinh">
-        <option value="23:30">Tý trước 0h (23h-24h)</option>
-        <option value="00:30">Tý sau 0h (0h-1h)</option>
-        <option value="02:30">Sửu (1h-3h)</option>
-        <option value="04:30">Dần (3h-5h)</option>
-        <option value="06:30">Mão (5h-7h)</option>
-        <option value="08:30">Thìn (7h-9h)</option>
-        <option value="10:30">Tỵ (9h-11h)</option>
-        <option value="12:30">Ngọ (11h-13h)</option>
-        <option value="14:30">Mùi (13h-15h)</option>
-        <option value="16:30">Thân (15h-17h)</option>
-        <option value="18:30" selected>Dậu (17h-19h)</option>
-        <option value="20:30">Tuất (19h-21h)</option>
-        <option value="22:30">Hợi (21h-23h)</option>
-      </select>
-    </div>
-    <div class="f-group">
-      <select id="gioiTinh"><option value="nam">Nam</option><option value="nu">Nữ</option></select>
-    </div>
-    <div class="btn-row">
-      <button class="btn-outline" id="btnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
-      <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
-      <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
-      <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
-      <button class="btn-blue not-done" id="btnLuuLaSo" onclick="luuLaSo()">Lưu lá số</button>
-      <button class="btn-purple" id="btnLuuKho" onclick="luuKhoLaSo()">Lưu Kho</button>
-      <button class="btn-brown" id="btnMoKho" onclick="openKhoLaSo()">Kho LS</button>
-    </div>
-    <div id="codeBar">
-      <span class="code-msg">🔑 Nhập mã để mở đầy đủ tính năng</span>
-      <div class="code-input-wrap">
-        <input type="text" id="inlineCodeInput" placeholder="VD: TUVI-3M-XXXXXX" onkeydown="if(event.key==='Enter')submitInlineCode()" oninput="this.value=this.value.toUpperCase()">
-        <button class="code-btn" id="inlineCodeBtn" onclick="submitInlineCode()">Kích hoạt</button>
-      </div>
-      <div style="width:100%;text-align:center">
-        <div id="codeBarMsg"></div>
-        <div style="font-size:.78rem;color:#a07830;margin-top:6px">
-          Cần <span style="color:#c9a84c;cursor:pointer;font-weight:700;text-decoration:underline" onclick="showAuthModal()">đăng nhập Google</span> để kích hoạt &nbsp;·&nbsp; Chưa có mã? Nhắn Zalo <a href="https://zalo.me/0909794441" target="_blank" style="color:#c9a84c;font-weight:700">0909794441</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="panel-flat" id="panelToado" hidden>
-    <div class="form-row" style="border:none;padding:8px 14px 4px;align-items:flex-start">
+    <div class="loc-row">
       <div class="f-group">
         <label>Quốc gia</label>
         <select id="quocGia" onchange="onCC()">
@@ -847,7 +817,59 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
         </select>
       </div>
     </div>
-    <div class="tz-line"><span class="tz-badge" id="tzBadge">UTC+7 · TP. Hồ Chí Minh</span></div>
+    <div class="info-row">
+      <div class="f-group f-name">
+        <input type="text" id="hoTen" placeholder="Nguyễn Văn A">
+      </div>
+      <button class="pill-btn" id="lichBtn" data-val="duong" onclick="toggleLich()">DƯƠNG LỊCH</button>
+      <div class="f-group f-date">
+        <div><label>Ngày</label><select id="ngayDD"></select></div>
+        <div><label>Tháng</label><select id="ngayMM"></select></div>
+        <div><label>Năm</label><input type="number" id="ngayYYYY" min="1900" max="2100" style="width:80px"></div>
+      </div>
+      <div class="f-group">
+        <select id="gioSinh">
+          <option value="23:30">Tý trước 0h (23h-24h)</option>
+          <option value="00:30">Tý sau 0h (0h-1h)</option>
+          <option value="02:30">Sửu (1h-3h)</option>
+          <option value="04:30">Dần (3h-5h)</option>
+          <option value="06:30">Mão (5h-7h)</option>
+          <option value="08:30">Thìn (7h-9h)</option>
+          <option value="10:30">Tỵ (9h-11h)</option>
+          <option value="12:30">Ngọ (11h-13h)</option>
+          <option value="14:30">Mùi (13h-15h)</option>
+          <option value="16:30">Thân (15h-17h)</option>
+          <option value="18:30" selected>Dậu (17h-19h)</option>
+          <option value="20:30">Tuất (19h-21h)</option>
+          <option value="22:30">Hợi (21h-23h)</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <select id="gioiTinh"><option value="nam">Nam</option><option value="nu">Nữ</option></select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-outline" id="btnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
+      <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
+      <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
+      <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
+      <button class="btn-blue not-done" id="btnLuuLaSo" onclick="luuLaSo()">Lưu lá số</button>
+      <button class="btn-purple" id="btnLuuKho" onclick="luuKhoLaSo()">Lưu Kho</button>
+      <button class="btn-brown" id="btnMoKho" onclick="openKhoLaSo()">Kho LS</button>
+    </div>
+    <div id="codeBar">
+      <span class="code-msg">🔑 Nhập mã để mở đầy đủ tính năng</span>
+      <div class="code-input-wrap">
+        <input type="text" id="inlineCodeInput" placeholder="VD: TUVI-3M-XXXXXX" onkeydown="if(event.key==='Enter')submitInlineCode()" oninput="this.value=this.value.toUpperCase()">
+        <button class="code-btn" id="inlineCodeBtn" onclick="submitInlineCode()">Kích hoạt</button>
+      </div>
+      <div style="width:100%;text-align:center">
+        <div id="codeBarMsg"></div>
+        <div style="font-size:.78rem;color:#a07830;margin-top:6px">
+          Cần <span style="color:#c9a84c;cursor:pointer;font-weight:700;text-decoration:underline" onclick="showAuthModal()">đăng nhập Google</span> để kích hoạt &nbsp;·&nbsp; Chưa có mã? Nhắn Zalo <a href="https://zalo.me/0909794441" target="_blank" style="color:#c9a84c;font-weight:700">0909794441</a>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="loader"><div class="spinner"></div>Đang tính toán...</div>
@@ -999,7 +1021,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
 
   <div id="panel2LaSo" class="dual-wrap" hidden>
     <div class="dual-shared-tools">
-      <button class="tool-btn" onclick="toggleDualPhiHoaLookup()">Tượng Phi Hóa</button>
+      <button class="tool-btn" onclick="toggleDualPhiHoaLookup('')">Tượng Phi Hóa</button>
       <button class="tool-btn" onclick="toggleDualKetCau('A')">Kết Cấu A</button>
       <button class="tool-btn" onclick="toggleDualKetCau('B')">Kết Cấu B</button>
     </div>
@@ -1014,22 +1036,61 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       </div>
     </div>
     <div class="ph-tool dual-phihoa-box" id="dualPhiHoaBox" hidden>
-      <button class="hoa-close-x" title="Đóng tượng phi hóa" onclick="toggleDualPhiHoaLookup()">×</button>
+      <button class="hoa-close-x" title="Đóng tượng phi hóa" onclick="toggleDualPhiHoaLookup('')">×</button>
       <div class="ph-row">
         <label>Phi:</label>
-        <select id="dualPhiCungSelect" onchange="renderDualPhiHoaLookup()"></select>
+        <select id="dualPhiCungSelect" onchange="renderDualPhiHoaLookup('')"></select>
       </div>
       <div class="ph-hoa-toggle">
-        <button class="ph-hoa-btn" data-hoa="A" onclick="setDualPhiHoaLetter('A')">A</button>
-        <button class="ph-hoa-btn" data-hoa="B" onclick="setDualPhiHoaLetter('B')">B</button>
-        <button class="ph-hoa-btn" data-hoa="C" onclick="setDualPhiHoaLetter('C')">C</button>
-        <button class="ph-hoa-btn" data-hoa="D" onclick="setDualPhiHoaLetter('D')">D</button>
+        <button class="ph-hoa-btn" data-hoa="A" onclick="setDualPhiHoaLetter('A','')">A</button>
+        <button class="ph-hoa-btn" data-hoa="B" onclick="setDualPhiHoaLetter('B','')">B</button>
+        <button class="ph-hoa-btn" data-hoa="C" onclick="setDualPhiHoaLetter('C','')">C</button>
+        <button class="ph-hoa-btn" data-hoa="D" onclick="setDualPhiHoaLetter('D','')">D</button>
       </div>
       <div class="ph-row">
         <label>Nhập:</label>
-        <select id="dualNhapCungSelect" onchange="renderDualPhiHoaLookup()"></select>
+        <select id="dualNhapCungSelect" onchange="renderDualPhiHoaLookup('')"></select>
       </div>
       <div id="dualPhiHoaResult"><p class="placeholder">Chọn loại hóa và cung nhập hóa để tra cứu.</p></div>
+    </div>
+  </div>
+
+  <!-- Tab "PLUS": bản sao y hệt tab "2 LÁ SỐ" cả về giao diện lẫn công cụ, nhưng dùng 2 lá số riêng (C/D)
+       hoàn toàn độc lập - không đồng bộ/hiển thị chung dữ liệu với A/B bên tab "2 LÁ SỐ". Dùng để mở thêm 1
+       cặp khách hàng khác cùng lúc mà không mất lá số đang xem ở tab kia. -->
+  <div id="panelPlus" class="dual-wrap" hidden>
+    <div class="dual-shared-tools">
+      <button class="tool-btn" onclick="toggleDualPhiHoaLookup('2')">Tượng Phi Hóa</button>
+      <button class="tool-btn" onclick="toggleDualKetCau('C')">Kết Cấu C</button>
+      <button class="tool-btn" onclick="toggleDualKetCau('D')">Kết Cấu D</button>
+    </div>
+    <div class="dual-row">
+      <div class="dual-col">
+        <div class="dual-ketcau-box" id="dualKetCauBox_C" hidden></div>
+        <div class="dual-side" id="dualSideBox_C"></div>
+      </div>
+      <div class="dual-col">
+        <div class="dual-ketcau-box" id="dualKetCauBox_D" hidden></div>
+        <div class="dual-side" id="dualSideBox_D"></div>
+      </div>
+    </div>
+    <div class="ph-tool dual-phihoa-box" id="dualPhiHoaBox2" hidden>
+      <button class="hoa-close-x" title="Đóng tượng phi hóa" onclick="toggleDualPhiHoaLookup('2')">×</button>
+      <div class="ph-row">
+        <label>Phi:</label>
+        <select id="dualPhiCungSelect2" onchange="renderDualPhiHoaLookup('2')"></select>
+      </div>
+      <div class="ph-hoa-toggle">
+        <button class="ph-hoa-btn" data-hoa="A" onclick="setDualPhiHoaLetter('A','2')">A</button>
+        <button class="ph-hoa-btn" data-hoa="B" onclick="setDualPhiHoaLetter('B','2')">B</button>
+        <button class="ph-hoa-btn" data-hoa="C" onclick="setDualPhiHoaLetter('C','2')">C</button>
+        <button class="ph-hoa-btn" data-hoa="D" onclick="setDualPhiHoaLetter('D','2')">D</button>
+      </div>
+      <div class="ph-row">
+        <label>Nhập:</label>
+        <select id="dualNhapCungSelect2" onchange="renderDualPhiHoaLookup('2')"></select>
+      </div>
+      <div id="dualPhiHoaResult2"><p class="placeholder">Chọn loại hóa và cung nhập hóa để tra cứu.</p></div>
     </div>
   </div>
 
@@ -1540,10 +1601,15 @@ function updateUI() {
   if (btnLap) {
     if (isActivated) {
       btnLap.textContent = 'LẬP LÁ SỐ';
+      btnLap.classList.remove('locked-text');
       btnLap.style.opacity = '1';
       btnLap.style.cursor  = 'pointer';
     } else {
-      btnLap.textContent = '🔒 Nhập mã kích hoạt để lập lá số';
+      // Rút gọn text (bản đầy đủ vẫn còn ở codeBar bên dưới) - câu dài "Nhập mã kích hoạt để lập lá số" không
+      // còn đủ chỗ từ khi đồng bộ chiều cao nút này bằng các ô thông tin phía trên (30px).
+      btnLap.textContent = '🔒 Cần kích hoạt';
+      btnLap.title = 'Nhập mã kích hoạt để lập lá số';
+      btnLap.classList.add('locked-text');
       btnLap.style.opacity = '0.6';
       btnLap.style.cursor  = 'not-allowed';
     }
@@ -1716,13 +1782,22 @@ function switchTopTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   document.getElementById('panelGio').hidden = name!=='gio';
   document.getElementById('panelForm').hidden = name!=='form';
-  document.getElementById('panelToado').hidden = name!=='toado';
+  // Tab "PLUS" là 1 khung RIÊNG (#panelPlus), y chang giao diện/công cụ tab "2 Lá Số" (#panel2LaSo) nhưng
+  // dùng 2 lá số C/D hoàn toàn độc lập với A/B - không đồng bộ, không hiện chung, mở 1 cặp khách khác mà
+  // không đụng tới cặp đang xem ở tab kia.
   document.getElementById('panel2LaSo').hidden = name!=='dual';
-  // Tab "2 Lá Số" là 1 khung xem riêng, song song - ẩn tạm khung lá số đơn (nếu đang có) để đỡ rối, các tab
-  // khác vẫn giữ nguyên hành vi cũ (workspace do lapLaSo/ingestResult tự bật khi có lá số).
-  if(name==='dual'){
+  document.getElementById('panelPlus').hidden = name!=='plus';
+  // Tab "2 Lá Số"/"PLUS" là khung xem riêng, song song - ẩn tạm khung lá số đơn (nếu đang có) để đỡ rối, các
+  // tab khác vẫn giữ nguyên hành vi cũ (workspace do lapLaSo/ingestResult tự bật khi có lá số).
+  if(name==='dual'||name==='plus'){
     document.getElementById('workspace').style.display='none';
     initDualPanelsOnce();
+    // Canvas mỗi bên có thể đã bị resize/redraw trong lúc tab này đang hidden (vd bấm "Đổi màu" ở tab kia -
+    // togglePlainBw bỏ qua vì panel đang hidden lúc đó), nên vẫn có thể kẹt kích thước/màu CŨ - đo + vẽ lại
+    // ngay khi tab hiện lại, giống hệt cách sizeCanvas() được gọi lại ở nhánh workspace bên dưới. Chỉ cần đo
+    // đúng cặp side thuộc tab đang mở (A/B cho "dual", C/D cho "plus") - cặp còn lại đang ẩn ở tab kia.
+    const sides = name==='plus' ? ['C','D'] : ['A','B'];
+    sides.forEach(side=>{ if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); } });
   }else if(name==='gio'){
     document.getElementById('workspace').style.display='none';
     initAtcPanelOnce();
@@ -1895,9 +1970,14 @@ function atcCellEdgeAnchor(idx,which){
   const pos=CELL_POS[idx]; if(!pos) return null;
   const [r,c]=pos;
   const cell=document.querySelector(`#atcBanWrap .cung[data-idx="${idx}"]`);
-  const wrap=document.getElementById('atcBanWrap');
-  if(!cell||!wrap) return null;
-  const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+  // Lấy mốc gốc tọa độ từ chính CANVAS (không phải atcBanWrap) - atcBanWrap có border riêng nên
+  // getBoundingClientRect() của nó lớn hơn/lệch so với canvas thật đúng bằng bề dày border (canvas nằm ở
+  // padding-box của atcBanWrap qua inset:0). Trước đây lấy mốc theo atcBanWrap khiến mọi tọa độ vẽ bị lệch
+  // đúng 1px so với lưới cung thật - nhìn không rõ khi còn mờ (do lỗi buffer canvas), giờ hết mờ mới lộ ra
+  // thành khe hở nhỏ ở điểm chạm mũi tên/viền.
+  const cvEl=document.getElementById('atcCanvas');
+  if(!cell||!cvEl) return null;
+  const wr=cvEl.getBoundingClientRect(), cr=cell.getBoundingClientRect();
   const left=cr.left-wr.left, top=cr.top-wr.top, right=left+cr.width, bottom=top+cr.height;
   const midX=left+cr.width/2, midY=top+cr.height/2;
   if(isCornerCung(idx)){
@@ -2012,9 +2092,11 @@ function atcRedrawCanvas(preview){
   [...atcShapes, ...(preview?[preview]:[])].forEach(sh=>drawShape(ctx,sh));
 }
 function atcSizeCanvas(){
-  const wrap=document.getElementById('atcBanWrap'), cv=document.getElementById('atcCanvas');
-  if(!wrap||!cv) return;
-  const r=wrap.getBoundingClientRect();
+  const cv=document.getElementById('atcCanvas');
+  if(!cv) return;
+  // Đo chính canvas, không đo atcBanWrap (có border riêng, lớn hơn kích thước canvas thật - xem giải thích ở
+  // sizeCanvas()).
+  const r=cv.getBoundingClientRect();
   // Khớp buffer canvas với mật độ điểm ảnh thật (devicePixelRatio) - nếu không, màn hình HiDPI/Retina sẽ
   // vẽ mờ (buffer ít điểm ảnh hơn số điểm ảnh thật cần hiển thị, trình duyệt phải phóng to/nội suy).
   const dpr=window.devicePixelRatio||1;
@@ -2159,8 +2241,9 @@ function pickCity(name){
 }
 function hideDD(){setTimeout(()=>document.getElementById('cityDD').classList.remove('show'),200)}
 function updateTz(){
-  const tz=parseFloat(document.getElementById('muiGio').value);
-  document.getElementById('tzBadge').textContent=`UTC${tz>=0?'+':''}${tz} · ${selCity?.n||''}`;
+  // Badge tóm tắt "UTC+7 · TP. Hồ Chí Minh" đã bỏ (dư thừa - Múi giờ/Thành phố đã hiện sẵn ngay trong 2 ô
+  // chọn rồi) - hàm này giữ lại rỗng vì vẫn còn được gọi từ onCC()/pickCity()/onchange, không dọn hết cũng
+  // không sao vì không còn việc gì để làm nữa.
 }
 
 window.onload=()=>{
@@ -2451,6 +2534,7 @@ function renderGridRaw(c){
               <div class="center-line">Âm: ${ti.ngayAm}</div>
               <div class="center-line" id="centerAgeInfo">Tuổi: ${currentAge(c)}</div>
               <div class="center-line">Giờ sinh: ${ti.gioSinh||''}</div>
+              ${ti.thanhPho?`<div class="center-line">Nơi sinh: ${ti.thanhPho} (${ti.muiGio||''})</div>`:''}
               <div class="center-line center-year-row">Năm xem:
                 <input type="number" id="centerYearInput" class="center-year-input"
                   value="${c.birthYear+currentAge(c)-1}"
@@ -2486,7 +2570,7 @@ function renderGridRaw(c){
         // đó (xem manualArrowUnderlineTargets), không phải trạng thái hover tạm thời.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
-          data-star="${s.ten}" onclick="event.stopPropagation();onStarClick(${idx},'${nameEsc}')">${s.ten}${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${picker}</span>`;
+          data-star="${s.ten}" onclick="event.stopPropagation();onStarClick(${idx},'${nameEsc}')"><span class="sao-name">${s.ten}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${picker}</span>`;
       };
       const chinhHtml=chinhs.map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
       // Cung "vô chính diệu" (không có chính tinh nào) mà vẫn thuộc lưỡng đầu kiến Kị - gạch đỏ tạm ở phụ
@@ -3315,15 +3399,18 @@ function buildPhiHoaSelects(){
   const phi=document.getElementById('phiCungSelect'), nhap=document.getElementById('nhapCungSelect');
   if(phi) phi.innerHTML=opts;
   if(nhap) nhap.innerHTML=opts;
-  const dPhi=document.getElementById('dualPhiCungSelect'), dNhap=document.getElementById('dualNhapCungSelect');
-  if(dPhi) dPhi.innerHTML=opts;
-  if(dNhap) dNhap.innerHTML=opts;
+  ['','2'].forEach(panelId=>{
+    const dPhi=document.getElementById('dualPhiCungSelect'+panelId), dNhap=document.getElementById('dualNhapCungSelect'+panelId);
+    if(dPhi) dPhi.innerHTML=opts;
+    if(dNhap) dNhap.innerHTML=opts;
+  });
 }
-// Tượng phi hóa dùng chung cho cả 2 bên "2 Lá Số" - đây là bảng tra cứu tĩnh (PHI_HOA_FULL), không phụ
-// thuộc lá số cụ thể nào, nên chỉ cần 1 bảng chung thay vì lặp lại mỗi bên.
-let dualPhiHoaLetter=null;
-function toggleDualPhiHoaLookup(){
-  const box=document.getElementById('dualPhiHoaBox'); if(!box) return;
+// Tượng phi hóa dùng chung cho cả 2 bên trong CÙNG 1 tab ("2 Lá Số" hoặc "PLUS") - đây là bảng tra cứu tĩnh
+// (PHI_HOA_FULL), không phụ thuộc lá số cụ thể nào, nên chỉ cần 1 bảng chung thay vì lặp lại mỗi bên. Nhưng
+// 2 tab "2 Lá Số"/"PLUS" độc lập với nhau nên vẫn cần 2 bộ riêng (panelId ''=tab "2 Lá Số", '2'=tab "PLUS").
+let dualPhiHoaLetter={'':null, '2':null};
+function toggleDualPhiHoaLookup(panelId){
+  const box=document.getElementById('dualPhiHoaBox'+(panelId||'')); if(!box) return;
   box.hidden=!box.hidden;
 }
 // Kết cấu Lộc/Kị riêng từng bên - thuật toán computeKetCauStructures/buildKetCauSvg gốc rất phức tạp (union-
@@ -3348,10 +3435,10 @@ function withDualContext(side,fn){
 // riêng của khung kết cấu (dualHoaViewMode) - tách biệt với inst.hcMode (chỉ quyết định nhánh nào đang vẽ
 // mũi tên/tô sáng trên MINI LÁ SỐ, không đổi theo tab kết cấu). Mỗi nhánh vẫn giữ tab kết cấu riêng + trạng
 // thái cô lập riêng (bấm đúp), đồng nhất với tab lá số đơn.
-let dualHoaStructureTabIdx={A:{hung:0,cat:0}, B:{hung:0,cat:0}};
-let dualIsolatedKetCauIdx={A:{hung:null,cat:null}, B:{hung:null,cat:null}};
-let dualLastHoaTabClick={A:{mode:null,idx:null,time:0}, B:{mode:null,idx:null,time:0}};
-let dualHoaViewMode={A:'hung', B:'hung'};
+let dualHoaStructureTabIdx={A:{hung:0,cat:0}, B:{hung:0,cat:0}, C:{hung:0,cat:0}, D:{hung:0,cat:0}};
+let dualIsolatedKetCauIdx={A:{hung:null,cat:null}, B:{hung:null,cat:null}, C:{hung:null,cat:null}, D:{hung:null,cat:null}};
+let dualLastHoaTabClick={A:{mode:null,idx:null,time:0}, B:{mode:null,idx:null,time:0}, C:{mode:null,idx:null,time:0}, D:{mode:null,idx:null,time:0}};
+let dualHoaViewMode={A:'hung', B:'hung', C:'hung', D:'hung'};
 function toggleDualKetCau(side){
   const box=document.getElementById('dualKetCauBox_'+side); if(!box) return;
   box.hidden=!box.hidden;
@@ -3416,16 +3503,19 @@ function dualRenderKetCau(side){
   `</div>`;
   box.innerHTML=`<b>Bên ${side}</b>`+modeTabs+dualRenderKetCauSection(side,vm);
 }
-function setDualPhiHoaLetter(hoa){
-  dualPhiHoaLetter = dualPhiHoaLetter===hoa? null : hoa;
-  document.querySelectorAll('#dualPhiHoaBox .ph-hoa-btn').forEach(b=>b.classList.toggle('active', b.dataset.hoa===dualPhiHoaLetter));
-  renderDualPhiHoaLookup();
+function setDualPhiHoaLetter(hoa,panelId){
+  panelId=panelId||'';
+  dualPhiHoaLetter[panelId] = dualPhiHoaLetter[panelId]===hoa? null : hoa;
+  document.querySelectorAll('#dualPhiHoaBox'+panelId+' .ph-hoa-btn').forEach(b=>b.classList.toggle('active', b.dataset.hoa===dualPhiHoaLetter[panelId]));
+  renderDualPhiHoaLookup(panelId);
 }
-function renderDualPhiHoaLookup(){
-  const box=document.getElementById('dualPhiHoaResult');
-  const phi=document.getElementById('dualPhiCungSelect').value;
-  const nhap=document.getElementById('dualNhapCungSelect').value;
-  if(!dualPhiHoaLetter || !nhap){
+function renderDualPhiHoaLookup(panelId){
+  panelId=panelId||'';
+  const letter=dualPhiHoaLetter[panelId];
+  const box=document.getElementById('dualPhiHoaResult'+panelId);
+  const phi=document.getElementById('dualPhiCungSelect'+panelId).value;
+  const nhap=document.getElementById('dualNhapCungSelect'+panelId).value;
+  if(!letter || !nhap){
     box.innerHTML='<p class="placeholder">Chọn loại hóa và cung nhập hóa để tra cứu.</p>';
     return;
   }
@@ -3434,7 +3524,7 @@ function renderDualPhiHoaLookup(){
     return;
   }
   const sourceCung = phi || 'Mệnh';
-  const hoaName=HOA_LETTER_NAME[dualPhiHoaLetter];
+  const hoaName=HOA_LETTER_NAME[letter];
   const src = PHI_HOA_FULL[sourceCung];
   if(!src){
     box.innerHTML=`<p class="placeholder">Chưa có dữ liệu cho cung ${sourceCung}.</p>`;
@@ -3442,11 +3532,11 @@ function renderDualPhiHoaLookup(){
   }
   let list, title;
   if(sourceCung===nhap){
-    list=(src.tu_hoa||{})[dualPhiHoaLetter];
-    title=`${sourceCung} tự Hóa ${hoaName} (${dualPhiHoaLetter})`;
+    list=(src.tu_hoa||{})[letter];
+    title=`${sourceCung} tự Hóa ${hoaName} (${letter})`;
   }else{
-    list=(src[nhap]||{})[dualPhiHoaLetter];
-    title=`${sourceCung} Hóa ${hoaName} (${dualPhiHoaLetter}) nhập ${nhap}`;
+    list=(src[nhap]||{})[letter];
+    title=`${sourceCung} Hóa ${hoaName} (${letter}) nhập ${nhap}`;
   }
   if(!phi) title += ' — niên hóa, mặc định từ Mệnh';
   if(!list || !list.length){
@@ -3501,8 +3591,21 @@ function togglePlainBw(){
   document.body.classList.toggle('plain-bw');
   document.getElementById('btnBangTrang').classList.toggle('active');
   // Màu mũi tên/kí tự tự hóa+phi hóa nằm trong canvas (vẽ bằng JS, không phải CSS) - đổi class body không
-  // tự cập nhật pixel đã vẽ, phải chủ động vẽ lại thì mới thấy đen trắng ngay.
-  redrawCanvas();
+  // tự cập nhật pixel đã vẽ, phải chủ động vẽ lại thì mới thấy đen trắng ngay. Badge niên hóa (.th) cũng đổi
+  // kích thước theo plain-bw (20px→26px), khiến chiều cao ô cung/lưới đổi theo - phải sizeCanvas() (đo lại
+  // wrap + resize buffer) chứ không chỉ redrawCanvas(), nếu không mũi tên tính theo canvas cũ sẽ lệch khỏi
+  // viền lưới mới. Áp dụng luôn cho cả 2 bên tab "2 Lá Số" (class đổi màu dùng chung cho body, canvas dual
+  // không tự vẽ lại khi class đổi vì đang không active/visible lúc bấm).
+  sizeCanvas();
+  // Tab "2 Lá Số"/"PLUS" đang hidden lúc bấm nút này (nút chỉ có ở tab lá số đơn) - offsetWidth/Height sẽ đọc
+  // ra 0 nếu cứ resize ngay bây giờ, làm hỏng luôn canvas đang có. Để switchTopTab('dual'/'plus') tự đo+vẽ
+  // lại đúng lúc tab đó hiện ra thay vì làm ở đây.
+  if(!document.getElementById('panel2LaSo').hidden) ['A','B'].forEach(side=>{
+    if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); }
+  });
+  if(!document.getElementById('panelPlus').hidden) ['C','D'].forEach(side=>{
+    if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); }
+  });
 }
 function toggleInfoVisible(){
   centerInfoHidden=!centerInfoHidden;
@@ -3603,10 +3706,13 @@ function selectTopic(key){
 
 // -- vẽ --
 function sizeCanvas(){
-  const wrap=document.getElementById('banWrap'), cv=document.getElementById('drawCanvas');
-  const r=wrap.getBoundingClientRect();
-  // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
-  // tương tự ở atcSizeCanvas).
+  const cv=document.getElementById('drawCanvas');
+  // Đo chính CANVAS (không đo banWrap) - banWrap có border 1px nên getBoundingClientRect() của nó LỚN HƠN
+  // kích thước canvas thật sự hiển thị (canvas là inset:0 bên trong, tức nằm trong padding-box, nhỏ hơn
+  // border-box của banWrap đúng 2×1px mỗi chiều). Trước đây đo theo banWrap khiến buffer canvas bị dư ra vài
+  // px so với kích thước hiển thị thật, trình duyệt phải co giãn/nội suy lại toàn bộ hình -> MỌI a hình vẽ
+  // (chữ ABCD, mũi tên đủ màu...) đều bị mờ nhẹ như nhau, không riêng gì phần đang tô cam khi chọn.
+  const r=cv.getBoundingClientRect();
   const dpr=window.devicePixelRatio||1;
   cv.width=r.width*dpr; cv.height=r.height*dpr;
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
@@ -3785,9 +3891,9 @@ function cellEdgeAnchor(idx, which){
   const pos=CELL_POS[idx]; if(!pos) return null;
   const [r,c]=pos;
   const cell=document.querySelector(`#banWrap .cung[data-idx="${idx}"]`);
-  const wrap=document.getElementById('banWrap');
-  if(!cell||!wrap) return null;
-  const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+  const cvEl=document.getElementById('drawCanvas');
+  if(!cell||!cvEl) return null;
+  const wr=cvEl.getBoundingClientRect(), cr=cell.getBoundingClientRect();
   const left=cr.left-wr.left, top=cr.top-wr.top, right=left+cr.width, bottom=top+cr.height;
   const midX=left+cr.width/2, midY=top+cr.height/2;
   if(isCornerCung(idx)){
@@ -3844,10 +3950,11 @@ function prepareCrossGroups(){
   crossGroupsCache=Object.values(groups).map(g=>{ g.toA.sort(); g.toB.sort(); return g; });
 }
 function haloColor(){ return document.body.classList.contains('theme-dark')?'#000':'#fff'; }
-function drawLetterWithHalo(ctx,text,x,y,color,glow){
-  ctx.font='bold 14px Segoe UI';
+function drawLetterWithHalo(ctx,text,x,y,color,glow,fontPx){
+  fontPx=fontPx||14;
+  ctx.font='bold '+fontPx+'px Segoe UI';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.lineWidth=2; ctx.strokeStyle=haloColor();
+  ctx.lineWidth=fontPx>=13?2:1.6; ctx.strokeStyle=haloColor();
   ctx.strokeText(text,x,y);
   if(glow){ ctx.shadowColor=color; ctx.shadowBlur=10; }
   ctx.fillStyle=color;
@@ -3934,23 +4041,26 @@ function drawTuHoaArrows(ctx){
   });
 }
 // -- phi Lộc chuyển Kị / phi Kị chuyển Kị: vẽ mũi tên nối 2 cung bất kì (không chỉ đối cung) --
+// Lấy mốc gốc tọa độ từ chính CANVAS (không phải banWrap) - banWrap có border riêng nên
+// getBoundingClientRect() của nó lệch so với canvas thật đúng bằng bề dày border (canvas nằm ở padding-box
+// của banWrap qua inset:0). Lấy mốc theo banWrap khiến mọi tọa độ vẽ bị lệch 1px so với lưới cung thật.
 function cellRect(idx){
   const cell=document.querySelector(`#banWrap .cung[data-idx="${idx}"]`);
-  const wrap=document.getElementById('banWrap');
-  if(!cell||!wrap) return null;
-  const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+  const cvEl=document.getElementById('drawCanvas');
+  if(!cell||!cvEl) return null;
+  const wr=cvEl.getBoundingClientRect(), cr=cell.getBoundingClientRect();
   const left=cr.left-wr.left, top=cr.top-wr.top;
   return {left,top,right:left+cr.width,bottom:top+cr.height,cx:left+cr.width/2,cy:top+cr.height/2};
 }
 // Vị trí thực tế của tên sao đích (để mũi tên chạm đúng vào chữ), fallback về tâm cung nếu không tìm thấy.
 function starAnchor(idx,starName){
-  const wrap=document.getElementById('banWrap');
+  const cvEl=document.getElementById('drawCanvas');
   const cell=document.querySelector(`#banWrap .cung[data-idx="${idx}"]`);
-  if(!wrap||!cell) return null;
+  if(!cvEl||!cell) return null;
   let target=null;
   cell.querySelectorAll('.sao').forEach(sp=>{ if(!target && sp.textContent.trim().startsWith(starName)) target=sp; });
   if(!target){ const r=cellRect(idx); return r?{x:r.cx,y:r.cy}:null; }
-  const wr=wrap.getBoundingClientRect(), sr=target.getBoundingClientRect();
+  const wr=cvEl.getBoundingClientRect(), sr=target.getBoundingClientRect();
   // Dừng lại ở khoảng trống ngay phía dưới tên sao (không phi đè lên chữ, không chọn phía trên).
   return {x:sr.left-wr.left+sr.width/2, y:sr.top-wr.top+sr.height+5};
 }
@@ -3960,7 +4070,10 @@ function starAnchor(idx,starName){
 let arrowHoverStarEl=null;
 function findStarNear(x,y){
   const wrap=document.getElementById('banWrap'); if(!wrap) return null;
-  const wr=wrap.getBoundingClientRect();
+  // x,y truyền vào đã tính theo mốc canvas (cv.getBoundingClientRect()) - phải đo lại theo đúng mốc đó,
+  // không phải theo wrap (lệch 1px do border, xem giải thích ở cellRect).
+  const cvEl=document.getElementById('drawCanvas');
+  const wr=(cvEl||wrap).getBoundingClientRect();
   const margin=12;
   let best=null, bestDist=Infinity;
   wrap.querySelectorAll('.cung .sao').forEach(sp=>{
@@ -4078,17 +4191,19 @@ function hitTestDrawnShape(x,y){
 }
 function drawShapeHighlight(ctx,sh){
   ctx.save();
-  ctx.strokeStyle='rgba(255,152,0,.55)'; ctx.lineCap='round'; ctx.lineJoin='round';
+  // Trước đây dày 16px + alpha .55 - viền cam bán trong suốt lấn át hẳn màu nét vẽ/mũi tên thật bên trong,
+  // nhìn như bị "mờ, ám cam". Giảm mỏng + nhạt lại, chỉ đủ để nhận biết đang được chọn, không che mất màu gốc.
+  ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineCap='round'; ctx.lineJoin='round';
   if(sh.type==='arrow'){
-    ctx.lineWidth=16;
+    ctx.lineWidth=7;
     ctx.beginPath(); ctx.moveTo(sh.x1,sh.y1); ctx.lineTo(sh.x2,sh.y2); ctx.stroke();
   }else if(sh.type==='rect'){
-    ctx.lineWidth=10;
+    ctx.lineWidth=5;
     ctx.strokeRect(Math.min(sh.x1,sh.x2),Math.min(sh.y1,sh.y2),Math.abs(sh.x2-sh.x1),Math.abs(sh.y2-sh.y1));
   }else if(sh.type==='text'){
     const r=(sh.fontSize||14)/14;
     const w=(sh.text||'').length*8*r+6;
-    ctx.fillStyle='rgba(255,152,0,.35)';
+    ctx.fillStyle='rgba(255,152,0,.25)';
     ctx.fillRect(sh.x1-3,sh.y1-16*r,w,20*r);
   }
   ctx.restore();
@@ -4271,7 +4386,9 @@ function drawPhiHoaChain(ctx){
   spreadConvergingEndpoints(entries);
   entries.forEach(({s,pts,isSel})=>{
     if(isSel){
-      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.55)'; ctx.lineWidth=16; ctx.lineCap='round';
+      // Giảm mỏng + nhạt (từ 16px/.55 xuống 7px/.4) - trước đây viền cam đè lấn hẳn màu mũi tên phi hóa thật
+      // bên trong (vd đỏ phi Quyền), nhìn như mũi tên bị mờ/ám cam thay vì chỉ là dấu hiệu "đang chọn".
+      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(pts.p1.x,pts.p1.y); ctx.lineTo(pts.p2.x,pts.p2.y); ctx.stroke(); ctx.restore();
     }
     drawPhiHoaArrow(ctx,s.from,s.to,s.star,s.letter,s.color,pts.p1,pts.p2);
@@ -5517,6 +5634,35 @@ const GIO_SINH_OPTS=[['23:30','Tý trước 0h'],['00:30','Tý sau 0h'],['02:30'
 function buildDualSideHtml(side){
   const gioOpts=GIO_SINH_OPTS.map(([v,n])=>`<option value="${v}"${v==='18:30'?' selected':''}>${n}</option>`).join('');
   return `
+    <div class="dual-mini-form dual-loc-form">
+      <select id="dualQuocGia_${side}" class="dual-input-country" onchange="dualOnCC('${side}')">
+        <option value="VN">Việt Nam</option><option value="US">Hoa Kỳ</option>
+        <option value="CN">Trung Quốc</option><option value="JP">Nhật Bản</option>
+        <option value="KR">Hàn Quốc</option><option value="FR">Pháp</option>
+        <option value="DE">Đức</option><option value="AU">Úc</option>
+        <option value="GB">Anh</option><option value="CA">Canada</option>
+        <option value="TH">Thái Lan</option><option value="SG">Singapore</option>
+        <option value="OTHER">Khác</option>
+      </select>
+      <div class="sw">
+        <input type="text" id="dualCitySearch_${side}" class="dual-input-city" placeholder="Tìm thành phố..." oninput="dualSearchCity('${side}')" onblur="dualHideDD('${side}')" autocomplete="off">
+        <div class="dd" id="dualCityDD_${side}"></div>
+      </div>
+      <select id="dualMuiGio_${side}" class="dual-input-tz" onchange="dualUpdateTz('${side}')">
+        <option value="-12">UTC-12</option><option value="-11">UTC-11</option><option value="-10">UTC-10</option>
+        <option value="-9">UTC-9</option><option value="-8">UTC-8</option><option value="-7">UTC-7</option>
+        <option value="-6">UTC-6</option><option value="-5">UTC-5</option>
+        <option value="-4">UTC-4</option><option value="-3">UTC-3</option><option value="-2">UTC-2</option>
+        <option value="-1">UTC-1</option><option value="0">UTC+0</option>
+        <option value="1">UTC+1</option><option value="2">UTC+2</option><option value="3">UTC+3</option>
+        <option value="4">UTC+4</option><option value="5">UTC+5</option><option value="5.5">UTC+5:30</option>
+        <option value="6">UTC+6</option><option value="7" selected>UTC+7 (VN)</option>
+        <option value="8">UTC+8</option><option value="9">UTC+9</option>
+        <option value="9.5">UTC+9:30</option><option value="10">UTC+10</option>
+        <option value="11">UTC+11</option><option value="12">UTC+12</option>
+      </select>
+      <span class="tz-badge dual-tz-badge" id="dualTzBadge_${side}">UTC+7 · TP. Hồ Chí Minh</span>
+    </div>
     <div class="dual-mini-form">
       <input type="text" id="dualHoTen_${side}" class="dual-input-name" placeholder="Họ tên">
       <input type="number" id="dualDD_${side}" class="dual-input-sm" placeholder="Ngày">
@@ -5525,12 +5671,17 @@ function buildDualSideHtml(side){
       <select id="dualGioSinh_${side}" class="dual-input-gio">${gioOpts}</select>
       <select id="dualGioiTinh_${side}" class="dual-input-sm"><option value="nam">Nam</option><option value="nu">Nữ</option></select>
       <button class="btn-dark dual-btn-sm" onclick="dualLapLaSo('${side}')">Lập</button>
+      <button class="btn-outline dual-btn-sm" onclick="dualExportToSingle('${side}')" title="Chuyển lá số bên này sang tab Nhập Thông Tin">Chuyển</button>
     </div>
     <div class="dual-toolbar">
       <div class="hc-toggle">
         <button class="hc-btn active" id="dualHcHung_${side}" data-hc="hung" onclick="dualSetMode('${side}','hung')">HUNG</button>
         <button class="hc-btn" id="dualHcCat_${side}" data-hc="cat" onclick="dualSetMode('${side}','cat')">CÁT</button>
       </div>
+      <button class="tool-btn" id="dualBtnTuHoaCross_${side}" onclick="dualToggleTuHoaCrossVisible('${side}')">Ẩn/Hiện tự hóa</button>
+      <button class="tool-btn" id="dualBtnInfo_${side}" onclick="dualToggleInfoVisible('${side}')">Ẩn/Hiện Info</button>
+    </div>
+    <div class="dual-toolbar">
       <div class="stepper">
         <button class="step-arrow" onclick="dualStepDaiVan('${side}',-1)">&lsaquo;</button>
         <button class="step-label" id="dualNavDv_${side}" onclick="dualToggleDaiVan('${side}')">Đ.VẬN</button>
@@ -5546,8 +5697,6 @@ function buildDualSideHtml(side){
         <button class="step-label" id="dualNavLg_${side}" onclick="dualToggleLuuNguyet('${side}')">L.NGUYỆT</button>
         <button class="step-arrow" onclick="dualStepLuuNguyet('${side}',1)">&rsaquo;</button>
       </div>
-      <button class="tool-btn" id="dualBtnTuHoaCross_${side}" onclick="dualToggleTuHoaCrossVisible('${side}')">Ẩn/Hiện tự hóa</button>
-      <button class="tool-btn" id="dualBtnInfo_${side}" onclick="dualToggleInfoVisible('${side}')">Ẩn/Hiện Info</button>
       <button class="tool-btn" onclick="dualFlyNienHoa('${side}','A')">N.Lộc</button>
       <button class="tool-btn" onclick="dualFlyNienHoa('${side}','D')">N.Kỵ</button>
       <button class="icon-btn" id="dualToolRect_${side}" title="Vẽ hình chữ nhật" onclick="dualSetDrawTool('${side}','rect')">
@@ -5579,19 +5728,50 @@ function buildDualSideHtml(side){
       <div class="ban-tuvi empty" id="dualBanTuvi_${side}"><p class="placeholder" style="padding:20px">Chưa lập lá số</p></div>
     </div>`;
 }
+let dualSelCity={A:CITIES[1],B:CITIES[1],C:CITIES[1],D:CITIES[1]};
+function dualOnCC(side){
+  document.getElementById('dualCitySearch_'+side).value='';
+  dualSearchCity(side);
+  const co=document.getElementById('dualQuocGia_'+side).value;
+  const firstMatch=CITIES.find(c=>co==='OTHER'||c.c===co);
+  if(firstMatch) dualPickCity(side,firstMatch.n);
+}
+function dualSearchCity(side){
+  const q=document.getElementById('dualCitySearch_'+side).value.toLowerCase();
+  const co=document.getElementById('dualQuocGia_'+side).value;
+  const res=CITIES.filter(c=>(co==='OTHER'||c.c===co)&&(q===''||c.n.toLowerCase().includes(q)));
+  const dd=document.getElementById('dualCityDD_'+side);
+  if(!res.length){dd.classList.remove('show');return}
+  dd.innerHTML=res.map(c=>`<div class="dd-item" onmousedown="dualPickCity('${side}','${c.n}')">${c.n}<span class="dd-tz">UTC${c.tz>=0?'+':''}${c.tz}</span></div>`).join('');
+  dd.classList.add('show');
+}
+function dualPickCity(side,name){
+  dualSelCity[side]=CITIES.find(c=>c.n===name)||dualSelCity[side];
+  document.getElementById('dualCitySearch_'+side).value=dualSelCity[side].n;
+  document.getElementById('dualMuiGio_'+side).value=String(dualSelCity[side].tz);
+  dualUpdateTz(side);
+  document.getElementById('dualCityDD_'+side).classList.remove('show');
+}
+function dualHideDD(side){setTimeout(()=>{const dd=document.getElementById('dualCityDD_'+side); if(dd) dd.classList.remove('show');},200)}
+function dualUpdateTz(side){
+  const tz=parseFloat(document.getElementById('dualMuiGio_'+side).value);
+  const badge=document.getElementById('dualTzBadge_'+side);
+  if(badge) badge.textContent=`UTC${tz>=0?'+':''}${tz} · ${dualSelCity[side]?.n||''}`;
+}
 function initDualPanelsOnce(){
   if(initDualPanelsOnce.done) return;
   initDualPanelsOnce.done=true;
-  document.getElementById('dualSideBox_A').innerHTML=buildDualSideHtml('A');
-  document.getElementById('dualSideBox_B').innerHTML=buildDualSideHtml('B');
-  wireDualCanvasDrag('A');
-  wireDualCanvasDrag('B');
-  wireDualDrawEvents('A');
-  wireDualDrawEvents('B');
+  // Dựng sẵn cả 4 bên A/B (tab "2 Lá Số") lẫn C/D (tab "PLUS", độc lập, không đồng bộ với A/B) cùng lúc, dù
+  // #panelPlus đang ẩn - giữ trạng thái xuyên suốt khi đổi qua lại giữa 2 tab.
+  ['A','B','C','D'].forEach(side=>{
+    document.getElementById('dualSideBox_'+side).innerHTML=buildDualSideHtml(side);
+    wireDualCanvasDrag(side);
+    wireDualDrawEvents(side);
+  });
   buildPhiHoaSelects();
   window.addEventListener('resize',()=>{
-    if(document.getElementById('panel2LaSo').hidden) return;
-    ['A','B'].forEach(side=>{ dualSizeCanvas(side); dualRedrawCanvas(side); });
+    if(!document.getElementById('panel2LaSo').hidden) ['A','B'].forEach(side=>{ dualSizeCanvas(side); dualRedrawCanvas(side); });
+    if(!document.getElementById('panelPlus').hidden) ['C','D'].forEach(side=>{ dualSizeCanvas(side); dualRedrawCanvas(side); });
   });
 }
 
@@ -5610,7 +5790,7 @@ function makeDualInstance(){
               // với Thể/Dụng (xem dualCloneHcState/dualApplySnapshot), giống hệt lá số đơn.
   };
 }
-let dualInst={A:makeDualInstance(), B:makeDualInstance()};
+let dualInst={A:makeDualInstance(), B:makeDualInstance(), C:makeDualInstance(), D:makeDualInstance()};
 
 // -- Toán lõi phi hóa, tách riêng (nhận "c" tường minh thay vì đọc chart() toàn cục) để không đụng vào
 // flyFrom/computeSingleChain/computeTuHoaFor gốc đang dùng cho lá số đơn. --
@@ -5727,7 +5907,8 @@ async function dualLapLaSo(side){
         gioiTinh:document.getElementById('dualGioiTinh_'+side).value,
         lichLoai:'duong',
         ngaySinh, gioSinh:document.getElementById('dualGioSinh_'+side).value,
-        muiGio:7, thanhPho:'TP. Hồ Chí Minh', quocGia:'VN',
+        muiGio:parseFloat(document.getElementById('dualMuiGio_'+side).value),
+        thanhPho:dualSelCity[side]?.n||'', quocGia:document.getElementById('dualQuocGia_'+side).value,
       })
     });
     const d=await res.json();
@@ -5752,32 +5933,63 @@ async function dualLapLaSo(side){
   }
 }
 
+// Nút "Chuyển" bên mỗi lá số nhỏ (tab "2 Lá Số"/"Plus") - đẩy nguyên dữ liệu lá số bên đó (data thô từ
+// /api/lap-laso, y hệt kết quả lapLaSo()) sang khung lá số đơn, giống hệt cơ chế atcExportToLapLaSo() bên
+// tab An Thủ Công (dùng chung ingestResult() + switchTopTab('form')), không gọi lại API lần nữa.
+function dualExportToSingle(side){
+  const inst=dualInst[side];
+  if(!inst || !inst.c){ alert('Bên này chưa lập lá số!'); return; }
+  // Đồng bộ luôn các ô trên thanh "NHẬP THÔNG TIN" theo đúng dữ liệu gốc đã dùng để lập lá số bên này -
+  // trước đây chỉ vẽ lá số ra (ingestResult) mà không cập nhật các ô input, nên "Lưu lá số"/"Lưu Kho" (đọc
+  // trực tiếp giá trị đang có sẵn trên các ô đó) vẫn lưu nhầm thông tin CŨ, không phải lá số vừa chuyển qua.
+  document.getElementById('hoTen').value = document.getElementById('dualHoTen_'+side).value;
+  document.getElementById('ngayDD').value = document.getElementById('dualDD_'+side).value;
+  document.getElementById('ngayMM').value = document.getElementById('dualMM_'+side).value;
+  document.getElementById('ngayYYYY').value = document.getElementById('dualYYYY_'+side).value;
+  document.getElementById('gioSinh').value = document.getElementById('dualGioSinh_'+side).value;
+  document.getElementById('gioiTinh').value = document.getElementById('dualGioiTinh_'+side).value;
+  // dualLapLaSo luôn gửi lichLoai:'duong' (mini-form bên dual không có tùy chọn Âm lịch) nên chuyển qua
+  // cũng phải để đúng trạng thái Dương lịch, khớp với dữ liệu thật đã lập.
+  const lichBtn=document.getElementById('lichBtn');
+  lichBtn.dataset.val='duong'; lichBtn.textContent='DƯƠNG LỊCH';
+  document.getElementById('quocGia').value = document.getElementById('dualQuocGia_'+side).value;
+  document.getElementById('citySearch').value = document.getElementById('dualCitySearch_'+side).value;
+  document.getElementById('muiGio').value = document.getElementById('dualMuiGio_'+side).value;
+  selCity = dualSelCity[side];
+  ingestResult(inst.c.data, inst.c.birthYear);
+  switchTopTab('form');
+}
+
 function dualSizeCanvas(side){
-  const wrap=document.getElementById('dualBanWrap_'+side);
   const cv=document.getElementById('dualCanvas_'+side);
-  if(!wrap||!cv) return;
+  if(!cv) return;
+  // Đo chính canvas, không đo dualBanWrap (có border riêng, lớn hơn kích thước canvas thật - xem giải thích
+  // ở sizeCanvas()).
+  const r=cv.getBoundingClientRect();
   // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
   // tương tự ở sizeCanvas/atcSizeCanvas).
   const dpr=window.devicePixelRatio||1;
-  cv.width=wrap.offsetWidth*dpr; cv.height=wrap.offsetHeight*dpr;
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
 }
+// Lấy mốc gốc tọa độ từ chính CANVAS (không phải dualBanWrap_X) - lý do giống hệt cellRect/cellEdgeAnchor
+// bên lá số đơn (dualBanWrap có border riêng, lệch khỏi canvas thật đúng bằng bề dày border).
 function dualCellRect(side,idx){
   const cell=document.querySelector(`#dualBanWrap_${side} .cung[data-idx="${idx}"]`);
-  const wrap=document.getElementById('dualBanWrap_'+side);
-  if(!cell||!wrap) return null;
-  const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+  const cvEl=document.getElementById('dualCanvas_'+side);
+  if(!cell||!cvEl) return null;
+  const wr=cvEl.getBoundingClientRect(), cr=cell.getBoundingClientRect();
   const left=cr.left-wr.left, top=cr.top-wr.top;
   return {left,top,right:left+cr.width,bottom:top+cr.height,cx:left+cr.width/2,cy:top+cr.height/2};
 }
 function dualStarAnchor(side,idx,starName){
-  const wrap=document.getElementById('dualBanWrap_'+side);
+  const cvEl=document.getElementById('dualCanvas_'+side);
   const cell=document.querySelector(`#dualBanWrap_${side} .cung[data-idx="${idx}"]`);
-  if(!wrap||!cell) return null;
+  if(!cvEl||!cell) return null;
   let target=null;
   cell.querySelectorAll('.sao').forEach(sp=>{ if(!target && sp.textContent.trim().startsWith(starName)) target=sp; });
   if(!target){ const r=dualCellRect(side,idx); return r?{x:r.cx,y:r.cy}:null; }
-  const wr=wrap.getBoundingClientRect(), sr=target.getBoundingClientRect();
+  const wr=cvEl.getBoundingClientRect(), sr=target.getBoundingClientRect();
   return {x:sr.left-wr.left+sr.width/2, y:sr.top-wr.top+sr.height+5};
 }
 // Port của cellEdgeAnchor, scoped theo side (mỗi bên có #dualBanWrap_A/B + .cung riêng).
@@ -5785,9 +5997,9 @@ function dualCellEdgeAnchor(side,idx,which){
   const pos=CELL_POS[idx]; if(!pos) return null;
   const [r,c]=pos;
   const cell=document.querySelector(`#dualBanWrap_${side} .cung[data-idx="${idx}"]`);
-  const wrap=document.getElementById('dualBanWrap_'+side);
-  if(!cell||!wrap) return null;
-  const wr=wrap.getBoundingClientRect(), cr=cell.getBoundingClientRect();
+  const cvEl=document.getElementById('dualCanvas_'+side);
+  if(!cell||!cvEl) return null;
+  const wr=cvEl.getBoundingClientRect(), cr=cell.getBoundingClientRect();
   const left=cr.left-wr.left, top=cr.top-wr.top, right=left+cr.width, bottom=top+cr.height;
   const midX=left+cr.width/2, midY=top+cr.height/2;
   if(isCornerCung(idx)){
@@ -5832,7 +6044,7 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const spacing=10, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
-      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter));
+      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter),11);
     });
   });
   if(!dualInst[side].tuHoaCrossVisible) return; // "Ẩn/Hiện tự hóa" - chỉ ẩn nhánh hướng tâm, ly tâm vẫn giữ
@@ -5843,14 +6055,49 @@ function dualDrawTuHoaArrows(side,ctx,c){
     if(!groups[k]) groups[k]={cungA,cungB,toA:[],toB:[]};
     if(a.to===cungA) groups[k].toA.push(a.letter); else groups[k].toB.push(a.letter);
   });
+  // Vẽ giống hệt bên lá số đơn (drawTuHoaArrows): đường KHÔNG xuyên qua chỗ có chữ (khoét đúng bề rộng cụm
+  // ký tự), mỗi ký tự có halo riêng xếp sát nhau - trước đây gộp cả cụm thành 1 chuỗi ("CD") vẽ vào 1 halo
+  // tròn của riêng 1 ký tự nên chữ đè lên nhau, đồng thời đường kẻ chạy xuyên thẳng qua giữa (không khoét).
   Object.values(groups).forEach(g=>{
     const A=dualCellEdgeAnchor(side,g.cungA,'inner'), B=dualCellEdgeAnchor(side,g.cungB,'inner');
     if(!A||!B) return;
+    const hasA=g.toA.length>0, hasB=g.toB.length>0;
     const lineColor = document.body.classList.contains('theme-dark')?'#fff':'#000';
-    drawLine(ctx,A,B,lineColor);
-    const dx=B.x-A.x, dy=B.y-A.y;
-    if(g.toA.length){ drawArrowHeadAt(ctx,A,-dx,-dy,lineColor); drawLetterWithHalo(ctx,g.toA.join(''),A.x+dx*0.13,A.y+dy*0.13,tuHoaLetterColor(g.toA[0])); }
-    if(g.toB.length){ drawArrowHeadAt(ctx,B,dx,dy,lineColor); drawLetterWithHalo(ctx,g.toB.join(''),A.x+dx*0.87,A.y+dy*0.87,tuHoaLetterColor(g.toB[0])); }
+    const dx=B.x-A.x, dy=B.y-A.y, len=Math.hypot(dx,dy)||1;
+    const pt=(t)=>({x:A.x+dx*t, y:A.y+dy*t});
+    const clusterHalf=(n)=>((n-1)*11/2 + 5)/len;
+
+    let cursor=0;
+    if(hasA){
+      const half=clusterHalf(g.toA.length);
+      const gapStart=Math.max(0,0.13-half), gapEnd=0.13+half;
+      if(cursor<gapStart) drawLine(ctx, pt(cursor), pt(gapStart), lineColor);
+      cursor=gapEnd;
+    }
+    if(hasB){
+      const half=clusterHalf(g.toB.length);
+      const gapStart=0.87-half, gapEnd=Math.min(1,0.87+half);
+      if(cursor<gapStart) drawLine(ctx, pt(cursor), pt(gapStart), lineColor);
+      cursor=gapEnd;
+    }
+    if(cursor<1) drawLine(ctx, pt(cursor), pt(1), lineColor);
+
+    if(hasA){
+      drawArrowHeadAt(ctx, A, -dx, -dy, lineColor);
+      const c=pt(0.13);
+      g.toA.forEach((L,i)=>{
+        const along=(i-(g.toA.length-1)/2)*11;
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,11);
+      });
+    }
+    if(hasB){
+      drawArrowHeadAt(ctx, B, dx, dy, lineColor);
+      const c=pt(0.87);
+      g.toB.forEach((L,i)=>{
+        const along=(i-(g.toB.length-1)/2)*11;
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,11);
+      });
+    }
   });
 }
 // Đuôi (p1) luôn cố định tại tâm cung nguồn; đầu (p2) dùng override đã kéo chỉnh nếu có (port của
@@ -5909,7 +6156,7 @@ function dualRedrawCanvas(side,preview){
   entries.forEach(({s,pts,isSel,isReverse})=>{
     const {p1,p2}=pts;
     if(isSel){
-      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.55)'; ctx.lineWidth=16; ctx.lineCap='round';
+      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke(); ctx.restore();
     }
     const color = isReverse ? s.color : (s.letter==='A' ? cs.getPropertyValue('--green').trim()
@@ -5937,9 +6184,9 @@ function dualHitTestArrowHandle(side,x,y){
   }
   return null;
 }
-let dualDraggingArrowHandle={A:null,B:null};
+let dualDraggingArrowHandle={A:null,B:null,C:null,D:null};
 // -- Undo/redo riêng từng bên (port của cloneHcState/pushHcAction/undoDraw/redoDraw) --
-let dualActionLog={A:[],B:[]}, dualActionRedoLog={A:[],B:[]};
+let dualActionLog={A:[],B:[],C:[],D:[]}, dualActionRedoLog={A:[],B:[],C:[],D:[]};
 function dualCloneHcState(side){
   const inst=dualInst[side];
   const hcState={};
@@ -6009,7 +6256,7 @@ function dualRedoDraw(side){
 // -- Vẽ tay riêng từng bên (port gọn của bộ vẽ tay lá số đơn - mũi tên/ô vuông/chữ, dùng chung drawShape/
 // startInlineTextInput/pushShapeAction-style, chỉ khác state + canvas tách theo side). Gộp chung lịch sử
 // Hoàn tác/Làm lại với Thể/Dụng qua dualPushHcAction/dualCloneHcState, không cần nút Undo/Redo riêng. --
-let dualDrawTool={A:null,B:null}, dualDrawColor={A:'#c0392b',B:'#c0392b'};
+let dualDrawTool={A:null,B:null,C:null,D:null}, dualDrawColor={A:'#c0392b',B:'#c0392b',C:'#c0392b',D:'#c0392b'};
 function dualSetDrawTool(side,t){
   dualDrawTool[side] = dualDrawTool[side]===t ? null : t;
   document.getElementById('dualToolRect_'+side).classList.toggle('active',dualDrawTool[side]==='rect');
@@ -6025,10 +6272,12 @@ function dualPushShape(side,shape){
 }
 // Gạch dưới sao khi mũi tên vẽ tay chạm tới - port gọn của findStarNear/updateArrowHoverUnderline/
 // clearArrowHoverUnderline/manualArrowUnderlineTargets bên lá số đơn, scoped riêng theo side.
-let dualArrowHoverStarEl={A:null,B:null};
+let dualArrowHoverStarEl={A:null,B:null,C:null,D:null};
 function dualFindStarNear(side,x,y){
   const wrap=document.getElementById('dualBanWrap_'+side); if(!wrap) return null;
-  const wr=wrap.getBoundingClientRect();
+  // x,y đã tính theo mốc canvas - đo lại đúng mốc đó (xem giải thích ở findStarNear bên lá số đơn).
+  const cvEl=document.getElementById('dualCanvas_'+side);
+  const wr=(cvEl||wrap).getBoundingClientRect();
   const margin=12;
   let best=null, bestDist=Infinity;
   wrap.querySelectorAll('.cung .sao').forEach(sp=>{
@@ -6109,12 +6358,12 @@ function wireDualDrawEvents(side){
   });
 }
 // -- Chọn + xóa 1 mũi tên phi hóa bằng double-click + phím Del (port của hitTestPhiArrow/deleteSelectedPhiArrow) --
-let dualSelectedPhiArrow={A:null,B:null};
+let dualSelectedPhiArrow={A:null,B:null,C:null,D:null};
 // -- Truy ngược (port của starPickerFor/reverseFlightStar/pickReverseLetter/computeReverseFlights) - bấm 1
 // sao -> hiện bảng chọn ABCD -> chọn 1 chữ để truy ngược cung nào phi chữ đó vào đúng sao này. --
-let dualStarPickerFor={A:null,B:null};
-let dualReverseFlightStar={A:null,B:null};
-let dualReverseFlightArrows={A:[],B:[]};
+let dualStarPickerFor={A:null,B:null,C:null,D:null};
+let dualReverseFlightStar={A:null,B:null,C:null,D:null};
+let dualReverseFlightArrows={A:[],B:[],C:[],D:[]};
 function dualQuickFlyLetter(side,idx,letter){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
   const st=inst.hcState[inst.hcMode];
@@ -6186,17 +6435,19 @@ function dualHitTestPhiArrowStep(side,x,y){
   }
   return null;
 }
-// Port của showPhiHoaMeaningForStep - dùng chung bảng tra "TƯỢNG PHI HÓA" (1 bảng chung cho cả 2 bên).
+// Port của showPhiHoaMeaningForStep - dùng chung bảng tra "TƯỢNG PHI HÓA" (1 bảng chung cho 2 bên CÙNG 1
+// tab). side A/B thuộc tab "2 Lá Số" (panelId '') , side C/D thuộc tab "PLUS" (panelId '2').
 function dualShowPhiHoaMeaningForStep(side,hit){
   const {step,chain,stepIndex}=hit;
   const c=dualInst[side].c; if(!c) return;
-  const box=document.getElementById('dualPhiHoaBox'); if(box) box.hidden=false;
-  const phiSel=document.getElementById('dualPhiCungSelect'), nhapSel=document.getElementById('dualNhapCungSelect');
+  const panelId = (side==='C'||side==='D') ? '2' : '';
+  const box=document.getElementById('dualPhiHoaBox'+panelId); if(box) box.hidden=false;
+  const phiSel=document.getElementById('dualPhiCungSelect'+panelId), nhapSel=document.getElementById('dualNhapCungSelect'+panelId);
   if(phiSel) phiSel.value=phiHoaCungName(step.from,c.vM);
   if(nhapSel) nhapSel.value=phiHoaCungName(step.to,c.vM);
-  dualPhiHoaLetter = stepIndex>=1 ? (chain.structureLetter||step.letter) : step.letter;
-  document.querySelectorAll('#dualPhiHoaBox .ph-hoa-btn').forEach(b=>b.classList.toggle('active', b.dataset.hoa===dualPhiHoaLetter));
-  renderDualPhiHoaLookup();
+  dualPhiHoaLetter[panelId] = stepIndex>=1 ? (chain.structureLetter||step.letter) : step.letter;
+  document.querySelectorAll('#dualPhiHoaBox'+panelId+' .ph-hoa-btn').forEach(b=>b.classList.toggle('active', b.dataset.hoa===dualPhiHoaLetter[panelId]));
+  renderDualPhiHoaLookup(panelId);
 }
 function dualDeleteSelectedPhiArrow(side){
   const sel=dualSelectedPhiArrow[side]; if(!sel) return;
@@ -6260,14 +6511,13 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Delete' && e.key!=='Backspace') return;
   const tag=(document.activeElement&&document.activeElement.tagName)||'';
   if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
-  if(dualSelectedPhiArrow.A) dualDeleteSelectedPhiArrow('A');
-  if(dualSelectedPhiArrow.B) dualDeleteSelectedPhiArrow('B');
+  ['A','B','C','D'].forEach(side=>{ if(dualSelectedPhiArrow[side]) dualDeleteSelectedPhiArrow(side); });
 });
 // Bấm ra ngoài khoảng trống (không phải sao/bảng ABCD) -> tự tắt bảng chọn truy ngược đang mở, cả bên lá số
-// đơn lẫn 2 bên "2 Lá Số" (mọi click trên sao/badge đã stopPropagation nên không lọt tới đây).
+// đơn lẫn 4 bên "2 Lá Số"/"PLUS" (mọi click trên sao/badge đã stopPropagation nên không lọt tới đây).
 document.addEventListener('click',()=>{
   if(starPickerFor){ starPickerFor=null; const c=chart(); if(c) renderGrid(c); }
-  ['A','B'].forEach(side=>{
+  ['A','B','C','D'].forEach(side=>{
     if(dualStarPickerFor[side]){ dualStarPickerFor[side]=null; dualRenderGrid(side); }
   });
 });
@@ -6339,7 +6589,7 @@ function dualRenderGrid(side){
         // Gạch dưới thủ công do vẽ mũi tên tay chạm tới sao này - giữ nguyên tới khi xóa mũi tên đó.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
-          data-star="${s.ten}" onclick="event.stopPropagation();dualOnStarClick('${side}',${idx},'${nameEsc}')">${s.ten}${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${pickerHtml}</span>`;
+          data-star="${s.ten}" onclick="event.stopPropagation();dualOnStarClick('${side}',${idx},'${nameEsc}')"><span class="sao-name">${s.ten}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${pickerHtml}</span>`;
       };
       const chinhHtml=chinhs.map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
       const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
