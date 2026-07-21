@@ -3644,6 +3644,14 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
 // trước, để 1 chuỗi KHÁC đi ngang qua đúng cung đó (định dùng Can của nó để chuyển tiếp) phải dừng lại NGAY
 // TRƯỚC đó, nhường lại đúng đoạn này cho chuỗi riêng của chính cung đó vẽ - tránh vẽ trùng y hệt 2 lần (1
 // đường CK đen từ chuỗi kia + 1 đường màu riêng từ chuỗi của chính cung đó, đè lên nhau cùng 1 đoạn).
+// CHỈ ĐÚNG cho kết cấu Kị: bước i=0 của 1 cung X (letter D) và bước CHUYỂN TIẾP (i>=1, luôn letter D) của 1
+// chuỗi KHÁC đáp qua X là CÙNG 1 phép tính flyFrom(X,'D') - chắc chắn trùng. Nhưng ở kết cấu LỘC, bước i=0
+// của X dùng letter A (flyFrom(X,'A')), còn bước CHUYỂN TIẾP dùng letter D (flyFrom(X,'D')) - 2 phép tính
+// KHÁC NHAU, ra 2 cạnh HOÀN TOÀN ĐỘC LẬP (khác đích, khác sao) - KHÔNG được coi là trùng lặp. Nếu lỡ truyền
+// realAnchorSet cho kết cấu Lộc, 2 cung cùng phi Lộc "bắt cặp" với nhau (X phi Lộc đáp Y, Y phi Lộc đáp X)
+// sẽ bị chặn ĐÚP cả 2 chiều (mỗi bên đều tưởng nhầm mình phải "nhường" bước chuyển Kị cho bên kia), làm mất
+// hẳn đường chuyển Kị của CẢ HAI - vì vậy các nơi gọi hàm này CHỈ được truyền realAnchorSet khi hcMode/letter
+// đang xét là 'D' (Kị), tuyệt đối không truyền cho 'A' (Lộc).
 function dedupSharedContinuations(chains,realAnchorSet){
   const usedFrom=new Set();
   if(realAnchorSet) realAnchorSet.forEach(idx=>usedFrom.add(idx));
@@ -3731,7 +3739,12 @@ function recomputePhiHoaChainsRaw(){
   // realAnchorSet để các cung Thể/Dụng thật sự LUÔN được ưu tiên giữ đúng đoạn xuất phát từ chính nó, không
   // phụ thuộc thứ tự xử lý chuỗi (vd Phúc Đức và Thiên Di cùng đáp 1 điểm về Tài Bạch - trước đây tùy chuỗi
   // nào xử lý trước mà 2 đường bị vẽ chồng lên nhau, giờ luôn nhường đúng đoạn đó cho chuỗi của Thiên Di).
-  chains=dedupSharedContinuations(chains,realAnchorSet);
+  // CHỈ truyền realAnchorSet cho kết cấu Kị (xem giải thích đầy đủ tại định nghĩa hàm) - kết cấu Lộc KHÔNG
+  // được truyền, nếu không 2 cung cùng phi Lộc "bắt cặp" (mỗi bên đáp về đúng cung kia) sẽ bị chặn đường
+  // chuyển Kị ở CẢ HAI phía, mất hẳn cả 2 mũi tên (vd chọn Điền làm Thể, Mệnh làm Dụng: Điền phi Lộc → Mệnh,
+  // Mệnh phi Lộc → Điền - 2 cạnh này dùng letter A, hoàn toàn khác và độc lập với 2 cạnh chuyển Kị letter D
+  // tiếp theo của mỗi bên, không phải trùng lặp).
+  chains=dedupSharedContinuations(chains, hcMode==='hung' ? realAnchorSet : null);
   st.quick.forEach((letter,idx)=>{
    try{
     // Chỉ nới thêm 1 nhịp khi ĐÚNG là cung niên D vừa bấm nút "N.Kỵ"/"N.Lộc" (nienGlowTarget) - bấm nhanh
@@ -3804,7 +3817,9 @@ function visiblePhiHoaChains(){
   // đáp vào Phu Thê rồi cùng CK tiếp Tài Bạch - đoạn CK đó dùng chung 1 Can nên là 1 đoạn duy nhất) - dedup
   // NGAY TRONG PHẠM VI nhóm cô lập này (không dùng lại mảng dedup toàn cục hcState.chains, vốn có thể đã gán
   // "quyền sở hữu" đoạn dùng chung đó cho 1 cung KHÁC ngoài nhóm này, gây mất hẳn đoạn đó khi cô lập riêng).
-  return dedupSharedContinuations(isoChains,isoRealAnchorSet);
+  // CHỈ truyền isoRealAnchorSet cho kết cấu Kị - xem giải thích đầy đủ tại định nghĩa dedupSharedContinuations
+  // (kết cấu Lộc truyền vào sẽ chặn nhầm 2 cung cùng phi Lộc "bắt cặp" với nhau ở cả 2 chiều).
+  return dedupSharedContinuations(isoChains, hcMode==='hung' ? isoRealAnchorSet : null);
 }
 function phiHoaTargetSet(){
   const set=new Set();
@@ -6583,8 +6598,8 @@ function dualRecomputeChains(side){
   }
   // Không còn gọi suppressTrungLapChains() nữa - xem giải thích chi tiết ở recomputePhiHoaChains (bản đơn):
   // dedupSharedContinuations() dưới đây đã đủ để tránh vẽ trùng đoạn, không cần xóa hẳn cả chuỗi của 1 cung.
-  // Truyền realAnchorSet để cung Thể/Dụng thật sự luôn giữ quyền vẽ đúng đoạn xuất phát từ chính nó.
-  chains=dedupSharedContinuations(chains,realAnchorSet);
+  // CHỈ truyền realAnchorSet cho kết cấu Kị - xem giải thích đầy đủ tại định nghĩa dedupSharedContinuations.
+  chains=dedupSharedContinuations(chains, inst.hcMode==='hung' ? realAnchorSet : null);
   st.quick.forEach((qLetter,idx)=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
     const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true)) : dualComputeSingleChain(c,idx,qLetter,true);
