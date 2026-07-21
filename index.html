@@ -1119,7 +1119,10 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
         <canvas id="drawCanvas"></canvas>
         <div class="ban-tuvi" id="banTuvi"></div>
       </div>
-      <div class="can-side-panel" id="canSidePanel">
+      <!-- Tạm ẩn bảng "An Can" cho nhẹ (yêu cầu người dùng) - thêm hidden để tắt hẳn hiển thị lẫn phần vẽ lại
+           (renderCanGrid tự bỏ qua khi panel bị hidden, xem giải thích tại renderCanGrid) - gỡ thuộc tính
+           hidden này (và không cần đổi gì khác) để bật lại chức năng như cũ bất cứ lúc nào. -->
+      <div class="can-side-panel" id="canSidePanel" hidden>
         <button class="can-min-btn" id="canMinBtn" title="Thu nhỏ" onclick="toggleCanPanelMinimize()">−</button>
         <div class="can-drag-handle" id="canDragHandle" title="Kéo để di chuyển">⠿⠿⠿</div>
         <div class="can-letter-toggle">
@@ -3283,7 +3286,10 @@ function flyNienHoa(letter){
   // Cung có niên A/D là cung ĐÃ có năng lượng Lộc/Kị sẵn - chỉ cần trực tiếp chuyển Kị (flyFrom letter D,
   // 1 nhịp duy nhất), KHÔNG phải "phi" (hóa Lộc rồi mới chuyển Kị 2 nhịp như Thể/Dụng), nên dùng cơ chế
   // "quick fly" (singleStepOnly) chứ không đưa vào tập Dụng.
-  if(st.the.has(idx)||st.dung.has(idx)) return; // đã có trong Thể/Dụng thì tự có chain riêng, khỏi trùng
+  // Trước đây cung này ĐÃ thuộc Thể/Dụng thì bị chặn hẳn không cho bấm ("tự có chain riêng, khỏi trùng") -
+  // nhưng năng lượng niên A/D vẫn là 1 nguồn Lộc/Kị ĐỘC LẬP đáng tính riêng (xem nienOverlapIdx trong
+  // computeKetCauStructuresRaw), chỉ là KHÔNG được vẽ thêm mũi tên trùng (đã tự lược ở recomputePhiHoaChains) -
+  // nên vẫn cho phép bấm chọn/bỏ chọn bình thường, chỉ khác ở chỗ không thêm mũi tên mới.
   const before=cloneHcState();
   if(st.quick.get(idx)==='D'){ st.quick.delete(idx); nienGlowTarget[hcMode]=null; } // bấm lại để bỏ chọn
   else { st.quick.set(idx,'D'); nienGlowTarget[hcMode]={idx,star}; }
@@ -3297,6 +3303,11 @@ function flyNienHoa(letter){
 }
 function renderCanGrid(){
   const box=document.getElementById('canGrid'); if(!box) return;
+  // Bảng "An Can" đang tạm ẩn (hidden) - bỏ qua luôn phần tính/vẽ lại (hàm này bị gọi lại RẤT NHIỀU lần mỗi
+  // khi bấm chọn Thể/Dụng, xem ghi chú ở computeKetCauStructures) để đúng tinh thần "cho nhẹ" của việc tắt
+  // tính năng này, không chỉ ẩn mỗi hình. Gỡ thuộc tính hidden ở #canSidePanel là tự động chạy lại bình thường.
+  const panel=document.getElementById('canSidePanel');
+  if(panel && panel.hidden) return;
   const c=chart();
   if(!c){ box.innerHTML=''; return; }
   const st=hcState[hcMode];
@@ -3585,6 +3596,7 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
   // tiếp năng lượng thật) - nếu không, 1 chuỗi tự nhiên hoàn toàn không liên quan vẫn bị "bơm" tiếp vô hạn chỉ
   // vì tình cờ đi ngang 1 cung Thể/Dụng khác giữa chừng.
   let trungLapBroken = false;
+  let returnedToRootOnce = false;
   const MAX_STEPS=20;
   while(steps.length<MAX_STEPS){
     // Trùng lặp phi hóa (chỉ kết cấu Kị): bước chuyển Kị vừa thêm (prev) dùng đúng Can của 1 cung Thể/Dụng
@@ -3597,9 +3609,20 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     const next=flyFrom(prev.to,'D');
     if(!next) break;
     if(next.to===prev.from && next.letter===prev.letter && next.star===prev.star) break; // quay lui đúng bước vừa đi
-    // Bay vòng về ĐÚNG triệu nhân cung (startIdx): cung đó đã "phóng Kị đi mất" từ đầu, không còn tọa Kị nữa,
-    // nên không tính là còn lực để chuyển tiếp - dừng NGAY TRƯỚC bước này (không vẽ cạnh quay lại gốc).
-    if(next.to===startIdx) break;
+    // Bay vòng về ĐÚNG triệu nhân cung (startIdx): THÔNG THƯỜNG cung đó đã "phóng Kị đi mất" từ đầu, không
+    // còn tọa Kị nữa, nên không tính là còn lực để chuyển tiếp - dừng NGAY TRƯỚC bước này (không vẽ cạnh quay
+    // lại gốc). NGOẠI LỆ: nếu lý do buộc tiếp tục ở đúng bước VỪA RỒI (prev) là "gặp niên cùng loại kết cấu"
+    // (đồng tinh diệu, không phải trùng lặp/tự hóa) - đây là 1 nguồn năng lượng ĐỘC LẬP hẳn với root, dùng
+    // đúng Can của prev.to (không phải Can của root) để bay tới, root chỉ đơn thuần là ĐÍCH tình cờ trùng với
+    // chính nó - vẫn phải vẽ đủ cạnh quay về root (vd Mệnh phi Lộc → Điền Trạch —CK→ Tử Nữ [Liêm Trinh, niên
+    // A] —CK→ Mệnh: bước cuối dùng Can Tử Nữ, do niên A thúc buộc, không phải Mệnh tự "phóng" Kị lần 2). Chỉ
+    // cho phép quay về root ĐÚNG 1 LẦN như vậy (returnedToRootOnce) - tránh vòng lặp dài vô nghĩa nếu vô tình
+    // lặp lại điều kiện này nhiều lần.
+    const prevIsNienMatch = c.thMap[prev.star]===firstLetter;
+    if(next.to===startIdx){
+      if(!prevIsNienMatch || returnedToRootOnce) break;
+      returnedToRootOnce = true;
+    }
     const key=next.to+':'+next.star;
     if(visited.has(key)) break; // đã đi qua đúng điểm này rồi - dừng, tránh vòng lặp
     visited.add(key);
@@ -3608,19 +3631,6 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     prev=next;
   }
   return {from:startIdx, steps, structureLetter:firstLetter};
-}
-function suppressTrungLapChains(chains,realAnchorSet){
-  // Trùng lặp phi hóa (kết cấu Kị): nếu chuỗi của 1 cung X đã "đi ngang" và dùng đúng Can của 1 cung Thể/Dụng
-  // khác (Y) để chuyển Kị tiếp, thì chuỗi ĐỘC LẬP của chính Y hoàn toàn trùng (từ đó về sau y hệt đuôi chuỗi
-  // của X) - chỉ còn 1 Kỵ chung, không vẽ 2 mũi tên chồng lên nhau cho cùng 1 đoạn.
-  const absorbed=new Set();
-  chains.forEach(ch=>{
-    for(let i=1;i<ch.steps.length;i++){
-      const fromCung=ch.steps[i-1].to;
-      if(fromCung!==ch.from && realAnchorSet.has(fromCung)) absorbed.add(fromCung);
-    }
-  });
-  return chains.filter(ch=>!absorbed.has(ch.from));
 }
 // Phụ mẫu truy Kị (bơm thêm lực): 1 cung Thể/Dụng khác phi Kị (base) đáp trúng đúng 1 cung mà chuỗi khác
 // ĐÃ đi qua (dù cung đó không phải Thể/Dụng đã chọn) - đoạn chuyển Kị TỪ đó về sau là y hệt nhau ở mọi
@@ -3689,9 +3699,14 @@ function recomputePhiHoaChainsRaw(){
     }
   }
   let chains=[...theChains, ...dungChains];
-  if(hcMode==='hung') chains=suppressTrungLapChains(chains,realAnchorSet);
   // Trùng đoạn chuyển Kị: dù kết cấu Lộc hay Kị, hễ 2 cung khác nhau cùng đáp (hóa Lộc/Kị gốc) trúng đúng 1
   // điểm, đoạn chuyển Kị TỪ đó về sau luôn giống hệt nhau (chỉ phụ thuộc Can của điểm đó) - chỉ vẽ 1 lần.
+  // Trước đây còn 1 bước suppressTrungLapChains() chạy TRƯỚC bước này riêng cho kết cấu Kị, XÓA HẲN chuỗi
+  // của 1 cung Thể/Dụng nếu nó "trùng lặp" với đuôi 1 chuỗi khác - hệ quả: cung đó vẫn đang được CHỌN
+  // (Thể/Dụng) nhưng KHÔNG còn mũi tên/tô sáng nào trên lá số nữa (dù đúng là đoạn ĐẦU riêng của chính nó
+  // không hề trùng lặp gì), gây cảm giác "chọn thêm cung khác lại làm MẤT mũi tên của cung đã chọn trước
+  // đó". dedupSharedContinuations() bên dưới đã xử lý đúng vấn đề này rồi - chỉ CẮT phần đuôi trùng, giữ
+  // nguyên đoạn đầu riêng của mỗi cung, không cần xóa hẳn cả chuỗi như suppressTrungLapChains() nữa.
   chains=dedupSharedContinuations(chains);
   st.quick.forEach((letter,idx)=>{
    try{
@@ -3710,6 +3725,12 @@ function recomputePhiHoaChainsRaw(){
       // đúng bằng Can của cung niên đó - đoạn CK tiếp này trùng y hệt đoạn "niên D tự chuyển Kị" riêng).
       const usedFrom=new Set();
       chains.forEach(c2=>c2.steps.forEach((s,i)=>{ if(i>=1) usedFrom.add(s.from); }));
+      // Chính cung niên đó (idx) LẠI cũng là 1 cung Thể/Dụng thật sự đã chọn: bước 0 (hóa Kị gốc) của chuỗi
+      // niên dùng ĐÚNG công thức y hệt bước 0 của chính chuỗi Thể/Dụng đó (cùng Can, cùng sao, cùng đích) -
+      // trùng ngay từ bước đầu tiên, không đợi tới bước chuyển Kị mới trùng - phải loại luôn từ i=0, nếu
+      // không sẽ vẽ chồng 2 mũi tên giống hệt nhau cho cùng 1 đoạn (điểm tính Kị vẫn cộng riêng ở kết cấu,
+      // xem nienOverlapIdx - chỉ KHÔNG vẽ thêm mũi tên).
+      if(st.the.has(idx)||st.dung.has(idx)) usedFrom.add(idx);
       const steps=[];
       for(let i=0;i<ch.steps.length;i++){
         const fromCung = i===0 ? ch.from : ch.steps[i-1].to;
@@ -3728,13 +3749,32 @@ function recomputePhiHoaChainsRaw(){
 // cung thuộc kết cấu đang cô lập (bấm đúp 1 tab) nếu có - dùng CHUNG cho mọi chỗ đọc dữ liệu để tô sáng/gạch
 // dưới trên lưới (phiHoaTargetSet, phiHoaGlowSet) lẫn vẽ mũi tên (drawPhiHoaChain), đảm bảo đồng bộ tuyệt
 // đối: đã ẩn mũi tên của 1 kết cấu khác thì cũng phải ẩn luôn phần tô sáng/gạch dưới của kết cấu đó.
+// Dựng lại đúng mạch mũi tên khi cô lập 1 kết cấu - dùng lại NGUYÊN chainSteps (đã bơm lực/truy Lộc) và
+// memberSubChains (đường đi riêng của từng thành viên hội tụ, đã cắt đúng tới điểm chạm) mà
+// computeKetCauStructures/evalRoot đã tính sẵn, thay vì tự tính lại raw computeSingleChain độc lập cho từng
+// cung như trước - cách cũ bỏ sót hẳn các đoạn CHỈ xuất hiện nhờ 1 thành viên khác "bơm lực"/truy Lộc vào
+// (vd Điền Trạch truy Lộc giúp mạch chính đi tiếp từ Mệnh sang Tật Ách - đoạn Mệnh→Tật Ách này không phải
+// đường đi TỰ NHIÊN của riêng Mệnh hay của riêng Điền Trạch, chỉ tồn tại nhờ bơm lực), khiến hình vẽ khi cô
+// lập kết cấu bị đứt đoạn dù dòng chữ kết cấu bên trái vẫn mô tả đủ.
+function ketCauIsoChains(s){
+  const letter=hcMode==='cat'?'A':'D';
+  const out=[];
+  const addStructure=st=>{
+    if(st.chainSteps && st.chainSteps.length) out.push({from:st.anchorIdx, steps:st.chainSteps, structureLetter:letter});
+    (st.memberSubChains||[]).forEach(sub=>{
+      if(sub.steps && sub.steps.length) out.push({from:sub.idx, steps:sub.steps, structureLetter:letter});
+    });
+  };
+  addStructure(s);
+  (s.merged||[]).forEach(addStructure);
+  return out;
+}
 function visiblePhiHoaChains(){
   const isoIdx=isolatedKetCauIdx[hcMode];
   if(isoIdx==null) return hcState[hcMode].chains;
   const s=computeKetCauStructures(hcMode)[isoIdx];
   if(!s) return [];
-  const realAnchorSet=new Set([...hcState[hcMode].the,...hcState[hcMode].dung]);
-  const isoChains=ketCauIsoMembers(s,realAnchorSet).map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
+  const isoChains=ketCauIsoChains(s);
   // Trùng đoạn chuyển Kị GIỮA CHÍNH các thành viên trong kết cấu đang cô lập (vd Phúc Đức và Tật Ách cùng
   // đáp vào Phu Thê rồi cùng CK tiếp Tài Bạch - đoạn CK đó dùng chung 1 Can nên là 1 đoạn duy nhất) - dedup
   // NGAY TRONG PHẠM VI nhóm cô lập này (không dùng lại mảng dedup toàn cục hcState.chains, vốn có thể đã gán
@@ -5417,6 +5457,11 @@ function computeKetCauStructuresRaw(mode){
   // Thể/Dụng thật, vì bản thân cung đó đã "tọa" sẵn năng lượng Lộc/Kị (không cần tự hóa gốc nữa).
   const nienGlow=nienGlowTarget[mode];
   const nienIdx=(nienGlow && !st.the.has(nienGlow.idx) && !st.dung.has(nienGlow.idx)) ? nienGlow.idx : null;
+  // Niên A/D lại TRÙNG đúng 1 cung Thể/Dụng THẬT SỰ đã chọn tay: không thêm 1 "triệu nhân cung" riêng nữa (sẽ
+  // đụng cache/chuỗi của chính cung đó, xem nienIdx phía trên) - nhưng năng lượng niên vẫn là 1 nguồn ĐỘC LẬP
+  // với việc cung đó "phi" bình thường (theo Can riêng làm Thể/Dụng), nên vẫn phải cộng thêm +1 Kị riêng cho
+  // đúng kết cấu chứa cung này, dù mũi tên trên lá số dùng chung 1 đường (xem recomputePhiHoaChains).
+  const nienOverlapIdx=(nienGlow && (st.the.has(nienGlow.idx) || st.dung.has(nienGlow.idx))) ? nienGlow.idx : null;
   const selected=[...st.the, ...st.dung];
   if(nienIdx!=null) selected.push(nienIdx);
   if(!selected.length) return [];
@@ -5535,8 +5580,23 @@ function computeKetCauStructuresRaw(mode){
       // viên khác (như Huynh Đệ) "bơm lực" làm dài ra ngang bằng nhánh chính thật sự, khiến chọn sai gốc.
       steps=steps.slice();
       let guardN=0;
-      while(guardN++<10){
+      while(guardN++<30){
         const lastStep=steps[steps.length-1];
+        // Điểm cuối vừa bơm lực (bomLuc) VẪN có thể tự nó còn "lực chuyển tiếp tự nhiên" (tự hóa Lộc/Kị xuất,
+        // gặp niên...) y hệt quy tắc computeSingleChain đã dùng cho mạch tự nhiên ban đầu - trước đây bỏ sót
+        // hẳn bước kiểm tra này SAU MỖI lần bơm lực, khiến mạch dừng sai ngay tại điểm vừa bơm dù nó rõ ràng
+        // còn lực đi tiếp (vd Tật Ách vừa được Điền Trạch bơm lực đáp tới, bản thân Tật Ách LẠI tự hóa Lộc
+        // xuất - phải tự đi tiếp sang Sự Nghiệp NGAY, không cần đợi có thêm 1 thành viên khác "truy" đúng vào
+        // Tật Ách mới được đi tiếp). Ưu tiên kiểm tra lực tự nhiên TRƯỚC, chỉ tìm thành viên bơm lực khi đã
+        // thật sự hết lực tự nhiên (đúng tinh thần "Truy Lộc/Kị đúng vào ĐIỂM CUỐI mạch chính đã hết lực").
+        if(mustContinueKy(lastStep,letter)){
+          const nat=flyFrom(lastStep.to,'D');
+          if(nat && !steps.some(s=>s.to===nat.to && s.star===nat.star) && nat.to!==root){
+            nat.color=hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu (visiblePhiHoaChains dùng lại đúng steps này)
+            steps.push(nat);
+            continue;
+          }
+        }
         let injected=false;
         for(const M of members){
           if(M===root || !realAnchorSet || !realAnchorSet.has(M)) continue;
@@ -5546,6 +5606,7 @@ function computeKetCauStructuresRaw(mode){
             const next=flyFrom(lastStep.to,'D');
             if(next && !steps.some(s=>s.to===next.to && s.star===next.star)){
               next.bomLucFrom=M; // đánh dấu bước này CHỈ tồn tại nhờ M truy Lộc/Kị bơm lực, để ghi rõ trên dòng chảy
+              next.color=hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu
               steps.push(next); injected=true;
             }
             break;
@@ -5569,7 +5630,11 @@ function computeKetCauStructuresRaw(mode){
     // của trường hợp KHÔNG tự hóa) - cộng +1 theo đúng quy tắc "gặp niên đồng tinh diệu/bất kỳ = +1" áp dụng
     // bình thường như mọi cung khác.
     const rootNienTag = rootSelfLoop ? nienTagFor(root, steps[0].star) : null;
-    if(rootSelfLoop && rootNienTag) total+=1;
+    // Phải đánh dấu nienCap.used=true ở đây - nếu không, root VỪA tự hóa ly tâm (đáp về chính nó) VỪA là
+    // đúng cung đang mang niên A/D (nienOverlapIdx) sẽ bị cộng ĐÚP: +1 ở đây (do tự hóa gặp niên) và thêm +1
+    // nữa ở khối "niên trùng đúng cung Thể/Dụng" phía cuối evalRoot - trong khi thực chất chỉ có 1 nguồn niên
+    // duy nhất, tự hóa ly tâm bản thân nó KHÔNG cộng điểm (xem giải thích phía trên), chỉ niên mới đáng +1.
+    if(rootSelfLoop && rootNienTag){ total+=1; nienCap.used=true; }
     // Ghi vắn tắt theo dòng chảy: "Cung (hóa Lộc/Kị) → Đích —CK→ Đích2 ...". Bước 0 = hóa (dùng Can gốc),
     // từ bước 1 trở đi luôn là CK (chuyển Kị, dùng Can cung vừa đáp). Riêng KXĐC (Kị xuất đối cung) xuống
     // dòng, chĩa mũi tên xuống (↓ KXĐC) để tách biệt khỏi luồng CK bình thường.
@@ -5673,6 +5738,16 @@ function computeKetCauStructuresRaw(mode){
           // khi chính M cũng có 1 lượt hóa Lộc GỐC của riêng mình trùng khớp y hệt điểm gốc của root).
           else if(steps[0] && p0.to===steps[0].to && p0.star===steps[0].star) found={p:p0, via:null};
           else if(steps.slice(1).some(s=>s.star===p0.star)) found={p:p0, via:null};
+          // M tự hóa Lộc XUẤT ngay tại chỗ (đáp thẳng về chính mình, p0.to===M) - Can của M CHƯA hề "rời" M ở
+          // bước 0 (chỉ tự xoay tại chỗ, chưa bay đi đâu), nên bước chuyển Kị KẾ TIẾP (i=1) vẫn dùng ĐÚNG Can
+          // của M chứ không phải Can "mượn" của 1 cung khác - khác hẳn 1 chuỗi bình thường đã thật sự bay qua
+          // ít nhất 1 cung trung gian trước khi chuyển Kị (lúc đó i=1 mới đúng là "mượn Can", không tính) -
+          // vẫn coi bước i=1 này là phần đóng góp CỦA RIÊNG M, được đối chiếu với mạch chính (kể cả các điểm
+          // vừa được bơm lực/truy Lộc thêm vào) y hệt p0 (vd Thiên Di tự hóa Lộc xuất rồi CK sang đúng điểm
+          // mà mạch chính cũng vừa đáp tới nhờ 1 thành viên khác truy Lộc vào).
+          else if(!found && p0.to===M && pts[1] && !pts[1].isTrungLap && steps.some(s=>s.to===pts[1].to && s.star===pts[1].star)){
+            found={p:pts[1], via:null};
+          }
         }
       }else{
         let onRootPoint=null;
@@ -5685,6 +5760,25 @@ function computeKetCauStructuresRaw(mode){
           for(const p of pts){
             if(p.isTrungLap || p.to===root) continue;
             if(anchorSetForThis.has(p.to) && p.to!==M){ found={p, via:p.to}; break; }
+          }
+        }
+        // M chạm vào 1 cung KHÔNG PHẢI Thể/Dụng, nhưng cung đó lại NẰM TRÊN đường đi riêng của 1 thành viên
+        // KHÁC (N) trong cùng kết cấu - nghĩa là cung đó đang "tọa Kị" nhờ chính N đáp qua (bất kể N đáp qua ở
+        // bước nào, kể cả bước hóa Kị gốc i=0 của N - khác hẳn quy tắc "via phải i>=1" ở nhánh phía trên, vì
+        // đó là quy tắc dành cho via LÀ 1 cung Thể/Dụng vừa nhận M vừa ĐỘC LẬP tự hóa đi nơi khác; còn ở đây
+        // chính điểm hội tụ ĐÓ mới là cái mà M và N cùng chạm vào - giống hệt cách bước gộp nhóm union-find
+        // phía trên đã coi "chạm điểm chung thứ 3" là hội tụ hợp lệ, không đòi hỏi i>=1). Vd: Tử Nữ hóa Kị →
+        // Tài Bạch —CK→ Điền Trạch; Điền Trạch không phải Thể/Dụng, nhưng Huynh Đệ (1 thành viên khác) hóa Kị
+        // → Điền Trạch (i=0) rồi mới CK tiếp sang Huynh Đệ (chạm mạch chính) - Tử Nữ chạm đúng vào Điền Trạch
+        // đó tức là đang nhập vào đúng kết cấu của Huynh Đệ, phải tính hội tụ qua N=Huynh Đệ làm "via".
+        if(!found){
+          outer: for(const p of pts){
+            if(p.isTrungLap || p.to===root) continue;
+            for(const N of members){
+              if(N===M || N===root || suppressed.has(N)) continue;
+              const ptsN=pointsFor(N, anchorSetForThis);
+              if(ptsN.some(q=>!q.isTrungLap && q.to===p.to)){ found={p, via:N}; break outer; }
+            }
           }
         }
         // Đáp thẳng vào chính gốc: đã tính trong nền "1" nên không cộng thêm, nhưng VẪN là 1 điểm chạm hợp lệ
@@ -5730,6 +5824,10 @@ function computeKetCauStructuresRaw(mode){
       return resolveSpineIndex(info.via, guard);
     }
     const convergences=[];
+    // Đường đi riêng (subSteps) của TỪNG thành viên hội tụ - lưu lại để tab "cô lập kết cấu" vẽ đúng y hệt
+    // những gì dòng chữ kết cấu đang mô tả (trước đây tab cô lập tự tính lại raw computeSingleChain riêng,
+    // không hề dùng subSteps này, nên bỏ sót các đoạn chỉ xuất hiện nhờ bơm lực/truy Lộc - xem visiblePhiHoaChains).
+    const memberSubChains=[];
     members.forEach(M=>{
       if(M===root) return;
       const info=touchInfo[M];
@@ -5740,9 +5838,11 @@ function computeKetCauStructuresRaw(mode){
         // lặp) —CK→ Phu Thê —CK→ Điền Trạch: đã tính trong nền" (điểm cuối Điền Trạch chập vào mạch chính).
         const mCh=chainFor(M);
         let flow='', rejoined=false, mStillConsecutive=true;
+        const suppressedSteps=[];
         if(mCh){
           for(let i=0;i<mCh.steps.length && !rejoined;i++){
             const s=mCh.steps[i];
+            suppressedSteps.push(s);
             const hasNext=i+1<mCh.steps.length;
             // "Trùng lặp" và tự hóa xuất giữa đường: cùng quy tắc như mạch chính (realAnchorSet, không phải
             // anchorSetForThis - xem giải thích ở evalRoot phía trên) và ghi "tự hóa X xuất" khi đáp lại
@@ -5756,6 +5856,7 @@ function computeKetCauStructuresRaw(mode){
             if(s.to===root || spineTargets.has(s.to)) rejoined=true;
           }
         }
+        if(suppressedSteps.length) memberSubChains.push({idx:M, steps:suppressedSteps});
         lines.push(`<li class="hoa-sub">⤷ <b>${label(M)}</b>${flow}: đã tính trong nền</li>`);
         return;
       }
@@ -5775,9 +5876,20 @@ function computeKetCauStructuresRaw(mode){
       const subTags = subSteps.map(()=>[]);
       // Tự hóa Kị/Lộc xuất TẠI CHỖ không cộng thêm điểm (chỉ ghi nhận diễn biến) - khác với M thực sự truy
       // Lộc/Kị BAY SANG 1 cung khác trên mạch chính, vốn LÀ 1 điểm hội tụ thật sự nên mới được +1.
+      // M tự hóa xuất NGAY TẠI ĐIỂM GỐC của chính nó (subSteps[0].to===M, vd Thiên Di tự hóa Lộc xuất rồi mới
+      // CK sang điểm hội tụ thật) - bước i=0 này là "của riêng M tự xoay tại chỗ", KHÔNG được cộng thêm điểm
+      // riêng, giống HỆT nguyên tắc "tự hóa xuất không cộng thêm" đã áp dụng cho root tự hóa xuất (xem
+      // rootSelfLoop phía trên) - nếu không loại trừ, 1 cung vừa tự hóa xuất vừa hội tụ tiếp sẽ bị cộng ĐÚP
+      // (1 lần do "tự hóa Lộc" ở đây, 1 lần nữa do bản thân việc hội tụ +1 ngay bên dưới).
+      const memberSelfLoopStart = subSteps[0] && subSteps[0].to===M;
       if(!info.onRoot && !isSelfLoopHere){
         total+=1;
         subSteps.forEach((s,i)=>{
+          if(i===0 && memberSelfLoopStart){
+            const selfHoaA=letter==='A' ? computeTuHoaFor(s.to) : [];
+            subTags[i]= selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===s.star) ? ['tự hóa Lộc'] : [];
+            return;
+          }
           const {add,tags,nienHit}=pointBonus(s.to, s.star, i, seenBonus, nienCap);
           total+=add;
           if(nienHit) nienBonusNode={to:s.to,star:s.star};
@@ -5810,10 +5922,19 @@ function computeKetCauStructuresRaw(mode){
       }else{
         lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow}</li>`);
       }
+      if(!isSelfLoopHere) memberSubChains.push({idx:M, steps:subSteps});
       const spineIdx=resolveSpineIndex(M, new Set([M]));
       if(spineIdx!==null && spineIdx!==undefined) convergences.push({stepIndex:spineIdx, otherIdx:M});
     });
-    return {root, total, lines, chainSteps:steps, convergences, nienBonusNode};
+    // Niên A/D trùng đúng 1 cung Thể/Dụng THẬT SỰ (root hoặc 1 thành viên khác) trong CHÍNH kết cấu này -
+    // cung đó vừa "phi" bình thường theo Can riêng (đã tính ở trên) vừa ĐỘC LẬP "tọa" thêm năng lượng niên,
+    // nên phải cộng thêm 1 Kị riêng - ghi thành 1 dòng riêng cho rõ ràng, KHÔNG vẽ thêm mũi tên nào (mũi tên
+    // niên trùng hệt mũi tên phi bình thường của chính cung đó, xem recomputePhiHoaChains đã tự lược bỏ).
+    if(nienOverlapIdx!=null && (root===nienOverlapIdx || members.includes(nienOverlapIdx)) && !nienCap.used){
+      total+=1; nienCap.used=true;
+      lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
+    }
+    return {root, total, lines, chainSteps:steps, convergences, nienBonusNode, memberSubChains};
   }
 
   const structures=[];
@@ -5862,7 +5983,7 @@ function computeKetCauStructuresRaw(mode){
     // ở nhiều kết cấu khác nhau.
     selected.forEach(root=>{
       const res=evalRoot(root, effectiveSelected, mainAnchorSet, mainSuppressed, trueSelectedSet);
-      if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode});
+      if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains});
     });
     // Loại bỏ kết cấu "nhỏ" mà CHÍNH triệu nhân cung của nó đã xuất hiện như 1 thành viên hội tụ TL (truy Lộc)
     // trong 1 kết cấu "lớn" khác - câu chuyện của nó đã được kể trọn vẹn trong kết cấu lớn kia rồi (cùng 1
@@ -5963,7 +6084,7 @@ function computeKetCauStructuresRaw(mode){
         // Cung KHÔNG nằm trong tập Thể/Dụng đã chọn thì không liên quan gì tới kết cấu, dù Can của nó có tình
         // cờ phi Kị thẳng vào gốc - không ghi vào kết cấu (trước đây có ghi thêm dạng "đã tính trong nền",
         // gây hiểu nhầm là cung đó cũng thuộc kết cấu).
-        structures.push({anchorIdx:final.root, memberIdxs:members, total:final.total, lines:final.lines, chainSteps:final.chainSteps, convergences:final.convergences, nienBonusNode:final.nienBonusNode, isolated});
+        structures.push({anchorIdx:final.root, memberIdxs:members, total:final.total, lines:final.lines, chainSteps:final.chainSteps, convergences:final.convergences, nienBonusNode:final.nienBonusNode, memberSubChains:final.memberSubChains, isolated});
       }
     });
   }
@@ -5977,7 +6098,7 @@ function computeKetCauStructuresRaw(mode){
     const extList=[autoIdx];
     const {anchorSetForThis:extAnchorSet, suppressed:extSuppressed}=computeSuppressed(extList);
     const res=evalRoot(autoIdx, extList, extAnchorSet, extSuppressed, new Set(effectiveSelected));
-    if(res) structures.push({anchorIdx:res.root, memberIdxs:extList, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode});
+    if(res) structures.push({anchorIdx:res.root, memberIdxs:extList, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains});
   });
 
   // ---- Lưỡng đầu kiến Kị (chỉ kết cấu Kị): 2 kết cấu HOÀN TOÀN riêng biệt (không chung cung nào, không
@@ -6011,6 +6132,7 @@ function computeKetCauStructuresRaw(mode){
           total:combo.total+other.total,
           lines:[...combo.lines, `<li class="hoa-sub hoa-plus">⤷ lưỡng đầu kiến Kị với kết cấu ${label(other.anchorIdx)} (${label(pair.a)} đối ${label(pair.b)}) = +${other.total} Kị</li>`, ...other.lines],
           chainSteps:combo.chainSteps, convergences:combo.convergences, nienBonusNode:combo.nienBonusNode,
+          memberSubChains:combo.memberSubChains,
           merged:[...(combo.merged||[]), other], luongDauPairs:[...(combo.luongDauPairs||[]), pair]
         };
       }
@@ -6426,7 +6548,8 @@ function dualRecomputeChains(side){
   const letter=inst.hcMode==='cat'?'A':'D';
   const realAnchorSet=new Set([...st.the,...st.dung]);
   let chains=[...st.the,...st.dung].map(idx=>dualComputeSingleChain(c,idx,letter,false,realAnchorSet)).filter(Boolean);
-  if(inst.hcMode==='hung') chains=suppressTrungLapChains(chains,realAnchorSet);
+  // Không còn gọi suppressTrungLapChains() nữa - xem giải thích chi tiết ở recomputePhiHoaChains (bản đơn):
+  // dedupSharedContinuations() dưới đây đã đủ để tránh vẽ trùng đoạn, không cần xóa hẳn cả chuỗi của 1 cung.
   chains=dedupSharedContinuations(chains);
   st.quick.forEach((qLetter,idx)=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
