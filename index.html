@@ -3639,8 +3639,14 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
 // ĐÃ đi qua (dù cung đó không phải Thể/Dụng đã chọn) - đoạn chuyển Kị TỪ đó về sau là y hệt nhau ở mọi
 // chuỗi cùng đáp qua, chỉ cần vẽ 1 lần. Xử lý theo thứ tự chuỗi: chuỗi nào tới trước giữ nguyên, chuỗi tới
 // sau chỉ giữ đoạn phi Kị GỐC của chính nó (i=0), cắt bỏ phần chuyển Kị trùng lặp phía sau.
-function dedupSharedContinuations(chains){
+// realAnchorSet (nếu có): các cung Thể/Dụng THẬT SỰ đã chọn LUÔN được "giữ quyền" vẽ đúng đoạn xuất phát từ
+// chính nó bằng CHUỖI RIÊNG của chính nó - đánh dấu "đã dùng" TRƯỚC, bất kể thứ tự xử lý chuỗi nào tới
+// trước, để 1 chuỗi KHÁC đi ngang qua đúng cung đó (định dùng Can của nó để chuyển tiếp) phải dừng lại NGAY
+// TRƯỚC đó, nhường lại đúng đoạn này cho chuỗi riêng của chính cung đó vẽ - tránh vẽ trùng y hệt 2 lần (1
+// đường CK đen từ chuỗi kia + 1 đường màu riêng từ chuỗi của chính cung đó, đè lên nhau cùng 1 đoạn).
+function dedupSharedContinuations(chains,realAnchorSet){
   const usedFrom=new Set();
+  if(realAnchorSet) realAnchorSet.forEach(idx=>usedFrom.add(idx));
   return chains.map(ch=>{
     const steps=[];
     for(let i=0;i<ch.steps.length;i++){
@@ -3709,8 +3715,11 @@ function recomputePhiHoaChainsRaw(){
   // (Thể/Dụng) nhưng KHÔNG còn mũi tên/tô sáng nào trên lá số nữa (dù đúng là đoạn ĐẦU riêng của chính nó
   // không hề trùng lặp gì), gây cảm giác "chọn thêm cung khác lại làm MẤT mũi tên của cung đã chọn trước
   // đó". dedupSharedContinuations() bên dưới đã xử lý đúng vấn đề này rồi - chỉ CẮT phần đuôi trùng, giữ
-  // nguyên đoạn đầu riêng của mỗi cung, không cần xóa hẳn cả chuỗi như suppressTrungLapChains() nữa.
-  chains=dedupSharedContinuations(chains);
+  // nguyên đoạn đầu riêng của mỗi cung, không cần xóa hẳn cả chuỗi như suppressTrungLapChains() nữa. Truyền
+  // realAnchorSet để các cung Thể/Dụng thật sự LUÔN được ưu tiên giữ đúng đoạn xuất phát từ chính nó, không
+  // phụ thuộc thứ tự xử lý chuỗi (vd Phúc Đức và Thiên Di cùng đáp 1 điểm về Tài Bạch - trước đây tùy chuỗi
+  // nào xử lý trước mà 2 đường bị vẽ chồng lên nhau, giờ luôn nhường đúng đoạn đó cho chuỗi của Thiên Di).
+  chains=dedupSharedContinuations(chains,realAnchorSet);
   st.quick.forEach((letter,idx)=>{
    try{
     // Chỉ nới thêm 1 nhịp khi ĐÚNG là cung niên D vừa bấm nút "N.Kỵ"/"N.Lộc" (nienGlowTarget) - bấm nhanh
@@ -3778,11 +3787,12 @@ function visiblePhiHoaChains(){
   const s=computeKetCauStructures(hcMode)[isoIdx];
   if(!s) return [];
   const isoChains=ketCauIsoChains(s);
+  const isoRealAnchorSet=new Set([...hcState[hcMode].the,...hcState[hcMode].dung]);
   // Trùng đoạn chuyển Kị GIỮA CHÍNH các thành viên trong kết cấu đang cô lập (vd Phúc Đức và Tật Ách cùng
   // đáp vào Phu Thê rồi cùng CK tiếp Tài Bạch - đoạn CK đó dùng chung 1 Can nên là 1 đoạn duy nhất) - dedup
   // NGAY TRONG PHẠM VI nhóm cô lập này (không dùng lại mảng dedup toàn cục hcState.chains, vốn có thể đã gán
   // "quyền sở hữu" đoạn dùng chung đó cho 1 cung KHÁC ngoài nhóm này, gây mất hẳn đoạn đó khi cô lập riêng).
-  return dedupSharedContinuations(isoChains);
+  return dedupSharedContinuations(isoChains,isoRealAnchorSet);
 }
 function phiHoaTargetSet(){
   const set=new Set();
@@ -6553,7 +6563,8 @@ function dualRecomputeChains(side){
   let chains=[...st.the,...st.dung].map(idx=>dualComputeSingleChain(c,idx,letter,false,realAnchorSet)).filter(Boolean);
   // Không còn gọi suppressTrungLapChains() nữa - xem giải thích chi tiết ở recomputePhiHoaChains (bản đơn):
   // dedupSharedContinuations() dưới đây đã đủ để tránh vẽ trùng đoạn, không cần xóa hẳn cả chuỗi của 1 cung.
-  chains=dedupSharedContinuations(chains);
+  // Truyền realAnchorSet để cung Thể/Dụng thật sự luôn giữ quyền vẽ đúng đoạn xuất phát từ chính nó.
+  chains=dedupSharedContinuations(chains,realAnchorSet);
   st.quick.forEach((qLetter,idx)=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
     const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true)) : dualComputeSingleChain(c,idx,qLetter,true);
