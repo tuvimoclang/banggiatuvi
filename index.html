@@ -3526,9 +3526,10 @@ function drawReverseFlights(ctx){
   });
 }
 // Bảng màu để tự động gán cho đường phi Kị đầu tiên (mỗi cung nguồn 1 màu riêng để phân biệt).
-// Bảng màu riêng cho mũi tên hóa Kị theo từng cung nguồn - toàn bộ phải ĐẬM/rõ nét (không dùng màu nhạt/pastel
-// như #dcbeff, #fabed4 trước đây, khó nhìn trên nền trắng khi có nhiều mũi tên chồng nhau).
-const PHI_KY_PALETTE=['#c0392b','#229954','#1f618d','#ca6f1e','#7d3c98','#117864','#6e2c00','#154360','#7b241c','#4a235a','#0e6251','#873600'];
+// Bảng màu riêng cho mũi tên hóa Kị theo từng cung nguồn - phải TƯƠI/NỔI BẬT (không nhạt/pastel như
+// #dcbeff, #fabed4 kiểu cũ, cũng KHÔNG tối/trầm như #4a235a, #873600 - loại tối dễ lẫn với màu đen của mũi
+// tên chuyển Kị). Tránh hẳn tông xanh lá (đã dùng riêng cho hóa Lộc).
+const PHI_KY_PALETTE=['#FFD400','#FF9900','#FF4136','#FF1493','#C71585','#9932CC','#7B2FF7','#4B0FDB','#1E90FF','#00BFFF','#00CED1','#FF6F61'];
 function phiKyColorForCung(idx){ return PHI_KY_PALETTE[idx%PHI_KY_PALETTE.length]; }
 // Kết cấu xuyến liên = tổng các đường phi hóa của cung Thể + từng cung Dụng đã chọn (cộng dồn, không loại trừ nhau).
 // letterOverride: dùng khi bấm nhanh A/B/C/D lúc hover 1 cung (mục "quick"), thay vì suy ra từ tab Hung/Cát.
