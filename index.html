@@ -3708,6 +3708,18 @@ function recomputePhiHoaChainsRaw(){
     }
   }
   let chains=[...theChains, ...dungChains];
+  // Cung X là ĐÍCH ĐẾN của chính lượt hóa Kị GỐC (i=0) của 1 cung Thể/Dụng THẬT SỰ khác (Y) - nghĩa là đoạn
+  // "X tự hóa Kị đi" (lượt hóa Kị GỐC của riêng X) và đoạn "Y chuyển Kị dùng Can X" LÀ CÙNG 1 CẠNH VẬT LÝ
+  // (cùng dùng Can X), chỉ là 2 cách diễn giải khác nhau của đúng 1 sự kiện - không còn là 1 lượt hóa Kị
+  // "thuần túy của riêng X" nữa (mang 2 ý nghĩa cùng lúc: hóa Kị của X, VÀ chuyển Kị của Y) nên phải tô màu
+  // ĐEN (màu chuyển Kị chung) thay vì màu riêng phân biệt theo cung (phiKyColorForCung), dù dedupSharedContinuations
+  // bên dưới vẫn giữ nguyên đoạn này (không xóa) để không mất dấu cung X đã chọn.
+  if(hcMode==='hung'){
+    const directLandingTargets=new Set(chains.map(ch=>ch.steps[0]&&ch.steps[0].to).filter(t=>t!==undefined));
+    chains.forEach(ch=>{
+      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=hoaArrowColor('D');
+    });
+  }
   // Trùng đoạn chuyển Kị: dù kết cấu Lộc hay Kị, hễ 2 cung khác nhau cùng đáp (hóa Lộc/Kị gốc) trúng đúng 1
   // điểm, đoạn chuyển Kị TỪ đó về sau luôn giống hệt nhau (chỉ phụ thuộc Can của điểm đó) - chỉ vẽ 1 lần.
   // Trước đây còn 1 bước suppressTrungLapChains() chạy TRƯỚC bước này riêng cho kết cấu Kị, XÓA HẲN chuỗi
@@ -6561,6 +6573,14 @@ function dualRecomputeChains(side){
   const letter=inst.hcMode==='cat'?'A':'D';
   const realAnchorSet=new Set([...st.the,...st.dung]);
   let chains=[...st.the,...st.dung].map(idx=>dualComputeSingleChain(c,idx,letter,false,realAnchorSet)).filter(Boolean);
+  // Cạnh "trùng lặp" (X là đích lượt hóa Kị gốc của 1 cung Thể/Dụng khác Y) mang 2 ý nghĩa cùng lúc - tô đen
+  // thay vì màu riêng theo cung, xem giải thích đầy đủ ở recomputePhiHoaChains (bản đơn).
+  if(inst.hcMode==='hung'){
+    const directLandingTargets=new Set(chains.map(ch=>ch.steps[0]&&ch.steps[0].to).filter(t=>t!==undefined));
+    chains.forEach(ch=>{
+      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=hoaArrowColor('D');
+    });
+  }
   // Không còn gọi suppressTrungLapChains() nữa - xem giải thích chi tiết ở recomputePhiHoaChains (bản đơn):
   // dedupSharedContinuations() dưới đây đã đủ để tránh vẽ trùng đoạn, không cần xóa hẳn cả chuỗi của 1 cung.
   // Truyền realAnchorSet để cung Thể/Dụng thật sự luôn giữ quyền vẽ đúng đoạn xuất phát từ chính nó.
