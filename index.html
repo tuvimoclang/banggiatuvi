@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<!-- Chặn trình duyệt cache lại file HTML này - nếu không, sau khi deploy bản mới lên host, người dùng để tab
+     mở lâu (hoặc quay lại bằng nút Back/mở tab mới cùng URL) vẫn có thể bị phục vụ đúng bản HTML/JS CŨ đã lưu
+     cache cục bộ, y hệt như chưa hề deploy gì cả - dù server đã có bản mới. Đây chỉ chặn được cache Ở TRÌNH
+     DUYỆT; nếu đứng sau CDN/reverse proxy (Cloudflare, Netlify...) vẫn cần cấu hình Cache-Control ở tầng đó. -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Lập Lá Số Tử Vi</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
