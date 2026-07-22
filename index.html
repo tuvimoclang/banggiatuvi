@@ -81,6 +81,11 @@ body.theme-dark #tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,
 .info-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;align-items:flex-end}
 .btn-outline{padding:5px 10px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.68rem;font-weight:500}
 .btn-outline.active{border-color:var(--accent);color:var(--accent);background:var(--hover)}
+/* Nút "Đổi màu" (bật/tắt chế độ trắng đen) - nền luôn trắng, bình thường viền/chữ đen, bấm bật thì đổi đỏ. */
+.btn-plainbw{padding:5px 10px;border:1px solid #000;border-radius:5px;background:#fff;color:#000;font-size:.68rem;font-weight:500}
+.btn-plainbw.active{border-color:var(--red);color:var(--red);background:#fff}
+/* Bản thu gọn dùng trong cột công cụ An Thủ Công - khớp kích thước với nút "XÓA NÉT" (btn-danger) cạnh nó. */
+.btn-plainbw.compact{padding:5px 2px;font-size:.62rem}
 .btn-outline.orange{border-color:#c8790a;color:#c8790a}
 .btn-dark{padding:5px 14px;border:none;border-radius:5px;background:#16a34a;color:#fff;font-size:.74rem;font-weight:500;letter-spacing:.8px}
 body.theme-dark .btn-dark{background:var(--gold);color:#000}
@@ -222,6 +227,10 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .cg-col-btn:hover{background:var(--hover);color:var(--text)}
 .nloc-btn.active-loc{background:var(--green);color:#fff;font-weight:700}
 .nky-btn.active-ky{background:var(--red-th);color:#fff;font-weight:700}
+/* Bản N.Lộc/N.Kỵ riêng bên tab "2 Lá Số"/"PLUS" - lớp CSS khác tên (không phải .nloc-btn/.nky-btn) để tránh
+   bị hàm updateNienBtnState() bên lá số đơn (querySelectorAll toàn trang) đụng nhầm vào, xem dualUpdateNienBtnState. */
+.dual-nloc-btn.active-loc{background:var(--green);color:#fff;font-weight:700}
+.dual-nky-btn.active-ky{background:var(--red-th);color:#fff;font-weight:700}
 .cg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
 .cg-btn{position:relative;padding:6px 5px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.68rem;font-weight:400}
 .cg-btn.active{background:var(--panel);color:var(--accent);border-color:var(--accent)}
@@ -828,6 +837,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
           </button>
         </div>
         <button class="btn-danger" onclick="atcClearDraw()">XÓA NÉT</button>
+        <button class="btn-plainbw compact" id="atcBtnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
       </div>
       <div class="atc-chart-col">
         <div class="ban-wrap" id="atcBanWrap">
@@ -957,10 +967,10 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
         <div class="tls-hide-panel">
           <div class="tls-cung-grid" id="tlsCungGrid"></div>
           <div class="tls-hoa-legend">
-            <button class="tls-hoa-btn" data-letter="A" onclick="tlsToggleHoaFilter('A')"><span class="tls-hoa-dot" style="background:#16a34a"></span>Lộc</button>
-            <button class="tls-hoa-btn" data-letter="B" onclick="tlsToggleHoaFilter('B')"><span class="tls-hoa-dot" style="background:#e63946"></span>Quyền</button>
-            <button class="tls-hoa-btn" data-letter="C" onclick="tlsToggleHoaFilter('C')"><span class="tls-hoa-dot" style="background:#2563eb"></span>Khoa</button>
-            <button class="tls-hoa-btn" data-letter="D" onclick="tlsToggleHoaFilter('D')"><span class="tls-hoa-dot" style="background:#000"></span>Kỵ</button>
+            <button class="tls-hoa-btn" data-letter="A" onclick="tlsToggleHoaFilter('A')"><span class="tls-hoa-dot" style="background:#16a34a"></span>A</button>
+            <button class="tls-hoa-btn" data-letter="B" onclick="tlsToggleHoaFilter('B')"><span class="tls-hoa-dot" style="background:#e63946"></span>B</button>
+            <button class="tls-hoa-btn" data-letter="C" onclick="tlsToggleHoaFilter('C')"><span class="tls-hoa-dot" style="background:#2563eb"></span>C</button>
+            <button class="tls-hoa-btn" data-letter="D" onclick="tlsToggleHoaFilter('D')"><span class="tls-hoa-dot" style="background:#000"></span>D</button>
           </div>
         </div>
       </div>
@@ -1037,7 +1047,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-outline" id="btnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
+      <button class="btn-plainbw" id="btnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
       <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
       <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
       <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
@@ -2021,13 +2031,18 @@ function switchTopTab(name){
 }
 // Tab "AN THỦ CÔNG" (top) chia 2 sub-tab bên panel-col PHẢI: "Lập Lá Số" (form ngày/tháng/năm sinh thật, gọi
 // đúng /api/lap-laso như tab lá số đơn) và "An Thủ Công" (công cụ chọn Can/Tử Vi/Tháng/Giờ/Mệnh thủ công CŨ).
-// Khung lá số + canvas (atcPreviewGrid/atcCanvas, chart-col bên trái) và toàn bộ khối Đại Vận/Lưu Niên/ẩn
-// cung phía dưới LUÔN hiện, dùng CHUNG cho cả 2 sub-tab - chỉ có phần TRÊN CÙNG của panel-col đổi qua lại.
+// Khung lá số + canvas (atcPreviewGrid/atcCanvas, chart-col bên trái) LUÔN hiện, nhưng giờ mỗi sub-tab có
+// LÁ SỐ RIÊNG (atcChartBySub) - trước đây dùng chung atcCurChart nên chọn tay bên An Thủ Công sẽ xóa mất lá
+// số vừa lập bằng ngày sinh thật (và ngược lại). Khối Đại Vận/Lưu Niên/ẩn cung/lọc niên hóa phía dưới vẫn
+// dùng CHUNG 1 bộ trạng thái cho cả 2 sub-tab như thiết kế cũ (không tách riêng).
 function switchAtcSubTab(name){
   document.querySelectorAll('.atc-subtab').forEach(t=>t.classList.toggle('active',t.dataset.atcsub===name));
   document.getElementById('atcPanelLls').hidden = name!=='lls';
   document.getElementById('atcPanelThuCong').hidden = name!=='thucong';
   if(name==='thucong') initAtcPanelOnce();
+  atcCurChart=atcChartBySub[name];
+  tlsRenderAll();
+  atcSizeCanvas();
 }
 // -- AN THỦ CÔNG: dựng lá số thủ công bằng cách chọn TỪNG PHẦN (Can, vị trí Tử Vi, Tháng, Giờ sinh, Mệnh)
 // - không cần biết ngày/năm sinh thật, và không cần chọn đủ hết mới ra hình - mỗi mục chọn được là an ngay
@@ -2175,6 +2190,7 @@ function atcRenderPreview(){
     canChiNam: atcSel.can ? `${atcSel.can} ${chiNamSinh!==null?DC[chiNamSinh]:''}`.trim() : '',
     rawApiData:null,
   } : null;
+  atcChartBySub.thucong=atcCurChart;
   tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null;
   tlsRenderAll();
   atcRedrawCanvas();
@@ -2225,15 +2241,18 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
   const cv=document.getElementById('atcCanvas'); if(!cv) return;
   let arrows=[];
   for(let idx=0;idx<12;idx++) arrows=arrows.concat(atcComputeTuHoaFor(idx,sc,tenCung));
-  // Cung đang bị "ẩn cung" (tlsHiddenCung) thì ẩn LUÔN mũi tên/chữ tự hóa xuất phát từ hoặc đáp vào đúng cung
-  // đó - TRỪ KHI nút Lộc/Quyền/Khoa/Kỵ của đúng loại hóa đó đang được bấm "lộ" (tlsHoaFilter[letter]===true),
-  // lúc đó mũi tên loại này được vẽ xuyên qua lớp ẩn. Cung không bị ẩn thì luôn vẽ đủ, không phụ thuộc nút này
-  // (nút Lộc/Quyền/Khoa/Kỵ giờ chỉ có tác dụng "lộ xuyên qua ẩn", không còn là bộ lọc ẩn/hiện chung nữa).
+  // Cung đang bị "ẩn cung" (tlsHiddenCung): ẩn LUÔN mũi tên/chữ tự hóa xuất phát từ hoặc đáp vào đúng cung đó,
+  // TRỪ KHI nút Lộc/Quyền/Khoa/Kỵ của đúng loại hóa đó đang được bấm "lộ" (tlsHoaFilter[letter]===true) - giữ
+  // nguyên tính năng "luyện trí nhớ" cũ (ẩn cung để tự đoán, bấm lộ đúng 1 loại để dò lại).
+  // Cung KHÔNG bị ẩn: khi có ít nhất 1 nút Lộc/Quyền/Khoa/Kỵ đang bật, dùng luôn nút đó làm bộ lọc cô lập
+  // (chỉ giữ lại đúng (các) loại đang bật, ẩn bớt loại còn lại) để xem riêng từng loại trên TOÀN lá số, không
+  // chỉ ở cung đang ẩn nữa; không bật nút nào thì hiện đủ như cũ (mặc định).
+  const anyHoaFilterActive=Object.values(tlsHoaFilter).some(v=>v);
   arrows=arrows.filter(a=>{
     const fromHidden=tlsHiddenCung.has(a.from);
     const toHidden=a.to!==undefined && tlsHiddenCung.has(a.to);
-    if(!fromHidden && !toHidden) return true;
-    return !!tlsHoaFilter[a.letter];
+    if(fromHidden || toHidden) return !!tlsHoaFilter[a.letter];
+    return !anyHoaFilterActive || !!tlsHoaFilter[a.letter];
   });
   if(!arrows.length) return;
   // Kích thước CSS thật (KHÔNG dùng cv.width/height - từ khi khớp devicePixelRatio, 2 giá trị đó đã bị nhân
@@ -2444,11 +2463,18 @@ async function atcExportToLapLaSo(){
 // ═══════════════════════════════════
 let tlsInited=false;
 let atcCurChart=null; // {sc,tenCung,vM,vT,thMap,daiHan,chiNamSinh,birthYear,hoTen,gioiTinh,ngayAm,ngayDuong,gioSinhLabel}
+// Lá số của sub-tab "Lập Lá Số" (ngày sinh thật) và "An Thủ Công" (chọn tay) giờ TÁCH RIÊNG - trước đây cả 2
+// cùng ghi đè lên atcCurChart, nên chọn tay bên An Thủ Công sẽ xóa mất lá số vừa lập bằng ngày sinh thật (và
+// ngược lại). atcCurChart luôn trỏ tới ĐÚNG lá số của sub-tab đang xem; switchAtcSubTab() tự đổi con trỏ này
+// mỗi lần đổi sub-tab. Khung Đại Vận/Lưu Niên/ẩn cung/lọc niên hóa VẪN dùng chung 1 bộ trạng thái cho cả 2
+// sub-tab như thiết kế cũ (không tách riêng theo yêu cầu).
+let atcChartBySub={lls:null, thucong:null};
 let tlsSelectedDaiVanIdx=null, tlsSelectedLuuNienYear=null;
 let tlsHiddenCung=new Set();
-// tlsHoaFilter giờ không còn là "bộ lọc ẩn/hiện chung" nữa (nút bấm, không phải checkbox) - mặc định TẮT hết,
-// chỉ có tác dụng "xuyên thấu" khi CHÍNH cung đó đang bị ẩn: bấm nút loại hóa nào thì lộ riêng niên hóa +
-// tự hóa (ly tâm/hướng tâm) của loại đó qua lớp ẩn; cung đang hiện thì luôn hiện đủ, không bị lọc bởi nút này.
+// tlsHoaFilter: mặc định TẮT hết (hiện đủ cả 4 loại). Bấm 1 (hoặc nhiều) nút Lộc/Quyền/Khoa/Kỵ sẽ CÔ LẬP
+// hiển thị - chỉ giữ lại đúng (các) loại đang bật, ẩn bớt loại còn lại - áp dụng cho TOÀN lá số (cả cung đang
+// hiện lẫn cung đang ẩn); bỏ bật hết (không nút nào bật) thì tự quay về hiện đủ. Riêng cung đang bị ẩn (luyện
+// trí nhớ, xem tlsHiddenCung): mặc định không hiện gì cả, chỉ nút đang bật mới "lộ" đúng loại đó qua lớp ẩn.
 let tlsHoaFilter={A:false,B:false,C:false,D:false};
 let tlsSelCity=null;
 
@@ -2525,6 +2551,7 @@ async function tlsLapLaSo(){
       hoTen:d.thongTin.hoTen, gioiTinh:d.thongTin.gioiTinh, ngayAm:d.thongTin.ngayAm, ngayDuong:d.thongTin.ngayDuong,
       gioSinhLabel:d.thongTin.gioSinh, canChiNam:d.thongTin.canChiNam, rawApiData:d,
     };
+    atcChartBySub.lls=atcCurChart;
     tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsHiddenCung=new Set();
     tlsHoaFilter={A:false,B:false,C:false,D:false};
     tlsRenderAll();
@@ -2560,12 +2587,47 @@ function tlsExportToSingle(){
 }
 function tlsRenderTuHoa(ky,hidden){
   if(!ky) return '';
-  if(hidden && !tlsHoaFilter[ky]) return ''; // cung đang ẩn: chỉ lộ badge nếu loại hóa đó đang được bấm "lộ"
+  if(hidden){
+    if(!tlsHoaFilter[ky]) return ''; // cung đang ẩn: chỉ lộ badge nếu loại hóa đó đang được bấm "lộ" (giữ nguyên)
+  }else{
+    // Cung đang hiện: có bộ lọc Lộc/Quyền/Khoa/Kỵ nào đang bật thì chỉ giữ lại đúng (các) loại đó, ẩn bớt loại
+    // còn lại (xem cùng bộ lọc anyHoaFilterActive ở atcDrawTuHoaArrows); không bật nút nào thì hiện đủ.
+    const anyHoaFilterActive=Object.values(tlsHoaFilter).some(v=>v);
+    if(anyHoaFilterActive && !tlsHoaFilter[ky]) return '';
+  }
   return `<span class="th th-${ky}">${ky}</span>`;
+}
+// Tập hợp các cung "liên quan" tới (các) loại hóa Lộc/Quyền/Khoa/Kỵ đang bật ở tlsHoaFilter - dùng để quyết
+// định cung nào được lộ đầy đủ khi lọc theo loại hóa (xem tlsRenderGrid). Phải gồm CẢ 2 nguồn:
+// (1) niên hóa (c.thMap: sao mang hóa theo Can năm sinh, áp cho đúng 1 sao duy nhất trên toàn lá số), VÀ
+// (2) tự hóa (atcComputeTuHoaFor: sao mang hóa theo Can RIÊNG của từng cung - ly tâm thì chỉ tính đúng cung
+// nguồn, hướng tâm thì tính thêm cả đối cung vì mũi tên bắt cặp sang đó) - nếu chỉ xét niên hóa như trước sẽ
+// bỏ sót mọi cung có tự hóa (vd Huynh Đệ tự hóa Quyền ly tâm ở Thiên Cơ, không liên quan gì tới niên hóa).
+function tlsRelevantCungSetForFilter(c){
+  const set=new Set();
+  const activeLetters=['A','B','C','D'].filter(l=>tlsHoaFilter[l]);
+  if(!activeLetters.length) return set;
+  for(let idx=0;idx<12;idx++){
+    const stars=(c.sc&&c.sc[idx])||(c.sc&&c.sc[String(idx)])||[];
+    if(c.thMap && stars.some(s=>activeLetters.includes(c.thMap[s.ten]))) set.add(idx);
+  }
+  if(c.tenCung){
+    for(let idx=0;idx<12;idx++){
+      if(!(c.tenCung[idx]||c.tenCung[String(idx)])) continue; // dữ liệu Can-Chi thiếu cung này - bỏ qua an toàn
+      atcComputeTuHoaFor(idx,c.sc,c.tenCung).forEach(a=>{
+        if(!activeLetters.includes(a.letter)) return;
+        set.add(a.from);
+        if(a.type==='cross') set.add(a.to);
+      });
+    }
+  }
+  return set;
 }
 function tlsRenderGrid(){
   const wrap=document.getElementById('atcPreviewGrid'); if(!wrap) return;
   const c=atcCurChart;
+  const anyHoaFilterActive=Object.values(tlsHoaFilter).some(v=>v);
+  const relevantCungSet=(anyHoaFilterActive && c) ? tlsRelevantCungSetForFilter(c) : null;
   let h='';
   for(let r=0;r<4;r++){
     for(let col=0;col<4;col++){
@@ -2591,17 +2653,35 @@ function tlsRenderGrid(){
       const starSpan=(s,cls)=>`<span class="sao ${cls}">${s.ten}${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden):''}</span>`;
       const hlCls=(tlsSelectedDaiVanIdx!==null && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx] && c.daiHan[tlsSelectedDaiVanIdx].cung===idx)?' hl-daivan':'';
       const hlLnCls=(tlsSelectedLuuNienYear!==null && chiOfYear(tlsSelectedLuuNienYear)===idx)?' hl-luunien':'';
-      if(hidden){
-        // Ẩn cung: ẩn TOÀN BỘ nội dung ô đó (Can-Chi, tên cung, đại vận, lưu niên...) - CHỈ TRỪ những sao đang
-        // mang loại hóa mà nút Lộc/Quyền/Khoa/Kỵ tương ứng đang bấm "lộ" (tlsHoaFilter[letter]===true), lộ ra
-        // đúng badge niên hóa của sao đó (mũi tên tự hóa ly tâm/hướng tâm xử lý riêng trong atcDrawTuHoaArrows).
-        const revealChinh=(c.thMap? chinhs.filter(s=>c.thMap[s.ten] && tlsHoaFilter[c.thMap[s.ten]]) : []);
-        const revealPhu=(c.thMap? phus.filter(s=>c.thMap[s.ten] && tlsHoaFilter[c.thMap[s.ten]]) : []);
-        h+= (revealChinh.length||revealPhu.length) ? `
-      <div class="cung tls-cung-hidden" data-idx="${idx}">
-        <div class="sao-chinh-wrap">${revealChinh.map(s=>starSpan(s,'chinh')).join('')}</div>
-        <div class="sao-phu-wrap">${revealPhu.map(s=>starSpan(s,'phu')).join('')}</div>
+      const cungMatchesFilter=anyHoaFilterActive && relevantCungSet.has(idx);
+      if(anyHoaFilterActive){
+        // Có ít nhất 1 nút Lộc/Quyền/Khoa/Kỵ đang bật (dù cung đang bị ẩn thủ công hay đang hiện bình thường):
+        // CHỈ cung nào có sao mang đúng loại hóa đang bật mới hiện - và hiện ĐỦ Can-Chi + cung chức + đại vận
+        // + lưu niên + TẤT CẢ tên sao của cung đó (không riêng gì sao mang loại hóa, để còn biết cung/vận/niên
+        // nào chứa hóa loại này), riêng badge THÂN vẫn không hiện. Cung không mang loại hóa đang bật thì ẩn
+        // trắng hoàn toàn, dù trước đó có đang bị ẩn thủ công hay không.
+        // Vẫn phải chừa 2 ô .dv-chuc/.ln-chuc (như bên nhánh hiện đủ bình thường) để tlsRenderDaiVanChuc/
+        // tlsRenderLuuNienChuc còn có chỗ ghi nhãn "an theo Đại Vận/Lưu Niên" khi 2 chế độ đó đang bật - thiếu
+        // 2 ô này thì querySelector trong 2 hàm đó không tìm thấy phần tử, nhãn lặng lẽ không hiện ra (không
+        // lỗi console, chỉ thiếu chữ). Thêm luôn hlCls/hlLnCls để tô sáng đúng cung đang là Đại Vận/Lưu Niên
+        // hiện hành, kể cả khi cung đó đang được lộ qua bộ lọc thay vì hiện bình thường.
+        h+= cungMatchesFilter ? `
+      <div class="cung tls-cung-hidden${hlCls}${hlLnCls}" data-idx="${idx}">
+        <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
+        ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
+        ${chuc?`<div class="cung-chuc">${chuc}</div>`:''}
+        <div class="sao-chinh-wrap">${chinhs.map(s=>starSpan(s,'chinh')).join('')}</div>
+        <div class="sao-phu-wrap">${phus.map(s=>starSpan(s,'phu')).join('')}</div>
+        <div class="ln">${ln}</div>
+        <div class="dv-chuc" data-idx="${idx}"></div>
+        <div class="ln-chuc" data-idx="${idx}"></div>
       </div>` : `<div class="cung tls-cung-hidden" data-idx="${idx}"></div>`;
+        continue;
+      }
+      if(hidden){
+        // Không có bộ lọc nào đang bật + cung đang bị ẩn thủ công -> ẩn trắng hoàn toàn (mặc định của tính
+        // năng "ẩn cung" để luyện trí nhớ).
+        h+=`<div class="cung tls-cung-hidden" data-idx="${idx}"></div>`;
         continue;
       }
       h+= `
@@ -4224,7 +4304,10 @@ function renderPhiHoaLookup(){
 // ═══════════════════════════════════
 function togglePlainBw(){
   document.body.classList.toggle('plain-bw');
-  document.getElementById('btnBangTrang').classList.toggle('active');
+  // Nút "Đổi màu" giờ có 2 bản sao (tab Nhập Thông Tin + tab An Thủ Công, cùng class .btn-plainbw) - đồng bộ
+  // trạng thái active của CẢ 2 theo cùng 1 state body.plain-bw, dù bấm từ bản nào.
+  const isPlainBw=document.body.classList.contains('plain-bw');
+  document.querySelectorAll('.btn-plainbw').forEach(b=>b.classList.toggle('active',isPlainBw));
   // Màu mũi tên/kí tự tự hóa+phi hóa nằm trong canvas (vẽ bằng JS, không phải CSS) - đổi class body không
   // tự cập nhật pixel đã vẽ, phải chủ động vẽ lại thì mới thấy đen trắng ngay. Badge niên hóa (.th) cũng đổi
   // kích thước theo plain-bw (20px→26px), khiến chiều cao ô cung/lưới đổi theo - phải sizeCanvas() (đo lại
@@ -4232,6 +4315,9 @@ function togglePlainBw(){
   // viền lưới mới. Áp dụng luôn cho cả 2 bên tab "2 Lá Số" (class đổi màu dùng chung cho body, canvas dual
   // không tự vẽ lại khi class đổi vì đang không active/visible lúc bấm).
   sizeCanvas();
+  // Nút giờ cũng có ở tab An Thủ Công - đo+vẽ lại luôn canvas bên đó (atcSizeCanvas tự bỏ qua an toàn nếu
+  // đang đo được 0×0 lúc tab này không hiển thị, xem giải thích ở sizeCanvas()).
+  atcSizeCanvas();
   // Tab "2 Lá Số"/"PLUS" đang hidden lúc bấm nút này (nút chỉ có ở tab lá số đơn) - offsetWidth/Height sẽ đọc
   // ra 0 nếu cứ resize ngay bây giờ, làm hỏng luôn canvas đang có. Để switchTopTab('dual'/'plus') tự đo+vẽ
   // lại đúng lúc tab đó hiện ra thay vì làm ở đây.
@@ -6448,8 +6534,8 @@ function buildDualSideHtml(side){
         <button class="step-label" id="dualNavLg_${side}" onclick="dualToggleLuuNguyet('${side}')">L.NGUYỆT</button>
         <button class="step-arrow" onclick="dualStepLuuNguyet('${side}',1)">&rsaquo;</button>
       </div>
-      <button class="tool-btn" onclick="dualFlyNienHoa('${side}','A')">N.Lộc</button>
-      <button class="tool-btn" onclick="dualFlyNienHoa('${side}','D')">N.Kỵ</button>
+      <button class="tool-btn dual-nloc-btn" id="dualNLoc_${side}" onclick="dualFlyNienHoa('${side}','A')">N.Lộc</button>
+      <button class="tool-btn dual-nky-btn" id="dualNKy_${side}" onclick="dualFlyNienHoa('${side}','D')">N.Kỵ</button>
       <button class="icon-btn" id="dualToolRect_${side}" title="Vẽ hình chữ nhật" onclick="dualSetDrawTool('${side}','rect')">
         <svg viewBox="0 0 24 24" width="15" height="15"><rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       </button>
@@ -6585,11 +6671,18 @@ function dualMustContinueKy(c,step,structureLetter){
 function dualComputeSingleChain(c,startIdx,letter,singleStepOnly,realAnchorSet){
   const step1=dualFlyFrom(c,startIdx,letter);
   if(!step1) return null;
+  // Gán màu cho step1 y hệt computeSingleChain bên lá số đơn - trước đây KHÔNG gán gì cả (color luôn
+  // undefined), khiến dualRedrawCanvas phải tự đoán màu lúc vẽ (chỉ phân biệt được đúng letter A, mọi
+  // trường hợp còn lại - B, C, VÀ CẢ D - đều bị vẽ chung 1 màu đen/vàng, mất hẳn bảng màu riêng theo cung
+  // (phiKyColorForCung) mà lá số đơn dùng để phân biệt nhiều đường phi Kị chồng nhau).
+  step1.color = singleStepOnly ? hoaArrowColor(letter)
+    : (letter==='A' ? hoaArrowColor('A') : (letter==='D' ? phiKyColorForCung(startIdx) : hoaArrowColor(letter)));
   const steps=[step1];
   if(singleStepOnly) return {from:startIdx,steps,structureLetter:letter};
   let step2=dualFlyFrom(c,step1.to,'D');
   if(step2 && step2.to===step1.from && step2.letter===step1.letter && step2.star===step1.star) step2=null;
   if(!step2) return {from:startIdx,steps,structureLetter:letter};
+  step2.color=hoaArrowColor('D');
   steps.push(step2);
   const visited=new Set([step1.to+':'+step1.star, step2.to+':'+step2.star]);
   let prev=step2;
@@ -6604,6 +6697,7 @@ function dualComputeSingleChain(c,startIdx,letter,singleStepOnly,realAnchorSet){
     const key=next.to+':'+next.star;
     if(visited.has(key)) break;
     visited.add(key);
+    next.color=hoaArrowColor('D');
     steps.push(next);
     prev=next;
   }
@@ -6622,6 +6716,7 @@ function dualExtendNienKyQuickChain(c,ch){
     const key=next.to+':'+next.star;
     if(visited.has(key)) break;
     visited.add(key);
+    next.color=hoaArrowColor('D');
     steps.push(next);
     prev=next;
     guard++;
@@ -6741,7 +6836,14 @@ function dualSizeCanvas(side){
   // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
   // tương tự ở sizeCanvas/atcSizeCanvas).
   const dpr=window.devicePixelRatio||1;
-  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  // Chốt cứng kích thước HIỂN THỊ (CSS px, style.width/height) về đúng số nguyên đã đo, thay vì để canvas tự
+  // co giãn theo width:100%/height:100% của CSS (.dual-side .ban-wrap canvas) - layout 2 cột chia đôi hàng
+  // ngang rất dễ ra số lẻ (vd 340.5px), khiến buffer (luôn phải là số nguyên px) và kích thước hiển thị thật
+  // LỆCH khỏi đúng tỉ lệ dpr, gây mờ nhẹ nhưng dai dẳng ngay từ đầu (khác lá số đơn: 1 cột, hiếm khi lẻ px).
+  // Ghim cả 2 vế (buffer và style) cùng dựa trên 1 số nguyên duy nhất để tỉ lệ luôn đúng tuyệt đối = dpr.
+  const cssW=Math.round(r.width), cssH=Math.round(r.height);
+  cv.style.width=cssW+'px'; cv.style.height=cssH+'px';
+  cv.width=cssW*dpr; cv.height=cssH*dpr;
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
 }
 // Lấy mốc gốc tọa độ từ chính CANVAS (không phải dualBanWrap_X) - lý do giống hệt cellRect/cellEdgeAnchor
@@ -6932,8 +7034,10 @@ function dualRedrawCanvas(side,preview){
       ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke(); ctx.restore();
     }
-    const color = isReverse ? s.color : (s.letter==='A' ? cs.getPropertyValue('--green').trim()
-      : (document.body.classList.contains('theme-dark') ? cs.getPropertyValue('--gold').trim() : '#000'));
+    // Trước đây bỏ qua hẳn s.color (chỉ set cho isReverse) - mọi mũi tên phi Thể/Dụng thường (letter B/C/D)
+    // đều bị vẽ chung 1 màu đen/vàng, mất bảng màu riêng theo cung (phiKyColorForCung) mà dualComputeSingleChain
+    // giờ đã gán đúng cho s.color, y hệt lá số đơn (drawPhiHoaChain dùng thẳng s.color, không tự đoán lại).
+    const color = s.color || cs.getPropertyValue('--green').trim();
     drawSkitchArrow(ctx,p1,p2,color);
     const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
     const ux=dx/len, uy=dy/len;
@@ -7552,6 +7656,7 @@ function dualSetMode(side,mode){
   dualRenderGrid(side);
   dualRedrawCanvas(side);
   dualRenderKetCau(side);
+  dualUpdateNienBtnState(side);
 }
 function dualToggleThe(side,offset){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
@@ -7605,6 +7710,17 @@ function dualFlyNienHoa(side,letter){
   dualRenderGrid(side);
   dualRedrawCanvas(side);
   dualRenderKetCau(side);
+  dualUpdateNienBtnState(side);
+}
+// Nút "N.Lộc"/"N.Kỵ" bên tab "2 Lá Số"/"PLUS" - trước đây KHÔNG có gì gọi hàm này cả (dualFlyNienHoa chỉ
+// cập nhật inst.nienGlowTarget, không đụng tới class CSS), nên bấm vào không hề đổi màu xanh lá/đỏ như bên
+// lá số đơn (nloc-btn/nky-btn + updateNienBtnState). Port lại y hệt cơ chế đó, dùng class riêng
+// (.dual-nloc-btn/.dual-nky-btn) để không bị hàm updateNienBtnState() bên lá số đơn quét nhầm vào.
+function dualUpdateNienBtnState(side){
+  const inst=dualInst[side]; if(!inst) return;
+  const locBtn=document.getElementById('dualNLoc_'+side), kyBtn=document.getElementById('dualNKy_'+side);
+  if(locBtn) locBtn.classList.toggle('active-loc', !!inst.nienGlowTarget.cat);
+  if(kyBtn) kyBtn.classList.toggle('active-ky', !!inst.nienGlowTarget.hung);
 }
 function dualRenderCgButtons(side){
   const inst=dualInst[side]; const c=inst.c;
@@ -7637,6 +7753,7 @@ function dualRenderAll(side){
   dualRedrawCanvas(side);
   dualUpdateStepperUI(side);
   dualRenderKetCau(side);
+  dualUpdateNienBtnState(side);
 }
 </script>
 </body>
