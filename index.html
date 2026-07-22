@@ -3810,16 +3810,15 @@ function recomputePhiHoaChainsRaw(){
   const theChains=[...st.the].map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
   let dungChains=[...st.dung].map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
   if(hoaFilterActive[hcMode]){
-    if(hcMode==='cat'){
-      // Lộc: mỗi cung Thể/Dụng đã chọn LUÔN là 1 gốc kết cấu độc lập riêng (xem computeKetCauStructures) -
-      // không còn đòi "Dụng phải kết nối riêng với Thể" như isDungConnectedToThe (quy tắc cũ, lỗi thời) -
-      // dùng lại ĐÚNG kết quả computeKetCauStructures để mũi tên trên lá số luôn khớp khối kết cấu bên trái,
-      // tránh mất mũi tên của 1 cung dù kết cấu vẫn tính nó hợp lệ (vd Thiên Di độc lập không "quy vu" Thể).
-      const validRoots=new Set(computeKetCauStructures('cat').flatMap(s=>s.memberIdxs||[s.anchorIdx]));
-      dungChains=dungChains.filter(ch=>validRoots.has(ch.from));
-    }else{
-      dungChains=dungChains.filter(ch=>isDungConnectedToThe(ch,theChains));
-    }
+    // Dùng lại ĐÚNG kết quả computeKetCauStructures (cả Lộc lẫn Kị) để mũi tên trên lá số luôn khớp khối kết
+    // cấu bên trái - không còn đòi "Dụng phải kết nối TRỰC TIẾP với Thể" như isDungConnectedToThe (quy tắc
+    // cũ, chỉ so Dụng với chính Thể, không biết gì về liên kết gián tiếp qua 1 Dụng khác hay qua Lưỡng đầu
+    // kiến Kị). Trước đây kết cấu Kị vẫn dùng isDungConnectedToThe riêng (chưa đồng bộ như Lộc), nên 1 Dụng
+    // chỉ liên kết được với Thể qua trung gian (vd Huynh Đệ/Tử Nữ chỉ nối vào Thể=Tật Ách qua Lưỡng đầu kiến
+    // Kị của Thiên Di, không đáp thẳng/đối cung với Tật Ách) bị lọc mất mũi tên khi bấm L.Kỵ, dù kết cấu bên
+    // trái vẫn tính nó hợp lệ.
+    const validRoots=new Set(computeKetCauStructures(hcMode).flatMap(s=>s.memberIdxs||[s.anchorIdx]));
+    dungChains=dungChains.filter(ch=>validRoots.has(ch.from));
   }
   let chains=[...theChains, ...dungChains];
   // Cung X là ĐÍCH ĐẾN của chính lượt hóa Kị GỐC (i=0) của 1 cung Thể/Dụng THẬT SỰ khác (Y) - nghĩa là đoạn
@@ -5087,9 +5086,15 @@ function spreadConvergingEndpoints(entries){
 function realMembersOfKetCau(s){
   const set=new Set([s.anchorIdx]);
   (s.convergences||[]).forEach(cv=>set.add(cv.otherIdx));
+  // Cung Thể/Dụng thật nằm ngay TRÊN mạch chính của root (bị đánh dấu "trùng lặp"/suppressed nên KHÔNG có
+  // trong convergences - xem giải thích ở spineRealMembers trong evalRoot) - vẫn phải tính là thành viên
+  // thật sự, nếu không "Thể là bắt buộc" sẽ loại oan 1 kết cấu mà Thể rõ ràng đang tham gia (chỉ là trên
+  // chính mạch của root thay vì là 1 nhánh hội tụ riêng).
+  (s.spineRealMembers||[]).forEach(idx=>set.add(idx));
   (s.merged||[]).forEach(m=>{
     set.add(m.anchorIdx);
     (m.convergences||[]).forEach(cv=>set.add(cv.otherIdx));
+    (m.spineRealMembers||[]).forEach(idx=>set.add(idx));
   });
   return set;
 }
@@ -5558,18 +5563,6 @@ function toggleHoaFilter(mode){
     redrawCanvas();
   }
 }
-function isDungConnectedToThe(dungChain,theChains){
-  if(!theChains.length) return true; // chưa chọn Thể thì chưa có gì để lọc theo
-  const theCungs=new Set(theChains.map(ch=>ch.from));
-  const theLanding=new Set();
-  theChains.forEach(ch=>ch.steps.forEach(s=>theLanding.add(s.to)));
-  for(const s of dungChain.steps){
-    if(theCungs.has(s.to)) return true; // Dụng quy vu Thể
-    if(theLanding.has(s.to)) return true; // Thể Dụng hợp nhất
-    for(const t of theCungs){ if(s.to===(t+6)%12) return true; } // Dụng xung phá Thể
-  }
-  return false;
-}
 // Mỗi cung Thể HOẶC Dụng (không phân biệt, cả 2 đều bình đẳng) đều có thể tự thành 1 KẾT CẤU riêng,
 // miễn đường bay của nó (từ bước 2 trở đi) chạm vào 1 cung khác cũng nằm trong tập Thể/Dụng đã chọn
 // ("miễn nó phi vào sao cung thể/dụng"). Với >=2 cung đã chọn, cung nào bay đi không chạm ai khác thì
@@ -5820,6 +5813,14 @@ function computeKetCauStructuresRaw(mode){
     // chọn)→Thiên Di(có chọn): Giao Hữu chen ngay từ bước đầu nên CẢ kết cấu này KHÔNG có trùng lặp phi hóa,
     // dù Phúc Đức→Thiên Di sau đó có liên tục Thể/Dụng với NHAU thì cũng không tính, vì không khởi từ gốc).
     let stillConsecutive=true;
+    // Cung THẬT SỰ thuộc Thể/Dụng (realAnchorSet) nằm ngay TRÊN mạch chính của root (kể cả khi bị đánh dấu
+    // "trùng lặp"/suppressed, tức bị 1 bước chuyển Kị "tiêu thụ" làm nguồn Can tái dùng) - vẫn phải được coi
+    // là 1 thành viên THẬT SỰ của kết cấu này (xem realMembersOfKetCau), vì nó chính là 1 phần nội dung của
+    // mạch chính, không kém gì 1 thành viên hội tụ độc lập. Trước đây bỏ sót hoàn toàn nhóm này (chỉ tính
+    // qua "convergences", vốn chỉ ghi nhận thành viên KHÔNG bị suppressed) - khiến 1 kết cấu có Thể nằm ngay
+    // trên mạch chính của root (vd Thể=Tật Ách, root=Mệnh, mạch Mệnh→Phúc→Tật→Tài→Mệnh) bị "Thể là bắt buộc"
+    // loại oan, dù rõ ràng Thể đang tham gia kết cấu (chỉ là qua vai trò "trùng lặp" trên mạch chính).
+    const spineRealMembers=new Set();
     steps.forEach((step,i)=>{
       if(i===0 && rootSelfLoop) return; // đã ghi ở dòng tiêu đề, không lặp lại "→ chính nó"
       // Niên Kị: tính ngay từ bước phi Kị GỐC (i=0), không cần đợi tới chuyển Kị - "Điền phi kỵ là 1 kỵ, có
@@ -5841,6 +5842,7 @@ function computeKetCauStructuresRaw(mode){
       // nên không được ghi nhãn "(trùng lặp)" (dễ hiểu lầm là 1 cung Thể/Dụng thật sự).
       const isSelectedHere = step.to===root || realAnchorSet.has(step.to);
       const isTrungLapCung = letter==='D' && hasNextStep && step.to!==root && stillConsecutive && realAnchorSet.has(step.to);
+      if(step.to!==root && realAnchorSet.has(step.to)) spineRealMembers.add(step.to);
       if(!isSelectedHere) stillConsecutive=false;
       const otherTags=bonus.tags.filter(t=>t!=='KXĐC');
       if(isTrungLapCung) otherTags.unshift('trùng lặp');
@@ -6100,7 +6102,7 @@ function computeKetCauStructuresRaw(mode){
       total+=1; nienCap.used=true;
       lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
     }
-    return {root, total, lines, chainSteps:steps, convergences, nienBonusNode, memberSubChains};
+    return {root, total, lines, chainSteps:steps, convergences, nienBonusNode, memberSubChains, spineRealMembers:[...spineRealMembers]};
   }
 
   const structures=[];
@@ -6149,7 +6151,7 @@ function computeKetCauStructuresRaw(mode){
     // ở nhiều kết cấu khác nhau.
     selected.forEach(root=>{
       const res=evalRoot(root, effectiveSelected, mainAnchorSet, mainSuppressed, trueSelectedSet);
-      if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains});
+      if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains, spineRealMembers:res.spineRealMembers});
     });
     // Loại bỏ kết cấu "nhỏ" mà CHÍNH triệu nhân cung của nó đã xuất hiện như 1 thành viên hội tụ TL (truy Lộc)
     // trong 1 kết cấu "lớn" khác - câu chuyện của nó đã được kể trọn vẹn trong kết cấu lớn kia rồi (cùng 1
@@ -6250,7 +6252,7 @@ function computeKetCauStructuresRaw(mode){
         // Cung KHÔNG nằm trong tập Thể/Dụng đã chọn thì không liên quan gì tới kết cấu, dù Can của nó có tình
         // cờ phi Kị thẳng vào gốc - không ghi vào kết cấu (trước đây có ghi thêm dạng "đã tính trong nền",
         // gây hiểu nhầm là cung đó cũng thuộc kết cấu).
-        structures.push({anchorIdx:final.root, memberIdxs:members, total:final.total, lines:final.lines, chainSteps:final.chainSteps, convergences:final.convergences, nienBonusNode:final.nienBonusNode, memberSubChains:final.memberSubChains, isolated});
+        structures.push({anchorIdx:final.root, memberIdxs:members, total:final.total, lines:final.lines, chainSteps:final.chainSteps, convergences:final.convergences, nienBonusNode:final.nienBonusNode, memberSubChains:final.memberSubChains, spineRealMembers:final.spineRealMembers, isolated});
       }
     });
   }
@@ -6264,7 +6266,7 @@ function computeKetCauStructuresRaw(mode){
     const extList=[autoIdx];
     const {anchorSetForThis:extAnchorSet, suppressed:extSuppressed}=computeSuppressed(extList);
     const res=evalRoot(autoIdx, extList, extAnchorSet, extSuppressed, new Set(effectiveSelected));
-    if(res) structures.push({anchorIdx:res.root, memberIdxs:extList, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains});
+    if(res) structures.push({anchorIdx:res.root, memberIdxs:extList, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains, spineRealMembers:res.spineRealMembers});
   });
 
   // ---- Lưỡng đầu kiến Kị (chỉ kết cấu Kị): 2 kết cấu HOÀN TOÀN riêng biệt (không chung cung nào, không
@@ -6280,32 +6282,42 @@ function computeKetCauStructuresRaw(mode){
     return set;
   };
   if(letter==='D' && structures.length>1){
-    const used=new Set();
-    const finalList=[];
-    for(let i=0;i<structures.length;i++){
-      if(used.has(i)) continue;
-      let combo=structures[i];
-      for(let j=i+1;j<structures.length;j++){
-        if(used.has(j)) continue;
-        const other=structures[j];
-        const setA=fullLandingSetOf(combo), setB=fullLandingSetOf(other);
-        let pair=null;
-        for(const a of setA){ if(setB.has((a+6)%12)){ pair={a,b:(a+6)%12}; break; } }
-        if(!pair) continue;
-        used.add(j);
-        combo={
-          anchorIdx:combo.anchorIdx, memberIdxs:[...combo.memberIdxs,...other.memberIdxs],
-          total:combo.total+other.total,
-          lines:[...combo.lines, `<li class="hoa-sub hoa-plus">⤷ lưỡng đầu kiến Kị với kết cấu ${label(other.anchorIdx)} (${label(pair.a)} đối ${label(pair.b)}) = +${other.total} Kị</li>`, ...other.lines],
-          chainSteps:combo.chainSteps, convergences:combo.convergences, nienBonusNode:combo.nienBonusNode,
-          memberSubChains:combo.memberSubChains,
-          merged:[...(combo.merged||[]), other], luongDauPairs:[...(combo.luongDauPairs||[]), pair]
-        };
+    // Lặp lại tới khi 1 lượt quét trọn không còn gộp thêm được cặp nào nữa (fixed-point) - 1 lượt quét duy
+    // nhất trước đây bỏ sót trường hợp gộp từ 3 kết cấu trở lên: nếu kết cấu C đáng lẽ lưỡng đầu kiến Kị với
+    // kết cấu A, nhưng A đã bị "dùng" (used) để gộp với B ngay trong CÙNG lượt quét đó (A đứng trước C trong
+    // mảng), thì C không bao giờ có cơ hội so sánh lại với kết cấu gộp A+B nữa - bị bỏ sót hẳn, tổng Kị tính
+    // thiếu (vd Mệnh+Huynh/Tử gộp trước, Thiên Di đáng lẽ gộp tiếp vào nhưng bị bỏ sót, thiếu +1 Kị của Di).
+    let changed=true;
+    while(changed){
+      changed=false;
+      const used=new Set();
+      const finalList=[];
+      for(let i=0;i<structures.length;i++){
+        if(used.has(i)) continue;
+        let combo=structures[i];
+        for(let j=i+1;j<structures.length;j++){
+          if(used.has(j)) continue;
+          const other=structures[j];
+          const setA=fullLandingSetOf(combo), setB=fullLandingSetOf(other);
+          let pair=null;
+          for(const a of setA){ if(setB.has((a+6)%12)){ pair={a,b:(a+6)%12}; break; } }
+          if(!pair) continue;
+          used.add(j);
+          changed=true;
+          combo={
+            anchorIdx:combo.anchorIdx, memberIdxs:[...combo.memberIdxs,...other.memberIdxs],
+            total:combo.total+other.total,
+            lines:[...combo.lines, `<li class="hoa-sub hoa-plus">⤷ lưỡng đầu kiến Kị với kết cấu ${label(other.anchorIdx)} (${label(pair.a)} đối ${label(pair.b)}) = +${other.total} Kị</li>`, ...other.lines],
+            chainSteps:combo.chainSteps, convergences:combo.convergences, nienBonusNode:combo.nienBonusNode,
+            memberSubChains:combo.memberSubChains, spineRealMembers:combo.spineRealMembers,
+            merged:[...(combo.merged||[]), other], luongDauPairs:[...(combo.luongDauPairs||[]), pair]
+          };
+        }
+        used.add(i);
+        finalList.push(combo);
       }
-      used.add(i);
-      finalList.push(combo);
+      structures.length=0; structures.push(...finalList);
     }
-    structures.length=0; structures.push(...finalList);
   }
 
   // Lưỡng đầu kiến Kị NGAY TRONG 1 kết cấu đã tự gộp sẵn (Thể/Dụng chạm nhau bình thường qua hội tụ/đáp
