@@ -3888,6 +3888,12 @@ function recomputePhiHoaChainsRaw(){
   // chuyển Kị ở CẢ HAI phía, mất hẳn cả 2 mũi tên (vd chọn Điền làm Thể, Mệnh làm Dụng: Điền phi Lộc → Mệnh,
   // Mệnh phi Lộc → Điền - 2 cạnh này dùng letter A, hoàn toàn khác và độc lập với 2 cạnh chuyển Kị letter D
   // tiếp theo của mỗi bên, không phải trùng lặp).
+  // Đã thử bỏ hẳn dedup cho kết cấu LỘC (vẽ đủ chuỗi riêng từng cung, chấp nhận đè lên nhau ở đoạn trùng) -
+  // nhưng đoạn trùng đè khít 2 mũi tên lên nhau lại rối mắt hơn, nên QUAY LẠI dùng dedup như cũ: đoạn chuyển
+  // Kị trùng khít giữa 2+ cung chỉ vẽ 1 lần. Đếm/lọc kết cấu (computeKetCauStructures, Đ.Lộc, khối "kết cấu"
+  // bên trái) KHÔNG dùng chains ở đây - đã tự tách riêng độc lập theo từng cung Thể/Dụng từ trước (xem
+  // computeKetCauStructuresRaw), nên dù mũi tên trên lá số gộp lại vẽ 1 lần, đếm/lọc vẫn đúng là 2 kết cấu
+  // riêng biệt như yêu cầu.
   chains=dedupSharedContinuations(chains, hcMode==='hung' ? realAnchorSet : null);
   st.quick.forEach((letter,idx)=>{
    try{
