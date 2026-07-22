@@ -227,10 +227,12 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .cg-btn.active{background:var(--panel);color:var(--accent);border-color:var(--accent)}
 .cg-btn.topic-hl{box-shadow:inset 0 0 0 2px var(--accent)}
 .cg-btn.disabled{opacity:.35;cursor:not-allowed}
-.topic-popup{position:absolute;top:100%;right:0;margin-top:6px;background:var(--panel);border:1px solid var(--border-lt);border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:10px;z-index:50;width:260px}
-.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.topic-btn{padding:8px 6px;border:1px solid var(--border-lt);border-radius:6px;background:var(--bg);font-size:.7rem;font-weight:500;color:var(--text);cursor:pointer;text-align:center}
-.topic-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.topic-popup{position:absolute;top:100%;right:0;margin-top:6px;background:var(--panel);border:1px solid var(--border-lt);border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:6px;z-index:50;width:190px}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.topic-btn{padding:5px 4px;border:1px solid var(--border-lt);border-radius:5px;background:var(--bg);font-size:.62rem;line-height:1.2;font-weight:500;color:var(--text);cursor:pointer;text-align:center}
+.topic-btn:not(.disabled):hover{background:var(--hover)}
+.topic-btn.active{background:#9ca3af;color:#fff;border-color:#9ca3af}
+.topic-btn.active:hover{background:#9ca3af}
 .topic-btn.disabled{opacity:.4;cursor:not-allowed}
 .cg-dot{position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%}
 .cg-dot.loc{background:var(--green)}
@@ -238,10 +240,13 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .sub-tabs{display:flex;gap:4px;margin:12px 0 8px}
 .sub-tab{flex:1;padding:6px 6px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.64rem;font-weight:400}
 .sub-tab.active{background:#16a34a;border-color:#16a34a;color:#fff}
-.sub-content{font-size:.8rem;min-height:160px;max-height:340px;overflow-y:auto;padding-right:4px}
-.sub-content .placeholder{color:var(--muted);font-style:italic;text-align:center;padding:26px 8px;line-height:1.5}
+.sub-content{font-size:.8rem;max-height:340px;overflow-y:auto;padding-right:4px}
+.sub-content .placeholder{color:var(--muted);font-style:italic;text-align:center;padding:8px;line-height:1.5}
 .sub-head{margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border-lt)}
 .meaning-badge{font-size:.6rem;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:1px 4px;margin-left:4px}
+.sub-head-meaning{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.meaning-close-btn{flex:0 0 auto;width:18px;height:18px;line-height:16px;padding:0;border:1px solid var(--border-lt);border-radius:50%;background:var(--bg);color:var(--muted);font-size:.62rem;cursor:pointer}
+.meaning-close-btn:hover{background:var(--hover);color:var(--text)}
 .mr-sub-title{font-size:.72rem;font-weight:700;color:var(--maroon);margin-top:8px;margin-bottom:3px}
 .mr-luu-y{margin-top:8px;padding:7px 9px;background:var(--hover);border:1px solid var(--border-lt);border-radius:5px;font-size:.75rem;font-style:italic;color:var(--muted)}
 .sub-list li{list-style:none;padding:5px 0;border-bottom:1px dashed var(--border-lt);display:flex;align-items:center;gap:6px}
@@ -406,12 +411,14 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-year-input{width:56px;padding:1px 4px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.72rem;text-align:center}
 
 /* -- right toolbar -- */
-.sidebar-right{width:88px;flex-shrink:0;padding:16px 5px 6px;display:flex;flex-direction:column;gap:5px;align-items:stretch;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.sidebar-right{width:88px;flex-shrink:0;padding:44px 5px 6px;display:flex;flex-direction:column;gap:5px;align-items:stretch;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 .tool-btn{padding:5px 2px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.58rem;font-weight:500;text-align:center}
 .tool-btn:hover{background:var(--hover)}
 .tool-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 /* Riêng Ẩn/Hiện Tự Hóa và Lập Cực: chỉ viền màu khi bật, không tô nền đặc như các tool-btn khác. */
 #btnTuHoaCross.active,#btnLapCuc.active{background:var(--panel);color:var(--accent);border-color:var(--accent)}
+/* L.Kỵ/Đ.Kỵ/L.Lộc/Đ.Lộc: nền xám khi đang bật (khác màu xanh dương mặc định của .tool-btn.active). */
+#btnLKy.active,#btnDKy.active,#btnLLoc.active,#btnDLoc.active{background:#9ca3af;color:#fff;border-color:#9ca3af}
 .tool-btn.orange{border-color:#c8790a;color:#c8790a}
 .topic-wrap{position:relative;width:100%}
 .topic-wrap .tool-btn{width:100%}
@@ -1060,7 +1067,6 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
     <aside class="sidebar-left">
       <div class="sb-tabs">
         <button class="sb-tab active" data-sbtab="thedung" onclick="switchSbTab('thedung')">THỂ/DỤNG</button>
-        <button class="sb-tab" data-sbtab="ketcau" onclick="switchSbTab('ketcau')">KẾT CẤU</button>
         <button class="sb-tab" data-sbtab="phihoa" onclick="switchSbTab('phihoa')">TƯỢNG PHI HÓA</button>
       </div>
 
@@ -1083,12 +1089,8 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
           <button class="sub-tab" data-sub="su" onclick="switchSub('su')">SỰ</button>
           <button class="sub-tab" data-sub="vat" onclick="switchSub('vat')">VẬT</button>
         </div>
-        <div class="sub-content" id="subContent"><p class="placeholder">Chọn một cung trên lá số để xem thông tin Gốc</p></div>
-      </div>
-
-      <div class="sb-content" id="sbKetCau" hidden>
+        <div class="sub-content" id="subContent"></div>
         <div id="hoaStructureBox" class="hoa-structure-box" hidden></div>
-        <div class="sub-content" id="subContentKetCau"><p class="placeholder">Đè giữ 2 giây vào 1 cung trên lá số để xem ý nghĩa cung.</p></div>
       </div>
 
       <div class="sb-content" id="sbPhihoa" hidden>
@@ -1143,7 +1145,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
         <button class="step-arrow" onclick="stepLapCuc(1)">&rsaquo;</button>
       </div>
       <div class="topic-wrap">
-        <button class="tool-btn orange" onclick="toggleChuDePopup()">CHỦ ĐỀ</button>
+        <button class="tool-btn orange" id="chuDeBtn" onclick="toggleChuDePopup()">CHỦ ĐỀ</button>
         <div class="topic-popup" id="topicPopup" hidden>
           <div class="topic-grid" id="topicGrid"></div>
         </div>
@@ -2323,6 +2325,9 @@ function atcSizeCanvas(){
   // Đo chính canvas, không đo atcBanWrap (có border riêng, lớn hơn kích thước canvas thật - xem giải thích ở
   // sizeCanvas()).
   const r=cv.getBoundingClientRect();
+  // Bỏ qua khi đo 0×0 (xem giải thích chi tiết ở sizeCanvas() - tránh canvas bị kẹt kích thước 0 khi resize
+  // giả bắn ra lúc tab đang ẩn).
+  if(r.width<=0 || r.height<=0) return;
   // Khớp buffer canvas với mật độ điểm ảnh thật (devicePixelRatio) - nếu không, màn hình HiDPI/Retina sẽ
   // vẽ mờ (buffer ít điểm ảnh hơn số điểm ảnh thật cần hiển thị, trình duyệt phải phóng to/nội suy).
   const dpr=window.devicePixelRatio||1;
@@ -2800,6 +2805,18 @@ window.onload=()=>{
   buildPhiHoaSelects();
   window.addEventListener('resize',sizeCanvas);
 };
+// Tab vừa hiện lại sau 1 thời gian bị ẩn (chuyển qua tab/app khác, thu nhỏ trình duyệt, máy sleep...) -
+// trong lúc ẩn, trình duyệt có thể đã bắn 1 sự kiện "resize" giả lúc canvas đo được 0×0 (đã bị chặn không
+// cho set width/height ở sizeCanvas/atcSizeCanvas/dualSizeCanvas, xem giải thích ở sizeCanvas()), nên đo lại
+// + vẽ lại toàn bộ canvas đang hiển thị 1 lần nữa cho chắc ăn khi tab visible trở lại.
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible') return;
+  sizeCanvas();
+  atcSizeCanvas();
+  const panel2=document.getElementById('panel2LaSo'), panelPlus=document.getElementById('panelPlus');
+  if(panel2 && !panel2.hidden) ['A','B'].forEach(side=>{ if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); } });
+  if(panelPlus && !panelPlus.hidden) ['C','D'].forEach(side=>{ if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); } });
+});
 
 // ═══════════════════════════════════
 // TỨ HÓA
@@ -3182,9 +3199,7 @@ function switchSbTab(name){
   sbTab=name;
   document.querySelectorAll('.sb-tab').forEach(t=>t.classList.toggle('active',t.dataset.sbtab===name));
   document.getElementById('sbThedung').hidden = name!=='thedung';
-  document.getElementById('sbKetCau').hidden = name!=='ketcau';
   document.getElementById('sbPhihoa').hidden = name!=='phihoa';
-  if(name==='ketcau'){ renderHoaStructureBox(); renderSubContent(); }
 }
 // -- TRA CAN: bấm 1 Thiên Can -> tự phi Lộc/Kị từ đúng cung đang mang Can đó (đỡ phải tự mò cung nào có Can gì) --
 // "Tra Can" đồng nhất với tổ hợp Thể/Dụng (KHÔNG dùng cơ chế quick-fly riêng nữa) - bấm 1 Thiên Can sẽ tự
@@ -3374,8 +3389,19 @@ function resetHcState(mode){
     actionLog=[]; actionRedoLog=[];
   }
   const btnLKy=document.getElementById('btnLKy'), btnLLoc=document.getElementById('btnLLoc');
-  if(!mode || mode==='hung'){ if(btnLKy) btnLKy.classList.remove('active'); }
-  if(!mode || mode==='cat'){ if(btnLLoc) btnLLoc.classList.remove('active'); }
+  const btnDKy=document.getElementById('btnDKy'), btnDLoc=document.getElementById('btnDLoc');
+  const hoaCountLabelEl=document.getElementById('hoaCountLabel');
+  if(!mode || mode==='hung'){
+    if(btnLKy) btnLKy.classList.remove('active');
+    if(btnDKy) btnDKy.classList.remove('active');
+    hoaCountActive.hung=false;
+  }
+  if(!mode || mode==='cat'){
+    if(btnLLoc) btnLLoc.classList.remove('active');
+    if(btnDLoc) btnDLoc.classList.remove('active');
+    hoaCountActive.cat=false;
+  }
+  if(hoaCountLabelEl) hoaCountLabelEl.textContent='';
 }
 function setHungCat(mode){
   hcMode=mode;
@@ -3900,6 +3926,13 @@ function showCungMeaning(idx){
   renderSidebarCungButtons();
   renderSubContent();
 }
+function closeCungMeaning(){
+  subContentMode='stars';
+  selectedCungIdx=null;
+  document.querySelectorAll('#banWrap .cung').forEach(el=>el.classList.remove('sel-ring'));
+  renderSidebarCungButtons();
+  renderSubContent();
+}
 function onCungClick(idx){
   if(longPressFired){ longPressFired=false; return; }
   if(lapCucPicking){
@@ -3918,38 +3951,21 @@ function switchSub(name){
 function subTabLabel(){ return {goc:'Gốc',nhan:'Nhân',su:'Sự',vat:'Vật'}[subTab]; }
 function renderSubContent(){
   const c=chart();
-  const onKetCauTab = sbTab==='ketcau';
-  const box=document.getElementById(onKetCauTab ? 'subContentKetCau' : 'subContent');
+  const box=document.getElementById('subContent');
   if(!box) return;
-  if(!c || selectedCungIdx===null){
-    box.innerHTML = onKetCauTab
-      ? `<p class="placeholder">Đè giữ 2 giây vào 1 cung trên lá số để xem ý nghĩa cung.</p>`
-      : `<p class="placeholder">Chọn một cung trên lá số để xem thông tin ${subTabLabel()} (bấm giữ 2 giây để xem ý nghĩa cung)</p>`;
+  if(c && selectedCungIdx!==null && subContentMode==='meaning'){
+    renderCungMeaningContent(c, selectedCungIdx, box);
     return;
   }
-  if(subContentMode==='meaning'){ renderCungMeaningContent(c, selectedCungIdx, box); return; }
-  if(onKetCauTab) return; // tab Kết cấu chỉ hiện ý nghĩa cung (đè giữ), không hiện danh sách sao Gốc/Nhân/Sự/Vật
-  const idx=selectedCungIdx;
-  const stars=c.data.saoCung[String(idx)]||[];
-  const chinh=stars.filter(s=>s.loai==='chinh');
-  const phu=stars.filter(s=>s.loai==='phu');
-  const canChi=c.data.tenCung[String(idx)]||DC[idx];
-  const chuc=cungChucOf(idx,c.vM);
-  let list;
-  if(subTab==='goc') list=[...chinh,...phu];
-  else if(subTab==='nhan') list=chinh;
-  else if(subTab==='su') list=phu;
-  else list=[...chinh,...phu].filter(s=>c.thMap[s.ten]);
-  let html=`<div class="sub-head"><b>${canChi}</b> &mdash; ${chuc}</div>`;
-  if(!list.length) html+=`<p class="placeholder">Không có dữ liệu.</p>`;
-  else html+=`<ul class="sub-list">`+list.map(s=>`<li>${s.ten}${renderTuHoa(c.thMap[s.ten])}</li>`).join('')+`</ul>`;
-  box.innerHTML=html;
+  // Bấm thường (mode 'stars') không hiện gì ở đây nữa - để trống hẳn cho khối kết cấu (hoaStructureBox)
+  // nằm sát ngay dưới Gốc/Nhân/Sự/Vật. Đè giữ 2 giây vẫn hiện ý nghĩa cung (nhánh trên xử lý riêng).
+  box.innerHTML = '';
 }
 function renderCungMeaningContent(c, idx, box){
   if(!box) box=document.getElementById('subContent');
   const canChi=c.data.tenCung[String(idx)]||DC[idx];
   const chuc=cungChucOf(idx,c.vM);
-  let html=`<div class="sub-head"><b>${canChi}</b> &mdash; ${chuc} <span class="meaning-badge">Ý nghĩa cung</span></div>`;
+  let html=`<div class="sub-head sub-head-meaning"><span><b>${canChi}</b> &mdash; ${chuc} <span class="meaning-badge">Ý nghĩa cung</span></span><button class="meaning-close-btn" title="Đóng ý nghĩa cung" onclick="closeCungMeaning()">✕</button></div>`;
   if(typeof MUOI_HAI_CUNG==='undefined'){
     html+='<p class="placeholder">Chưa tải được dữ liệu ý nghĩa cung.</p>';
     box.innerHTML=html; return;
@@ -4283,7 +4299,7 @@ function stepLapCuc(dir){
 // ═══════════════════════════════════
 const TOPIC_LIST=[
   {key:'tinh_cach',label:'Tính cách'},{key:'gia_dao',label:'Gia đạo'},
-  {key:'xuat_than',label:'Xuất thân'},{key:'tinh_cam',label:'Tình cảm'},
+  {key:'xuat_than',label:'Xuất thân'},{key:'hon_nhan_bame',label:'Hôn nhân ba mẹ'},
   {key:'su_nghiep',label:'Thành tựu sự nghiệp'},{key:'hoc_hanh',label:'Duyên học hành'},
   {key:'hon_nhan',label:'Hôn nhân'},{key:'cao_thap',label:'Cao/thấp'},
   {key:'map_om',label:'Mập/ốm'},{key:'dung_mao',label:'Dung mạo'},
@@ -4297,10 +4313,20 @@ const TOPIC_THE_DUNG={
   gia_dao:{the:['Điền Trạch'],dung:['Mệnh','Phúc Đức','Thiên Di']},
   su_nghiep:{the:['Huynh Đệ'],dung:['Mệnh','Phúc Đức','Thiên Di']},
   suc_khoe:{the:['Tật Ách'],dung:['Mệnh','Phúc Đức','Thiên Di','Tử Nữ','Huynh Đệ']},
-  hoc_hanh:{the:['Phụ Mẫu'],dung:['Mệnh','Phúc Đức','Thiên Di']},
-  hon_nhan:{the:['Phu Thê'],dung:[]},
+  // Dụng còn gồm cung đang mang niên A (Lộc)/niên D (Kỵ) - chọn qua nút "N.Lộc"/"N.Kỵ" riêng, không lưu ở đây.
+  xuat_than:{the:['Điền Trạch'],dung:['Mệnh','Phúc Đức','Thiên Di','Tật Ách','Phụ Mẫu']},
+  hoc_hanh:{the:['Phụ Mẫu','Sự Nghiệp'],dung:['Mệnh','Phúc Đức','Thiên Di']},
+  hon_nhan_bame:{the:['Phụ Mẫu','Huynh Đệ','Điền Trạch'],dung:['Phúc Đức','Thiên Di']},
+  hon_nhan:{the:['Phu Thê','Điền Trạch','Phụ Mẫu'],dung:['Mệnh','Phúc Đức','Thiên Di']},
   tinh_cach:{the:['Mệnh','Tật Ách','Phúc Đức'],dung:[]},
-  tai_nan:{the:['Tật Ách','Thiên Di','Tử Nữ'],dung:['Mệnh','Phúc Đức','Huynh Đệ']},
+  tai_nan:{the:['Thiên Di','Tật Ách','Tử Nữ'],dung:['Mệnh','Phúc Đức']},
+  cao_thap:{the:['Tật Ách'],dung:['Mệnh','Phụ Mẫu','Thiên Di']},
+  map_om:{the:['Tật Ách'],dung:['Mệnh','Phụ Mẫu','Phúc Đức','Thiên Di']},
+  dung_mao:{the:['Phụ Mẫu','Thiên Di'],dung:['Mệnh']},
+  duyen_con_cai:{the:['Tử Nữ'],dung:['Mệnh','Điền Trạch']},
+  can_co:{the:['Thiên Di','Phúc Đức','Tử Nữ'],dung:['Mệnh','Tật Ách']},
+  di_chuyen:{the:['Thiên Di','Tật Ách','Điền Trạch'],dung:['Mệnh','Phúc Đức']},
+  thi_phi:{the:['Mệnh','Phúc Đức','Tật Ách'],dung:['Thiên Di','Phụ Mẫu']},
 };
 let activeTopicKey=null;
 function toggleChuDePopup(){
@@ -4332,6 +4358,13 @@ function sizeCanvas(){
   // px so với kích thước hiển thị thật, trình duyệt phải co giãn/nội suy lại toàn bộ hình -> MỌI a hình vẽ
   // (chữ ABCD, mũi tên đủ màu...) đều bị mờ nhẹ như nhau, không riêng gì phần đang tô cam khi chọn.
   const r=cv.getBoundingClientRect();
+  // Bỏ qua khi đo được 0×0 (canvas đang ẩn/tab nền lúc sự kiện resize bắn ra, hoặc đang giữa 1 lần layout
+  // dang dở) - nếu cứ set cv.width/height theo giá trị 0 này, canvas sẽ bị xóa trắng (set .width/.height dù
+  // cùng giá trị cũ vẫn luôn xóa buffer) và KẸT LUÔN ở kích thước 0 cho tới lần resize hợp lệ kế tiếp. Mọi
+  // mũi tên phi hóa vẽ sau đó (redrawCanvas) coi như biến mất dù dữ liệu Thể/Dụng vẫn tính đúng - không có
+  // lỗi console vì canvas vẫn "vẽ được", chỉ là vẽ vào 1 buffer rỗng. Đây là nguyên nhân của lỗi "để 1 thời
+  // gian rồi đơ, bấm cung không ra phi hóa" (resize giả bắn ra khi tab bị ẩn lâu/máy sleep rồi thức dậy).
+  if(r.width<=0 || r.height<=0) return;
   const dpr=window.devicePixelRatio||1;
   cv.width=r.width*dpr; cv.height=r.height*dpr;
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
@@ -4396,6 +4429,13 @@ document.addEventListener('click',(e)=>{
   if(pop && !pop.hidden && !pop.contains(e.target) && e.target.id!=='colorSwatchBtn') pop.hidden=true;
   const fsPop=document.getElementById('fontSizePopup');
   if(fsPop && !fsPop.hidden && !fsPop.contains(e.target) && e.target.id!=='toolText') fsPop.hidden=true;
+  const topicPop=document.getElementById('topicPopup');
+  // Dùng composedPath() thay vì topicPop.contains(e.target): bấm 1 chủ đề sẽ gọi renderTopicPopup() làm mới
+  // innerHTML NGAY trong lúc bubble, khiến e.target (nút cũ) bị gỡ khỏi DOM trước khi tới listener này ở
+  // document - lúc đó contains() luôn trả false dù bấm bên trong khung, làm khung tự đóng ngoài ý muốn.
+  const path=e.composedPath?e.composedPath():[];
+  const clickedChuDeBtn=document.getElementById('chuDeBtn');
+  if(topicPop && !topicPop.hidden && !path.includes(topicPop) && e.target!==clickedChuDeBtn) topicPop.hidden=true;
 });
 function applyHcSnapshot(snap){
   hcState=snap;
@@ -6249,12 +6289,18 @@ function hoaCountLabelText(n,letter){
   if(n<=0) return '0';
   return n + (names[n] ? ' ('+names[n]+')' : n>4 ? ' (Sụp đổ)' : '');
 }
+let hoaCountActive={hung:false, cat:false};
 function countHoaAndShow(mode){
+  hoaCountActive[mode]=!hoaCountActive[mode];
+  const btnId = mode==='hung' ? 'btnDKy' : 'btnDLoc';
+  const btn=document.getElementById(btnId);
+  if(btn) btn.classList.toggle('active', hoaCountActive[mode]);
+  const el=document.getElementById('hoaCountLabel');
+  if(!el) return;
+  if(!hoaCountActive[mode]){ el.textContent=''; return; }
   const structures=computeKetCauStructures(mode);
   const letter=mode==='cat'?'A':'D';
   const label=mode==='hung'?'Kị: ':'Lộc: ';
-  const el=document.getElementById('hoaCountLabel');
-  if(!el) return;
   el.textContent = label + (structures.length ? structures.map(s=>hoaCountLabelText(s.total,letter)).join(' | ') : '0');
 }
 // Ghi ra từng kết cấu riêng biệt bên khối THỂ/DỤNG (góc trái) khi nút lọc L.Kỵ/L.Lộc đang bật -
@@ -6689,6 +6735,9 @@ function dualSizeCanvas(side){
   // Đo chính canvas, không đo dualBanWrap (có border riêng, lớn hơn kích thước canvas thật - xem giải thích
   // ở sizeCanvas()).
   const r=cv.getBoundingClientRect();
+  // Bỏ qua khi đo 0×0 (xem giải thích chi tiết ở sizeCanvas() - tránh canvas bị kẹt kích thước 0 khi resize
+  // giả bắn ra lúc tab đang ẩn).
+  if(r.width<=0 || r.height<=0) return;
   // Khớp buffer canvas với devicePixelRatio thật - tránh mờ nét trên màn hình HiDPI/Retina (xem giải thích
   // tương tự ở sizeCanvas/atcSizeCanvas).
   const dpr=window.devicePixelRatio||1;
