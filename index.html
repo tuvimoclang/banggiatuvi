@@ -919,6 +919,10 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
               </div>
             </div>
             <button class="btn-dark" style="width:100%" onclick="tlsLapLaSo()">Lập lá số</button>
+            <div class="btn-row" style="margin-top:8px">
+              <button class="btn-purple" onclick="luuKhoLaSo('tls')">Lưu Kho</button>
+              <button class="btn-brown" onclick="openKhoLaSo('tls')">Kho LS</button>
+            </div>
           </div>
           <div id="tlsError" class="atc-error"></div>
         </div>
@@ -1344,14 +1348,38 @@ function khoLoadCategories() { return JSON.parse(localStorage.getItem(getKhoCatK
 function khoSaveCategories(cats) { localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(cats)); }
 let khoActiveCategory = 'ALL'; // 'ALL' | 'UNASSIGNED' | tên danh mục
 let khoSearchQuery = '';
+// Lưu Kho/Kho LS giờ dùng chung 1 modal + 1 danh sách localStorage cho MỌI tab (trước đây chỉ đọc/ghi cứng
+// vào form #hoTen/#ngayDD... của riêng tab "Nhập Thông Tin") - khoSource nhớ ĐANG bấm từ form nào (đặt khi
+// mở luuKhoModal/khoModal), để confirmLuuKho() đọc đúng form và moKhoItem() điền lại + lập đúng vào form đó.
+let khoSource = 'single';
+const KHO_SOURCES = {
+  single: {hoTen:'hoTen', dd:'ngayDD', mm:'ngayMM', yyyy:'ngayYYYY', gio:'gioSinh', gioiTinh:'gioiTinh', lich:'lichBtn',
+    lichText:v=>v==='am'?'ÂM LỊCH':'DƯƠNG LỊCH',
+    submit:()=>{ if(!isActivated){ flashCodeBar(); return; } lapLaSo(); }},
+  tls: {hoTen:'tlsHoTen', dd:'tlsNgayDD', mm:'tlsNgayMM', yyyy:'tlsNgayYYYY', gio:'tlsGioSinh', gioiTinh:'tlsGioiTinh', lich:'tlsLichBtn',
+    lichText:v=>v==='am'?'ÂM LỊCH':'DƯƠNG LỊCH',
+    submit:()=>tlsLapLaSo()},
+  dualA:{hoTen:'dualHoTen_A', dd:'dualDD_A', mm:'dualMM_A', yyyy:'dualYYYY_A', gio:'dualGioSinh_A', gioiTinh:'dualGioiTinh_A', lich:'dualLichBtn_A',
+    lichText:v=>v==='am'?'AL':'DL', submit:()=>dualLapLaSo('A')},
+  dualB:{hoTen:'dualHoTen_B', dd:'dualDD_B', mm:'dualMM_B', yyyy:'dualYYYY_B', gio:'dualGioSinh_B', gioiTinh:'dualGioiTinh_B', lich:'dualLichBtn_B',
+    lichText:v=>v==='am'?'AL':'DL', submit:()=>dualLapLaSo('B')},
+  dualC:{hoTen:'dualHoTen_C', dd:'dualDD_C', mm:'dualMM_C', yyyy:'dualYYYY_C', gio:'dualGioSinh_C', gioiTinh:'dualGioiTinh_C', lich:'dualLichBtn_C',
+    lichText:v=>v==='am'?'AL':'DL', submit:()=>dualLapLaSo('C')},
+  dualD:{hoTen:'dualHoTen_D', dd:'dualDD_D', mm:'dualMM_D', yyyy:'dualYYYY_D', gio:'dualGioSinh_D', gioiTinh:'dualGioiTinh_D', lich:'dualLichBtn_D',
+    lichText:v=>v==='am'?'AL':'DL', submit:()=>dualLapLaSo('D')},
+};
 // Bấm "Lưu Kho" chỉ MỞ hộp thoại chọn danh mục/ghi chú trước - việc lưu thật sự nằm ở confirmLuuKho(),
 // bấm "Lưu vào thư viện" trong hộp thoại đó mới ghi vào localStorage.
-function luuKhoLaSo() {
+// source: khớp 1 key trong KHO_SOURCES ('single'/'tls'/'dualA'/'dualB'/'dualC'/'dualD') - bỏ trống mặc định
+// 'single' để không phá vỡ chỗ gọi cũ (nút Lưu Kho gốc bên tab Nhập Thông Tin không cần sửa lời gọi).
+function luuKhoLaSo(source) {
+  khoSource = source || 'single';
+  const f = KHO_SOURCES[khoSource];
   if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập Google để lưu vào Kho.'); return; }
-  const hoTen = document.getElementById('hoTen').value.trim();
-  const ngayDD = document.getElementById('ngayDD').value;
-  const ngayMM = document.getElementById('ngayMM').value;
-  const ngayYYYY = document.getElementById('ngayYYYY').value;
+  const hoTen = document.getElementById(f.hoTen).value.trim();
+  const ngayDD = document.getElementById(f.dd).value;
+  const ngayMM = document.getElementById(f.mm).value;
+  const ngayYYYY = document.getElementById(f.yyyy).value;
   if (!hoTen || !ngayDD || !ngayMM || !ngayYYYY) { alert('Nhập đủ họ tên và ngày sinh trước khi lưu vào Kho.'); return; }
   document.getElementById('lkNameDisplay').textContent = hoTen;
   document.getElementById('lkGhiChu').value = '';
@@ -1377,18 +1405,19 @@ function lkQuickCreateCategory() {
   input.value = '';
 }
 function confirmLuuKho() {
-  const hoTen = document.getElementById('hoTen').value.trim();
-  const ngayDD = document.getElementById('ngayDD').value;
-  const ngayMM = document.getElementById('ngayMM').value;
-  const ngayYYYY = document.getElementById('ngayYYYY').value;
+  const f = KHO_SOURCES[khoSource];
+  const hoTen = document.getElementById(f.hoTen).value.trim();
+  const ngayDD = document.getElementById(f.dd).value;
+  const ngayMM = document.getElementById(f.mm).value;
+  const ngayYYYY = document.getElementById(f.yyyy).value;
   if (!hoTen || !ngayDD || !ngayMM || !ngayYYYY) { closeLuuKhoModal(); return; }
   const record = {
     id: Date.now(),
     hoTen,
-    lichLoai: document.getElementById('lichBtn').dataset.val,
+    lichLoai: document.getElementById(f.lich).dataset.val,
     ngayDD, ngayMM, ngayYYYY,
-    gioSinh: document.getElementById('gioSinh').value,
-    gioiTinh: document.getElementById('gioiTinh').value,
+    gioSinh: document.getElementById(f.gio).value,
+    gioiTinh: document.getElementById(f.gioiTinh).value,
     savedAt: new Date().toISOString(),
     category: document.getElementById('lkCategorySelect').value || null, // '' = "Chưa phân loại"
     ghiChu: document.getElementById('lkGhiChu').value.trim(),
@@ -1538,7 +1567,9 @@ function saveKhoNoteEdit(id) {
   khoEditingNotes.delete(id);
   renderKhoLaSoList();
 }
-function openKhoLaSo() {
+// source: giống luuKhoLaSo() - nhớ ĐANG mở Kho từ form nào, để moKhoItem() biết điền lại + lập vào đúng form đó.
+function openKhoLaSo(source) {
+  khoSource = source || 'single';
   if (!currentUser || !currentUser.email) { alert('Vui lòng đăng nhập Google để xem Kho.'); return; }
   khoActiveCategory = 'ALL'; khoSearchQuery = '';
   const si = document.getElementById('khoSearchInput'); if (si) si.value = '';
@@ -1551,17 +1582,18 @@ function closeKhoLaSo() {
 function moKhoItem(id) {
   const list = khoLoadList();
   const r = list.find(x => x.id === id); if (!r) return;
-  document.getElementById('hoTen').value = r.hoTen;
-  document.getElementById('ngayDD').value = r.ngayDD;
-  document.getElementById('ngayMM').value = r.ngayMM;
-  document.getElementById('ngayYYYY').value = r.ngayYYYY;
-  document.getElementById('gioSinh').value = r.gioSinh;
-  document.getElementById('gioiTinh').value = r.gioiTinh;
-  const lichBtn = document.getElementById('lichBtn');
-  if (lichBtn.dataset.val !== r.lichLoai) toggleLich();
+  const f = KHO_SOURCES[khoSource];
+  document.getElementById(f.hoTen).value = r.hoTen;
+  document.getElementById(f.dd).value = r.ngayDD;
+  document.getElementById(f.mm).value = r.ngayMM;
+  document.getElementById(f.yyyy).value = r.ngayYYYY;
+  document.getElementById(f.gio).value = r.gioSinh;
+  document.getElementById(f.gioiTinh).value = r.gioiTinh;
+  const lichBtn = document.getElementById(f.lich);
+  lichBtn.dataset.val = r.lichLoai;
+  lichBtn.textContent = f.lichText(r.lichLoai);
   closeKhoLaSo();
-  if (!isActivated) { flashCodeBar(); return; }
-  lapLaSo();
+  f.submit();
 }
 function xoaKhoItem(id) {
   khoSaveList(khoLoadList().filter(x => x.id !== id));
@@ -6521,6 +6553,8 @@ function buildDualSideHtml(side){
       <button class="pill-btn dual-btn-sm" id="dualLichBtn_${side}" data-val="duong" onclick="dualToggleLich('${side}')">DL</button>
       <button class="btn-dark dual-btn-sm" onclick="dualLapLaSo('${side}')">Lập</button>
       <button class="btn-outline dual-btn-sm" onclick="dualExportToSingle('${side}')" title="Chuyển lá số bên này sang tab Nhập Thông Tin">Chuyển</button>
+      <button class="btn-purple dual-btn-sm" onclick="luuKhoLaSo('dual${side}')">Lưu Kho</button>
+      <button class="btn-brown dual-btn-sm" onclick="openKhoLaSo('dual${side}')">Kho LS</button>
     </div>
     <div class="dual-toolbar">
       <div class="hc-toggle">
