@@ -10,6 +10,13 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<!-- Đánh dấu thời điểm build, in ra Console lúc tải trang - dùng để kiểm tra xem server (Render) có đang
+     phục vụ ĐÚNG bản mới nhất vừa deploy hay không: mở trang trên Render, F12 -> Console, xem dòng
+     "BUILD_STAMP" in ra có khớp đúng thời điểm vừa deploy hay không. Nếu thấy 1 mốc thời gian CŨ (không phải
+     lần deploy gần nhất) dù đã hard-refresh, tức là có 1 tầng cache NGOÀI trình duyệt (CDN/reverse proxy của
+     Render, hoặc chính Render chưa build lại) đang phục vụ bản cũ - không phải lỗi logic trong code này.
+     Cập nhật lại giá trị này (đổi sang thời điểm hiện tại) mỗi khi cần làm phép thử này lần nữa. -->
+<script>console.log('BUILD_STAMP:', '2026-07-22T00:00:00+07:00');</script>
 <title>Lập Lá Số Tử Vi</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -403,7 +410,7 @@ body.theme-dark .th-D{background:var(--gold);color:#000;border-color:var(--gold)
 body.theme-dark .th-D.th-glow{box-shadow:0 0 7px 3px var(--gold)}
 /* Đổi màu (trắng đen): niên ABCD to hơn hẳn, TẤT CẢ 4 chữ đều cùng 1 màu đỏ (viền đỏ + chữ đỏ, nền trắng),
    không phân biệt theo từng chữ nữa. */
-body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:26px;height:26px;font-size:.86rem}
+body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:29px;height:29px;font-size:.94rem}
 body.plain-bw .dual-side .th{width:20px;height:20px;font-size:.68rem}
 .mth{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:.6rem;font-weight:700;line-height:1;flex-shrink:0;border:1.5px solid var(--text);background:var(--panel);color:var(--text)}
 body.show-menh-hoa .mth{display:inline-flex}
@@ -726,7 +733,10 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
     <img class="lw-logo" src="LOGO.png" alt="Tử Vi Mộc Lang" onerror="this.style.display='none'">
     <p style="margin-bottom:4px;font-weight:800;color:#5eead4">Tool nội bộ</p>
     <p>Vui lòng đăng nhập bằng email cá nhân của bạn.</p>
-    <button class="btn-google" onclick="dangNhapGoogle()">
+    <!-- Nút Google THẬT do chính SDK Google vẽ ra (renderGsiButtons) - cách được Google khuyến nghị lâu dài,
+         thay cho google.accounts.id.prompt() kiểu cũ (One Tap) đang bị khai tử dần theo lộ trình FedCM. -->
+    <div id="gsiBtnWall" style="display:flex;justify-content:center;min-height:44px"></div>
+    <button class="btn-google btn-google-fallback" onclick="dangNhapGoogle()">
       <svg viewBox="0 0 48 48" style="width:22px;height:22px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Đăng nhập bằng Google
     </button>
@@ -743,7 +753,8 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       Đăng nhập để kích hoạt mã Premium<br>
       <span style="font-size:.78rem">Không cần mật khẩu — nhanh chóng &amp; bảo mật</span>
     </p>
-    <button class="btn-google" onclick="dangNhapGoogle()">
+    <div id="gsiBtnModal" style="display:flex;justify-content:center;min-height:44px"></div>
+    <button class="btn-google btn-google-fallback" onclick="dangNhapGoogle()">
       <svg viewBox="0 0 48 48" style="width:22px;height:22px"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.29-8.16 2.29-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
       Tiếp tục với Google
     </button>
@@ -1350,9 +1361,51 @@ function khoCatIconHtml(key,idx){
 function getKhoLaSoKey(email) { return KHOLASO_KEY + '_' + simpleHash(email); }
 function getKhoCatKey(email) { return KHOLASO_CAT_KEY + '_' + simpleHash(email); }
 function khoLoadList() { return JSON.parse(localStorage.getItem(getKhoLaSoKey(currentUser.email)) || '[]'); }
-function khoSaveList(list) { localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(list)); }
+function khoSaveList(list) { localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(list)); khoSyncToServer(); }
 function khoLoadCategories() { return JSON.parse(localStorage.getItem(getKhoCatKey(currentUser.email)) || '[]'); }
-function khoSaveCategories(cats) { localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(cats)); }
+function khoSaveCategories(cats) { localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(cats)); khoSyncToServer(); }
+// ============================================================
+// ĐỒNG BỘ KHO LÁ SỐ QUA SERVER (Apps Script, action=kho_get/kho_save) - để đăng nhập đúng 1 Gmail trên MÁY
+// KHÁC vẫn thấy đúng Kho đó, không chỉ giới hạn trong localStorage của riêng từng máy. localStorage vẫn là
+// nguồn đọc/ghi CHÍNH (mọi hàm khoLoadList/khoSaveList... giữ nguyên, không đổi gì, luôn tức thời) - 2 hàm
+// dưới đây chỉ thêm lớp đồng bộ NGẦM, không chặn UI: khoSyncToServer() đẩy lên sau mỗi lần lưu (gộp các lần
+// lưu liên tiếp trong 600ms thành 1 lần gửi, đỡ tốn request), khoSyncFromServer() kéo về khi mở Kho.
+// ============================================================
+let _khoSyncTimer = null;
+function khoSyncToServer() {
+  // Bắt buộc phải isActivated (đã kích hoạt đúng mã tương ứng email này, xem actionVerify) mới cho đồng bộ -
+  // bản offline không xác thực Gmail thật (chỉ gõ chữ, không mật khẩu), nếu chỉ cần currentUser.email là đủ
+  // thì ai cũng gõ đại email người khác để đọc/ghi được vào đúng Kho của họ. Bắt buộc thêm isActivated buộc
+  // phải có ĐÚNG mã kích hoạt hợp lệ khớp với email đó mới đồng bộ được, ngang mức bảo mật của toàn hệ thống
+  // mã hiện có, không tạo thêm lỗ hổng riêng cho Kho.
+  if (!currentUser || !currentUser.email || !isActivated) return;
+  if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) return;
+  clearTimeout(_khoSyncTimer);
+  _khoSyncTimer = setTimeout(() => {
+    const list = khoLoadList();
+    const categories = khoLoadCategories();
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action:'kho_save', email: currentUser.email, list: JSON.stringify(list), categories: JSON.stringify(categories) })
+    }).catch(e => console.warn('Đồng bộ Kho lên server thất bại (vẫn lưu local, sẽ tự thử lại lần lưu kế tiếp):', e));
+  }, 600);
+}
+async function khoSyncFromServer() {
+  // Cùng lý do như khoSyncToServer() - chỉ đồng bộ khi đã isActivated, tránh gõ đại email người khác để đọc
+  // được Kho của họ khi chưa có mã kích hoạt hợp lệ đúng email đó.
+  if (!currentUser || !currentUser.email || !isActivated) return;
+  if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) return;
+  try {
+    const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({ action:'kho_get', email: currentUser.email }).toString();
+    const result = await fetch(url).then(r => r.json());
+    if (result.ok) {
+      // Server luôn là bản "mới nhất tính tới lần lưu gần nhất" - ghi đè thẳng vào cache local để đồng bộ
+      // đúng dữ liệu từ máy khác (nếu có), tránh hiện nhầm dữ liệu cũ chỉ có ở riêng máy đang mở.
+      localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(result.list || []));
+      localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(result.categories || []));
+    }
+  } catch(e) { console.warn('Không tải được Kho từ server (tạm dùng dữ liệu local):', e); }
+}
 let khoActiveCategory = 'ALL'; // 'ALL' | 'UNASSIGNED' | tên danh mục
 let khoSearchQuery = '';
 // Lưu Kho/Kho LS giờ dùng chung 1 modal + 1 danh sách localStorage cho MỌI tab (trước đây chỉ đọc/ghi cứng
@@ -1582,6 +1635,11 @@ function openKhoLaSo(source) {
   const si = document.getElementById('khoSearchInput'); if (si) si.value = '';
   renderKhoLaSoList();
   const m = document.getElementById('khoModal'); if (m) m.style.display = 'flex';
+  // Mở Kho ngay bằng cache local (tức thời, không chờ mạng) - đồng bộ ngầm từ server phía sau, nếu có dữ
+  // liệu mới hơn (vd vừa lưu từ máy khác) thì tự vẽ lại danh sách khi tải xong, không cần bấm làm mới.
+  khoSyncFromServer().then(() => {
+    if (m && m.style.display === 'flex') renderKhoLaSoList();
+  });
 }
 function closeKhoLaSo() {
   const m = document.getElementById('khoModal'); if (m) m.style.display = 'none';
@@ -1626,8 +1684,25 @@ function initGoogleAuth() {
   s.onload = () => {
     if (typeof google === 'undefined') return;
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleResponse, auto_select: false });
+    renderGsiButtons();
   };
   document.head.appendChild(s);
+}
+// Vẽ nút Google THẬT (renderButton) vào 2 chỗ (loginWall + modal) - cách Google khuyến nghị lâu dài, thay
+// cho google.accounts.id.prompt() kiểu One Tap cũ (đang bị Google khai tử dần theo lộ trình FedCM - xem
+// cảnh báo "may stop functioning when FedCM becomes mandatory" trong Console). Chỉ vẽ 1 lần; ẩn nút tự vẽ
+// (.btn-google-fallback) đi ngay khi nút thật đã hiện ra, chỉ giữ nút tự vẽ làm phương án dự phòng lúc SDK
+// Google chưa tải kịp (mạng chậm, hoặc bị chặn).
+let _gsiButtonsRendered = false;
+function renderGsiButtons() {
+  if (typeof google === 'undefined' || _gsiButtonsRendered) return;
+  ['gsiBtnWall', 'gsiBtnModal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 280, text: 'signin_with', locale: 'vi' });
+  });
+  _gsiButtonsRendered = true;
+  document.querySelectorAll('.btn-google-fallback').forEach(b => b.style.display = 'none');
 }
 function handleGoogleResponse(response) {
   const parts   = response.credential.split('.');
@@ -1637,15 +1712,14 @@ function handleGoogleResponse(response) {
   hideAuthModal();
   updateUI();
 }
+// Phương án dự phòng: chỉ còn tác dụng khi nút Google thật (renderGsiButtons) CHƯA kịp hiện ra (SDK còn
+// đang tải). Nếu SDK đã sẵn sàng, nút tự vẽ này đã tự ẩn đi rồi (xem renderGsiButtons), người dùng luôn bấm
+// đúng nút thật của Google, không còn đi qua đường này nữa.
 function dangNhapGoogle() {
   if (GOOGLE_CLIENT_ID === 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID') { showDemoLoginModal(); return; }
-  if (typeof google !== 'undefined') {
-    google.accounts.id.prompt((n) => {
-      if (n.isNotDisplayed() || n.isSkippedMoment()) {
-        google.accounts.id.renderButton(document.getElementById('googleBtnContainer'), { theme:'outline', size:'large', width:280 });
-      }
-    });
-  }
+  if (typeof google === 'undefined') { alert('Đang tải hệ thống đăng nhập Google, vui lòng đợi vài giây rồi thử lại.'); return; }
+  renderGsiButtons();
+  google.accounts.id.prompt();
 }
 function dangXuat() {
   currentUser = null;
@@ -1966,6 +2040,8 @@ const TU_HOA={
   8:["Thiên Lương","Tử Vi","Tả Phụ","Vũ Khúc"],
   9:["Phá Quân","Cự Môn","Thái Âm","Tham Lang"],
 };
+// OFFLINE_BUILD_INSERT_POINT - không xóa dòng này: build_offline.py dùng làm mốc để tự chèn module tính lá
+// số offline (layLaSoLocal) vào đúng vị trí này khi build lại index_offline.html từ file index.html này.
 
 let selCity=CITIES[1];
 let charts=[];          // {data, vM, vT, thMap, chiNamSinh, dvMap, label, ghiChu}
