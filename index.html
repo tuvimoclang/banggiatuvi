@@ -90,6 +90,10 @@ body.theme-dark #tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,
 .pill-btn:hover{background:var(--hover)}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;margin-top:8px}
 .btn-row button{width:118px;height:30px;padding:2px 6px;text-align:center;font-size:.68rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1.15}
+/* Chọn độ phân giải ảnh PNG khi bấm "Lưu lá số" (đọc bởi taiAnhLaSo, xem giải thích ở đó) - chỉ ảnh hưởng
+   file tải về, KHÔNG ảnh hưởng lá số đang hiển thị trên màn hình (đó là HTML/CSS thật, đã nét sẵn ở mọi độ
+   phân giải màn hình, không phải ảnh raster nên không có khái niệm "độ phân giải" để chọn). */
+#anhScaleSelect{height:30px;padding:2px 4px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.62rem;font-weight:500;box-sizing:border-box}
 .btn-row button.locked-text{font-size:.56rem;line-height:1.05}
 .loc-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:flex-start;align-items:flex-end;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border-lt)}
 .info-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;align-items:flex-end}
@@ -287,12 +291,15 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .ph-meaning-list li{margin-bottom:6px}
 
 /* -- chart area -- */
-.chart-area{flex:1;min-width:0;padding:0 130px 12px 12px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:8px}
+.chart-area{flex:1;min-width:0;padding:0 54px 12px 12px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:8px}
 /* max-width +30px (~780->810) = mỗi cung trong lưới 4 cột rộng thêm ~7.5px (~2mm) theo chiều ngang. */
-/* Giảm padding (không phải tăng max-width) mới thật sự nới rộng được lưới 4 cột - .chart-area đang chừa sẵn
-   156px bên phải cho bảng An Can nổi nên ban-wrap hiếm khi chạm tới max-width để tăng có tác dụng. Giảm
-   48px -> 33px mỗi bên = +30px cho lưới = mỗi cung trong 4 cột rộng thêm ~7.5px (~2mm) thật sự nhìn thấy. */
-.ban-wrap{position:relative;max-width:810px;width:100%;padding:48px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
+/* Bảng An Can (#canSidePanel) đang bị ẩn tĩnh (thuộc tính hidden, xem #banWrap) nên phần đệm phải của
+   .chart-area không còn cần chừa chỗ cho nó - đã giảm từ 130px xuống 54px để nhường chỗ cho lá số rộng hơn.
+   max-width của .ban-wrap: 810 -> 886 (+76px ~ 2cm) rồi lùi lại 886 -> 848 (-38px ~ 1cm, thấy 886 hơi rộng)
+   để nới rộng lưới 4 cột theo chiều ngang net +38px (~1cm) so với bản gốc 810; padding .ban-wrap giữ nguyên
+   48px mỗi bên nên toàn bộ phần tăng thêm đều rơi vào lưới .ban-tuvi bên trong. Nếu sau này bật lại
+   #canSidePanel (gỡ hidden), cần tăng lại padding phải ở đây để tránh đè lên lá số. */
+.ban-wrap{position:relative;max-width:848px;width:100%;padding:48px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .inline-text-input{position:absolute;z-index:20;border:1px dashed var(--accent);background:transparent;font:14px Segoe UI;padding:0 2px;outline:none;min-width:40px}
 #atcCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
@@ -325,7 +332,9 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 body.theme-dark .can-letter-btn.active.can-letter-D{background:var(--gold);color:#000;border-color:var(--gold)}
 
 .ban-tuvi{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border-lt);background:var(--border-lt)}
-.cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:132px;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
+/* min-height +10px/cung x 4 hàng = lá số cao thêm ~40px (~1cm) theo chiều dọc - lưới không đặt
+   grid-template-rows nên các hàng tự giãn theo min-height này của .cung. */
+.cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:142px;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
 .cung:hover{background:var(--hover)}
 .cung.sel-ring{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
 .cung.hl-daivan{outline:2px solid var(--red);outline-offset:-2px}
@@ -341,21 +350,21 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 .cung.center{grid-column:2/4;grid-row:2/4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0;padding:14px;cursor:default}
 .cung.center:hover{background:var(--panel)}
 
-.cung-cc-top{position:absolute;top:5px;left:7px;font-size:.7rem;color:var(--text);font-weight:600;text-align:left;line-height:1.15}
+.cung-cc-top{position:absolute;top:5px;left:7px;font-size:.76rem;color:var(--text);font-weight:600;text-align:left;line-height:1.15}
 .can-hl{background:var(--blue);color:#fff;font-weight:700;padding:0 3px;border-radius:2px}
-.cung-chuc{font-size:.82rem;color:var(--text);font-weight:500;letter-spacing:.3px;text-transform:uppercase;text-align:center;margin-bottom:4px}
-.b-menh{font-size:.58rem;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
-.b-than{font-size:.58rem;background:#6d28d9;color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
+.cung-chuc{font-size:.88rem;color:var(--text);font-weight:500;letter-spacing:.3px;text-transform:uppercase;text-align:center;margin-bottom:4px}
+.b-menh{font-size:.63rem;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
+.b-than{font-size:.63rem;background:#6d28d9;color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
 .cung.has-lapcuc{padding-top:25px;padding-bottom:9px}
-.lapcuc-badge{position:absolute;top:5px;left:50%;transform:translateX(-50%);max-width:106px;font-size:.68rem;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;color:#fff;background:var(--accent);border-radius:3px;padding:2px 6px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:4}
+.lapcuc-badge{position:absolute;top:5px;left:50%;transform:translateX(-50%);max-width:106px;font-size:.74rem;font-weight:700;letter-spacing:.2px;text-transform:uppercase;text-align:center;color:#fff;background:var(--accent);border-radius:3px;padding:2px 6px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;z-index:4}
 .cung.lapcuc-pickable{cursor:pointer;box-shadow:inset 0 0 0 2px var(--accent)}
 .cung.lapcuc-pickable:hover{background:var(--hover)}
 .cung.lapcuc-anchor{outline:3px solid var(--accent);outline-offset:-3px;z-index:2}
 
 .sao-chinh-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;margin:5px 0 3px}
 .sao-phu-wrap{display:grid;grid-template-columns:repeat(2,auto);justify-content:center;gap:1px 10px}
-.sao{font-size:.74rem;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;color:var(--text);cursor:pointer;position:relative}
-.sao.chinh{font-weight:500;font-size:.86rem}
+.sao{font-size:.8rem;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;color:var(--text);cursor:pointer;position:relative}
+.sao.chinh{font-weight:500;font-size:.93rem}
 .sao.phu{color:var(--muted);font-weight:500}
 /* Gạch dưới đặt trên .sao-name (span CHỈ bọc riêng tên sao) thay vì cả .sao - trước đây gạch trên .sao khiến
    nét tràn qua badge niên hóa/tứ hóa mệnh (.th/.mth, nằm cùng cấp SAU .sao-name) dù đã thử text-decoration:
@@ -379,7 +388,7 @@ body.plain-bw .dv-chuc,body.plain-bw .ln-chuc,body.plain-bw .lg-chuc{color:#000 
 .phi-hover-badges{position:absolute;left:2px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:6}
 .cung:hover .phi-hover-badges{opacity:.55;pointer-events:auto}
 .phi-hover-badges:hover{opacity:1 !important}
-.phb{width:15px;height:15px;border-radius:50%;font-size:.56rem;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+.phb{width:15px;height:15px;border-radius:50%;font-size:.61rem;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
 .phb-A{background:var(--green)}
 .phb-B{background:var(--red)}
 .phb-C{background:var(--blue)}
@@ -394,7 +403,7 @@ body.theme-dark .phb-D{border:1px solid var(--gold)}
    đúng phần chữ tên sao, không đụng tới badge. display:inline-flex vẫn không đủ ngăn hẳn 1 số trình duyệt vẽ
    đường gạch của .sao tràn xuống dưới badge (do gạch chân của ancestor vẽ theo cùng layer text, không tính
    theo box con) - phải thêm position:relative + z-index để badge chắc chắn vẽ ĐÈ LÊN trên đường gạch đó.*/
-.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
+.th{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:.92rem;font-weight:600;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
 /* Lá số đơn giữ nguyên kích cỡ gốc (đẹp rồi, không đổi) - CHỈ thu nhỏ riêng cho lá số mini bên tab "2 Lá Số"
    cho gọn với lưới cung vốn đã nhỏ hơn ở đó. */
 .dual-side .th{width:16px;height:16px;font-size:.58rem}
@@ -416,20 +425,20 @@ body.plain-bw .dual-side .th{width:20px;height:20px;font-size:.68rem}
 body.show-menh-hoa .mth{display:inline-flex}
 body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color:#000 !important}
 
-.dv{position:absolute;top:5px;right:7px;font-size:.78rem;color:var(--text);font-weight:500}
-.ln{position:absolute;bottom:3px;left:6px;font-size:.6rem;color:var(--muted);text-align:left;line-height:1.4}
+.dv{position:absolute;top:5px;right:7px;font-size:.84rem;color:var(--text);font-weight:500}
+.ln{position:absolute;bottom:3px;left:6px;font-size:.65rem;color:var(--muted);text-align:left;line-height:1.4}
 .ln-age{cursor:pointer}
 .ln-age:hover{color:var(--accent);text-decoration:underline}
-.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.66rem;font-weight:600;color:#e63946;line-height:1.3;z-index:3}
-.ln-chuc{position:absolute;bottom:15px;right:5px;font-size:.58rem;font-weight:600;color:#2563eb;line-height:1.3;z-index:3}
-.lg-chuc{position:absolute;bottom:27px;right:5px;font-size:.58rem;font-weight:600;color:#16a34a;line-height:1.3;z-index:3}
+.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.71rem;font-weight:600;color:#e63946;line-height:1.3;z-index:3}
+.ln-chuc{position:absolute;bottom:15px;right:5px;font-size:.63rem;font-weight:600;color:#2563eb;line-height:1.3;z-index:3}
+.lg-chuc{position:absolute;bottom:27px;right:5px;font-size:.63rem;font-weight:600;color:#16a34a;line-height:1.3;z-index:3}
 .cung.dv-menh-bg{background:#ffe1ec}
 body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-info{margin-top:2px}
 
-.center-title{font-size:1.05rem;font-weight:500;color:var(--blue);letter-spacing:.5px;margin-bottom:2px}
-.center-name{font-size:.82rem;font-weight:700;color:var(--red);text-align:center;margin-bottom:4px}
-.center-line{font-size:.76rem;color:var(--text);line-height:1.5}
+.center-title{font-size:1.12rem;font-weight:500;color:var(--blue);letter-spacing:.5px;margin-bottom:2px}
+.center-name{font-size:.88rem;font-weight:700;color:var(--red);text-align:center;margin-bottom:4px}
+.center-line{font-size:.82rem;color:var(--text);line-height:1.5}
 .center-year-row{display:flex;align-items:center;justify-content:center;gap:4px}
 .center-year-input{width:56px;padding:1px 4px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.72rem;text-align:center}
 
@@ -1073,6 +1082,12 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
       <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
       <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
+      <select id="anhScaleSelect" title="Độ phân giải ảnh khi tải về">
+        <option value="1">Ảnh 1x</option>
+        <option value="2" selected>Ảnh 2x (nét)</option>
+        <option value="3">Ảnh 3x (rất nét)</option>
+        <option value="4">Ảnh 4x (siêu nét)</option>
+      </select>
       <button class="btn-blue not-done" id="btnLuuLaSo" onclick="luuLaSo()">Lưu lá số</button>
       <button class="btn-purple" id="btnLuuKho" onclick="luuKhoLaSo()">Lưu Kho</button>
       <button class="btn-brown" id="btnMoKho" onclick="openKhoLaSo()">Kho LS</button>
@@ -1398,12 +1413,22 @@ async function khoSyncFromServer() {
   try {
     const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({ action:'kho_get', email: currentUser.email }).toString();
     const result = await fetch(url).then(r => r.json());
-    if (result.ok) {
-      // Server luôn là bản "mới nhất tính tới lần lưu gần nhất" - ghi đè thẳng vào cache local để đồng bộ
-      // đúng dữ liệu từ máy khác (nếu có), tránh hiện nhầm dữ liệu cũ chỉ có ở riêng máy đang mở.
-      localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(result.list || []));
-      localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(result.categories || []));
+    if (!result.ok) return;
+    if (result.updatedAt === null) {
+      // Server CHƯA TỪNG có dữ liệu của email này (lần đồng bộ đầu tiên, updatedAt null) - TUYỆT ĐỐI không
+      // được ghi đè local bằng danh sách rỗng của server trong trường hợp này, nếu không sẽ XÓA MẤT dữ liệu
+      // cục bộ đã lưu từ trước khi có tính năng đồng bộ (đây chính xác là lỗi đã từng làm mất Kho thật của
+      // người dùng khi họ deploy bản có đồng bộ lần đầu). Thay vào đó, đẩy NGƯỢC dữ liệu local hiện có (nếu
+      // có) lên server để "khởi tạo" - máy khác lần đầu đồng bộ sau đó sẽ nhận đúng dữ liệu này.
+      const localList = khoLoadList();
+      const localCats = khoLoadCategories();
+      if (localList.length || localCats.length) khoSyncToServer();
+      return;
     }
+    // Server đã có dữ liệu thật (từng đồng bộ ít nhất 1 lần trước đó, updatedAt khác null) - lúc này mới coi
+    // server là bản mới nhất, ghi đè cache local để đồng bộ đúng dữ liệu từ máy khác (nếu có).
+    localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(result.list || []));
+    localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(result.categories || []));
   } catch(e) { console.warn('Không tải được Kho từ server (tạm dùng dữ liệu local):', e); }
 }
 let khoActiveCategory = 'ALL'; // 'ALL' | 'UNASSIGNED' | tên danh mục
@@ -3220,7 +3245,9 @@ async function taiAnhLaSo(){
   catch(e){ throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.'); }
   if(typeof html2canvas!=='function') throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.');
   const cs=getComputedStyle(document.body);
-  const canvas=await html2canvas(wrap,{backgroundColor:cs.getPropertyValue('--bg').trim()||'#fff', useCORS:true, scale:2});
+  const scaleSel=document.getElementById('anhScaleSelect');
+  const scale=scaleSel?(parseFloat(scaleSel.value)||2):2;
+  const canvas=await html2canvas(wrap,{backgroundColor:cs.getPropertyValue('--bg').trim()||'#fff', useCORS:true, scale});
   const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
   if(!blob) throw new Error('Không tạo được ảnh PNG');
   const c=chart();
@@ -3576,10 +3603,20 @@ function resetHcState(mode){
     hcState[m]={the:new Set(), dung:new Set(), quick:new Map(), chains:[]};
     nienGlowTarget[m]=null;
     hoaFilterActive[m]=false;
+    // "XÓA ALL" (luôn gọi resetHcState KÈM đúng hcMode, không phải gọi rỗng) trước đây KHÔNG xóa các trạng
+    // thái phụ trợ dưới đây vì chúng chỉ nằm trong nhánh if(!mode) (chỉ chạy khi lập lá số MỚI, không chạy
+    // khi bấm "XÓA ALL" thường) - khiến "cô lập kết cấu" (isolatedKetCauIdx), tab kết cấu đang xem
+    // (hoaStructureTabIdx), khối kết cấu đang đóng (hoaBoxClosed), và các mũi tên đã bị kéo lệch tay
+    // (arrowOverrides) của ĐÚNG mode đó vẫn còn nguyên sau khi bấm "XÓA ALL" - đây chính là nguyên nhân
+    // "nhớ lại kết cấu cũ" gây mũi tên nhảy loạn xạ/mất tích khi chọn lại Thể/Dụng mới, dù người dùng tưởng
+    // đã xóa sạch. Giờ luôn xóa đủ cả các mục này cho ĐÚNG mode đang reset, bất kể gọi kèm mode hay không.
+    isolatedKetCauIdx[m]=null;
+    hoaBoxClosed[m]=false;
+    hoaStructureTabIdx[m]=0;
+    Object.keys(arrowOverrides).forEach(k=>{ if(k.startsWith(m+':')) delete arrowOverrides[k]; });
+    if(selectedPhiArrow && selectedPhiArrow.mode===m) selectedPhiArrow=null;
   });
   if(!mode){
-    arrowOverrides={};
-    selectedPhiArrow=null;
     reverseFlightStar=null; reverseFlightArrows=[]; starPickerFor=null;
     actionLog=[]; actionRedoLog=[];
   }
@@ -3920,6 +3957,12 @@ function recomputePhiHoaChains(){
   catch(e){ console.error('recomputePhiHoaChains lỗi:', e); }
 }
 function recomputePhiHoaChainsRaw(){
+  // Mỗi khi Thể/Dụng/bộ lọc thay đổi (hàm này luôn được gọi lại ngay sau đó), tự động BỎ chế độ "cô lập 1
+  // kết cấu" (isolatedKetCauIdx) của ĐÚNG chế độ đang xem - tránh tình trạng đã cô lập "Kết cấu 1" từ 1 tổ
+  // hợp cung TRƯỚC ĐÓ, rồi bấm thêm/bớt cung khác đi hẳn, nhưng vẫn bị kẹt ở đúng cô lập cũ (chỉ số "Kết cấu
+  // 1" giờ trỏ vào 1 kết cấu hoàn toàn khác, hoặc các kết cấu MỚI hình thành từ lựa chọn mới bị ẩn đi một
+  // cách khó hiểu) - đây chính xác là nguyên nhân "mất phi hóa" mà người dùng liên tục gặp phải.
+  isolatedKetCauIdx[hcMode]=null;
   const st=hcState[hcMode];
   const realAnchorSet=new Set([...st.the,...st.dung]);
   const theChains=[...st.the].map(idx=>computeSingleChain(idx,null,false,realAnchorSet)).filter(Boolean);
@@ -4858,7 +4901,7 @@ function drawTuHoaArrows(ctx){
     const spacing=11, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
-      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter));
+      drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter),16);
     });
   });
   // Hướng tâm: gộp theo cặp cung, ký tự nằm ngang, đúng trên đường thẳng, nhưng đường KHÔNG vẽ xuyên qua chỗ có chữ.
@@ -4895,7 +4938,7 @@ function drawTuHoaArrows(ctx){
       const c=pt(0.13);
       g.toA.forEach((L,i)=>{
         const along=(i-(g.toA.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,16);
       });
     }
     if(hasB){
@@ -4903,7 +4946,7 @@ function drawTuHoaArrows(ctx){
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
         const along=(i-(g.toB.length-1)/2)*11;
-        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L));
+        drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,16);
       });
     }
   });
@@ -5676,6 +5719,12 @@ let hoaFilterActive={hung:false, cat:false};
 function toggleHoaFilter(mode){
   hoaFilterActive[mode]=!hoaFilterActive[mode];
   if(hoaFilterActive[mode]) hoaBoxClosed[mode]=false; // bật lại filter thì luôn hiện khối kết cấu
+  // Bật/tắt lọc làm thay đổi hẳn tập kết cấu của ĐÚNG mode này (Đ.Lộc/Đ.Kỵ, danh sách kết cấu đều đổi theo) -
+  // 1 chỉ số "cô lập kết cấu" (isolatedKetCauIdx) đã chọn TỪ TRƯỚC không còn ý nghĩa gì nữa, phải bỏ NGAY,
+  // bất kể mode này có đang được xem hay không (2 nút L.Kỵ/L.Lộc luôn hiện cùng lúc, có thể bấm nút của mode
+  // KHÔNG đang xem - lúc đó recomputePhiHoaChains() bên dưới không chạy vì chỉ chạy cho hcMode hiện tại, nên
+  // phải tự xóa isolatedKetCauIdx ở đây, không dựa vào đúng chỗ đó).
+  isolatedKetCauIdx[mode]=null;
   const btnId = mode==='hung' ? 'btnLKy' : 'btnLLoc';
   document.getElementById(btnId).classList.toggle('active',hoaFilterActive[mode]);
   if(hcMode===mode){
@@ -5809,27 +5858,41 @@ function computeKetCauStructuresRaw(mode){
   // niên Lộc/Kị chỉ được cộng TỐI ĐA 1 LẦN cho toàn bộ 1 kết cấu (dù gặp ở nhiều điểm khác nhau).
   // Ghi vắn tắt: "niên A"/"niên D" (thay vì "gặp niên Lộc/Kị đồng tinh diệu"), "KXĐC" (thay vì "Kị xuất đối
   // cung"). Trả về "tags" ngắn để evalRoot ghép vào dòng chảy chính, thay vì mỗi bonus 1 dòng <li> riêng.
-  function pointBonus(target,star,i,seen,nienCap){
+  // Nhận diện thuần túy các đặc điểm (niên A/D, tự hóa Lộc, KXĐC) của 1 điểm (cung đích + tinh diệu + vị trí
+  // bước i) - KHÔNG đụng "seen"/nienCap, dùng riêng để HIỂN THỊ nhãn đúng cho đường đi riêng của 1 thành viên
+  // hội tụ, ngay cả khi điểm đó đã được CỘNG ĐIỂM rồi (qua mạch chính của root hoặc 1 thành viên khác xử lý
+  // trước) - "seen" chỉ nên chặn CỘNG ĐIỂM TRÙNG, không được làm mất luôn nhãn mô tả (nếu không, dòng mô tả
+  // riêng của thành viên đó sẽ trông như "không có gì đặc biệt" dù rõ ràng đang đi qua đúng 1 điểm niên D/KXĐC).
+  // KXĐC (Kị xuất đối cung) là đặc điểm của cung XUẤT PHÁT (fromIdx) của bước này - chính fromIdx tự hóa Kị
+  // "xuất" bay thẳng sang đối cung của NÓ (mà đối cung đó lại đúng bằng "target" của bước này) - vd Tử Nữ tự
+  // hóa Kị xuất đối cung Điền Trạch: đặc điểm thuộc về TỬ NỮ, không phải Điền Trạch hay Phụ Mẫu (cung phi TỚI
+  // Tử Nữ trước đó) - phải kiểm tra computeTuHoaFor(fromIdx), TUYỆT ĐỐI không phải computeTuHoaFor(target).
+  function detectBonusTags(target,star,i,fromIdx){
+    const tags=[];
+    const cungHasNienD = letter==='D' && (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]==='D');
+    if(cungHasNienD) tags.push('niên D');
+    if(letter==='A' && c.thMap[star]==='A') tags.push('niên A');
+    if(letter==='A'){
+      const selfHoaA=computeTuHoaFor(target);
+      if(selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===star)) tags.push('tự hóa Lộc');
+    }
+    if(i>=2 && fromIdx!=null){
+      const selfHoaD=computeTuHoaFor(fromIdx);
+      if(selfHoaD.some(a=>a.type==='cross'&&a.letter==='D')) tags.push('KXĐC');
+    }
+    return tags;
+  }
+  function pointBonus(target,star,i,seen,nienCap,fromIdx){
     const key=target+':'+star;
     if(seen.has(key)) return {add:0,tags:[],nienHit:false};
     let add=0; const tags=[]; let nienHit=false;
+    const det=detectBonusTags(target,star,i,fromIdx);
     // Kết cấu Kị: khác tinh diệu vẫn tính chung Kị - chỉ cần cùng cung có sao mang niên Kị (không cần đúng
     // ngay sao vừa đáp) là vẫn +1 Kị.
-    const cungHasNienD = letter==='D' && (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]==='D');
-    if(cungHasNienD && !nienCap.used){ add+=1; tags.push('niên D'); nienCap.used=true; nienHit=true; }
-    if(letter==='A' && c.thMap[star]==='A' && !nienCap.used){ add+=1; tags.push('niên A'); nienCap.used=true; nienHit=true; }
-    if(letter==='A'){
-      const selfHoaA=computeTuHoaFor(target);
-      if(selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===star)){
-        add+=1; tags.push('tự hóa Lộc');
-      }
-    }
-    if(i>=2){
-      const selfHoaD=computeTuHoaFor(target);
-      if(selfHoaD.some(a=>a.type==='cross'&&a.letter==='D')){
-        add+=1; tags.push('KXĐC');
-      }
-    }
+    if(det.includes('niên D') && !nienCap.used){ add+=1; tags.push('niên D'); nienCap.used=true; nienHit=true; }
+    if(det.includes('niên A') && !nienCap.used){ add+=1; tags.push('niên A'); nienCap.used=true; nienHit=true; }
+    if(det.includes('tự hóa Lộc')){ add+=1; tags.push('tự hóa Lộc'); }
+    if(det.includes('KXĐC')){ add+=1; tags.push('KXĐC'); }
     if(add>0) seen.add(key);
     return {add,tags,nienHit};
   }
@@ -5948,7 +6011,7 @@ function computeKetCauStructuresRaw(mode){
       // niên D thì cũng +1 kỵ" (không cần đồng tinh diệu). Kết cấu Lộc vẫn giữ nguyên chỉ tính từ i>=1.
       let bonus={add:0,tags:[],nienHit:false};
       if(i>=1 || (letter==='D' && !rootSelfLoop)){
-        bonus=pointBonus(step.to,step.star,i,seenBonus,nienCap);
+        bonus=pointBonus(step.to,step.star,i,seenBonus,nienCap,step.from);
         total+=bonus.add;
         if(bonus.nienHit) nienBonusNode={to:step.to,star:step.star};
       }else{
@@ -5996,7 +6059,16 @@ function computeKetCauStructuresRaw(mode){
     const touchInfo={};
     members.forEach(M=>{
       if(M===root) return;
-      if(letter==='D' && suppressed.has(M)){ touchInfo[M]={suppressed:true}; return; }
+      if(letter==='D' && suppressed.has(M)){
+        // M bị tiêu thụ (suppressed) bởi CHUỖI RIÊNG của 1 thành viên KHÁC (không phải root) - vd Mệnh hóa Kị
+        // → Huynh Đệ (trùng lặp) → ... - Huynh Đệ vẫn là 1 cung Thể/Dụng THẬT SỰ đang tham gia kết cấu này,
+        // chỉ là không được tính công/hội tụ riêng (đã kể trong chuỗi của Mệnh) - nếu không ghi nhận vào
+        // spineRealMembers thì hasThe()/realMembersOfKetCau() sẽ "mất dấu" Huynh Đệ hoàn toàn, dẫn tới loại
+        // oan cả kết cấu khi Huynh Đệ chính là Thể bắt buộc (bug đã gặp: chọn Thể=Huynh Đệ, Dụng=Mệnh/Phúc
+        // Đức/Thiên Di → kết cấu biến mất dù rõ ràng có liên kết đúng, chỉ vì Huynh Đệ bị suppressed qua Mệnh).
+        if(realAnchorSet.has(M)) spineRealMembers.add(M);
+        touchInfo[M]={suppressed:true}; return;
+      }
       const pts=pointsFor(M, anchorSetForThis);
       let found=null;
       if(letter==='A'){
@@ -6139,14 +6211,25 @@ function computeKetCauStructuresRaw(mode){
             const isSelectedHere = s.to===root || realAnchorSet.has(s.to);
             const isTrungLapHere = hasNext && s.to!==root && mStillConsecutive && realAnchorSet.has(s.to);
             if(!isSelectedHere) mStillConsecutive=false;
-            const tagStr = isTrungLapHere ? ' (trùng lặp)' : '';
+            // Nhãn KXĐC vẫn phải hiện ở đây dù điểm này CÓ THỂ đã được cộng điểm rồi qua mạch chính của root
+            // (dùng detectBonusTags thuần hiển thị, không đụng seen/nienCap) - nếu không, đường đi riêng của
+            // 1 cung bị suppressed sẽ trông như "không có gì đặc biệt" dù rõ ràng đang đáp qua đúng 1 điểm
+            // Kị xuất đối cung, gây khó hiểu khi đối chiếu với mạch chính (nơi VẪN thấy nhãn KXĐC).
+            const dispTags = detectBonusTags(s.to,s.star,i,s.from);
+            const hasKXDC = dispTags.includes('KXĐC');
+            const otherDisp = dispTags.filter(t=>t!=='KXĐC');
+            if(isTrungLapHere) otherDisp.unshift('trùng lặp');
+            const tagStr = otherDisp.length ? ` (${otherDisp.join(', ')})` : '';
+            const targetHtml = label(s.to)+tagStr;
             if(s.from===s.to) flow += `: tự hóa ${letter} xuất${tagStr}`;
-            else flow += (i===0 ? ` —TK→ ` : ` —CK→ `) + label(s.to) + tagStr;
+            else if(hasKXDC) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
+            else flow += (i===0 ? ` —TK→ ` : ` —CK→ `) + targetHtml;
             if(s.to===root || spineTargets.has(s.to)) rejoined=true;
           }
         }
         if(suppressedSteps.length) memberSubChains.push({idx:M, steps:suppressedSteps});
-        lines.push(`<li class="hoa-sub">⤷ <b>${label(M)}</b>${flow}: đã tính trong nền</li>`);
+        // Không hiển thị dòng "đã tính trong nền" nữa (theo yêu cầu) - cung này vẫn được ghi nhận đủ vào
+        // suppressedSteps/memberSubChains (cho tab "cô lập kết cấu" vẽ đúng), chỉ không thêm dòng chữ mô tả.
         return;
       }
       // Ghi đủ các bước riêng của M cho tới đúng điểm chạm vào mạch chính (không chỉ mỗi điểm chạm) - vd
@@ -6171,6 +6254,13 @@ function computeKetCauStructuresRaw(mode){
       // rootSelfLoop phía trên) - nếu không loại trừ, 1 cung vừa tự hóa xuất vừa hội tụ tiếp sẽ bị cộng ĐÚP
       // (1 lần do "tự hóa Lộc" ở đây, 1 lần nữa do bản thân việc hội tụ +1 ngay bên dưới).
       const memberSelfLoopStart = subSteps[0] && subSteps[0].to===M;
+      const subKXDC = subSteps.map(()=>false);
+      // "Trùng lặp" cho đường đi riêng của 1 thành viên HỘI TỤ THẬT (không suppressed) - áp dụng CÙNG quy tắc
+      // như mạch chính của root (xem isTrungLapCung phía trên): nếu chính M CŨNG đáp qua 1 cung Thể/Dụng thật
+      // khác trên đường đi riêng của nó trước khi chạm vào mạch chính, cung đó vẫn phải được đánh dấu "(trùng
+      // lặp)" y hệt - trước đây nhánh này hoàn toàn không tính trùng lặp, khiến dòng mô tả của M trông như
+      // KHÔNG đáp qua cung Thể/Dụng nào khác, dù thực tế Can của nó đã bị "mượn" y hệt cơ chế trùng lặp.
+      let mStillConsecutive=true;
       if(!info.onRoot && !isSelfLoopHere){
         total+=1;
         subSteps.forEach((s,i)=>{
@@ -6179,10 +6269,20 @@ function computeKetCauStructuresRaw(mode){
             subTags[i]= selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===s.star) ? ['tự hóa Lộc'] : [];
             return;
           }
-          const {add,tags,nienHit}=pointBonus(s.to, s.star, i, seenBonus, nienCap);
+          const {add,tags,nienHit}=pointBonus(s.to, s.star, i, seenBonus, nienCap, s.from);
           total+=add;
           if(nienHit) nienBonusNode={to:s.to,star:s.star};
-          subTags[i]=tags.filter(t=>t!=='KXĐC');
+          // Nhãn KXĐC vẫn phải hiện đúng dù điểm này CÓ THỂ đã được cộng điểm rồi (qua mạch chính của root hay
+          // 1 thành viên khác xử lý trước - xem detectBonusTags): "seen" chỉ nên chặn CỘNG ĐIỂM TRÙNG, không
+          // được làm mất nhãn mô tả của riêng đường đi này.
+          const dispTags = tags.length ? tags : detectBonusTags(s.to, s.star, i, s.from);
+          const hasNextSub = i+1<subSteps.length;
+          const isTrungLapSub = letter==='D' && hasNextSub && s.to!==root && mStillConsecutive && realAnchorSet.has(s.to);
+          if(!(s.to===root || realAnchorSet.has(s.to))) mStillConsecutive=false;
+          const otherTags=dispTags.filter(t=>t!=='KXĐC');
+          if(isTrungLapSub) otherTags.unshift('trùng lặp');
+          subTags[i]=otherTags;
+          subKXDC[i]=dispTags.includes('KXĐC');
         });
       }
       let flow='';
@@ -6198,17 +6298,19 @@ function computeKetCauStructuresRaw(mode){
         subSteps.forEach((s,i)=>{
           const tags=subTags[i];
           const tagStr = tags.length ? ` (${tags.join(', ')})` : '';
+          const targetHtml = label(s.to)+tagStr;
           // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
           // thích tương tự ở mạch chính phía trên.
           if(i>0 && s.from===s.to) flow += `: tự hóa ${letter} xuất${tagStr}`;
-          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${label(s.to)}${tagStr}` : ` → ${label(s.to)}${tagStr}`;
-          else flow += ` —CK→ ${label(s.to)}${tagStr}`;
+          else if(subKXDC[i]) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
+          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}` : ` → ${targetHtml}`;
+          else flow += ` —CK→ ${targetHtml}`;
         });
       }
       const memberLabel = isNienMember ? `niên ${mode==='cat'?'A':'D'}` : label(M);
-      if(info.onRoot){
-        lines.push(`<li class="hoa-sub">⤷ <b>${memberLabel}</b>${flow}: đã tính trong nền</li>`);
-      }else{
+      // Không hiển thị dòng "đã tính trong nền" nữa (theo yêu cầu) - vẫn giữ subSteps/memberSubChains để tab
+      // "cô lập kết cấu" vẽ đúng, chỉ bỏ dòng chữ mô tả khi M đáp thẳng vào gốc (info.onRoot).
+      if(!info.onRoot){
         lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow}</li>`);
       }
       if(!isSelfLoopHere) memberSubChains.push({idx:M, steps:subSteps});
@@ -6860,6 +6962,11 @@ function dualExtendNienKyQuickChain(c,ch){
 }
 function dualRecomputeChains(side){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
+  // Cùng lý do như recomputePhiHoaChainsRaw() bên lá số đơn - mỗi khi Thể/Dụng/bộ lọc của bên này thay đổi
+  // (hàm này luôn được gọi lại ngay sau đó), tự bỏ chế độ "cô lập 1 kết cấu" của ĐÚNG side+mode đang tính,
+  // tránh kẹt lại đúng lỗi đã tìm ra và sửa ở bản đơn (chọn cung mới nhưng vẫn bị "kẹt" ở kết cấu đã cô lập
+  // từ tổ hợp cung trước đó).
+  dualIsolatedKetCauIdx[side][inst.hcMode]=null;
   const st=inst.hcState[inst.hcMode];
   const letter=inst.hcMode==='cat'?'A':'D';
   const realAnchorSet=new Set([...st.the,...st.dung]);
@@ -7233,10 +7340,18 @@ function dualApplySnapshot(side,snap){
 // hành vi resetHcState() gốc.
 function dualClearAll(side){
   const inst=dualInst[side];
-  inst.hcState[inst.hcMode]={the:new Set(), dung:new Set(), quick:new Map()};
-  inst.chains[inst.hcMode]=[];
+  const mode=inst.hcMode;
+  inst.hcState[mode]={the:new Set(), dung:new Set(), quick:new Map()};
+  inst.chains[mode]=[];
   inst.shapes=[];
-  inst.nienGlowTarget[inst.hcMode]=null;
+  inst.nienGlowTarget[mode]=null;
+  // Cùng lỗi đã tìm ra và sửa ở bản đơn (resetHcState) - "XÓA ALL" bên dual/plus trước đây cũng không xóa
+  // các trạng thái phụ này của ĐÚNG side+mode đang xóa, khiến cô lập kết cấu/tab đang xem/mũi tên đã kéo
+  // lệch tay từ TRƯỚC đó vẫn còn nguyên sau khi bấm xóa, gây hiện tượng "nhớ lại kết cấu cũ" y hệt bản đơn.
+  dualIsolatedKetCauIdx[side][mode]=null;
+  dualHoaStructureTabIdx[side][mode]=0;
+  Object.keys(inst.arrowOverrides).forEach(k=>{ if(k.startsWith(mode+':')) delete inst.arrowOverrides[k]; });
+  if(dualSelectedPhiArrow[side] && dualSelectedPhiArrow[side].mode===mode) dualSelectedPhiArrow[side]=null;
   dualActionLog[side]=[]; dualActionRedoLog[side]=[];
   dualRenderCgButtons(side);
   dualRenderGrid(side);
