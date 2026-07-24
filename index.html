@@ -90,10 +90,6 @@ body.theme-dark #tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,
 .pill-btn:hover{background:var(--hover)}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;margin-top:8px}
 .btn-row button{width:118px;height:30px;padding:2px 6px;text-align:center;font-size:.68rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1.15}
-/* Chọn độ phân giải ảnh PNG khi bấm "Lưu lá số" (đọc bởi taiAnhLaSo, xem giải thích ở đó) - chỉ ảnh hưởng
-   file tải về, KHÔNG ảnh hưởng lá số đang hiển thị trên màn hình (đó là HTML/CSS thật, đã nét sẵn ở mọi độ
-   phân giải màn hình, không phải ảnh raster nên không có khái niệm "độ phân giải" để chọn). */
-#anhScaleSelect{height:30px;padding:2px 4px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.62rem;font-weight:500;box-sizing:border-box}
 .btn-row button.locked-text{font-size:.56rem;line-height:1.05}
 .loc-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:flex-start;align-items:flex-end;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border-lt)}
 .info-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;align-items:flex-end}
@@ -403,7 +399,7 @@ body.theme-dark .phb-D{border:1px solid var(--gold)}
    đúng phần chữ tên sao, không đụng tới badge. display:inline-flex vẫn không đủ ngăn hẳn 1 số trình duyệt vẽ
    đường gạch của .sao tràn xuống dưới badge (do gạch chân của ancestor vẽ theo cùng layer text, không tính
    theo box con) - phải thêm position:relative + z-index để badge chắc chắn vẽ ĐÈ LÊN trên đường gạch đó.*/
-.th{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:.92rem;font-weight:600;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
+.th{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:.92rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
 /* Lá số đơn giữ nguyên kích cỡ gốc (đẹp rồi, không đổi) - CHỈ thu nhỏ riêng cho lá số mini bên tab "2 Lá Số"
    cho gọn với lưới cung vốn đã nhỏ hơn ở đó. */
 .dual-side .th{width:16px;height:16px;font-size:.58rem}
@@ -1082,12 +1078,6 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       <button class="btn-outline" id="btnInfo" onclick="toggleInfoVisible()">Ẩn/Hiện Info</button>
       <button class="btn-outline" id="btnTuHoa" onclick="toggleTuHoaVisible()">Tứ hóa mệnh</button>
       <button class="btn-dark not-done" id="btnLapLaSo" onclick="if(!isActivated){flashCodeBar();return;}lapLaSo()">LẬP LÁ SỐ</button>
-      <select id="anhScaleSelect" title="Độ phân giải ảnh khi tải về">
-        <option value="1">Ảnh 1x</option>
-        <option value="2" selected>Ảnh 2x (nét)</option>
-        <option value="3">Ảnh 3x (rất nét)</option>
-        <option value="4">Ảnh 4x (siêu nét)</option>
-      </select>
       <button class="btn-blue not-done" id="btnLuuLaSo" onclick="luuLaSo()">Lưu lá số</button>
       <button class="btn-purple" id="btnLuuKho" onclick="luuKhoLaSo()">Lưu Kho</button>
       <button class="btn-brown" id="btnMoKho" onclick="openKhoLaSo()">Kho LS</button>
@@ -3245,9 +3235,7 @@ async function taiAnhLaSo(){
   catch(e){ throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.'); }
   if(typeof html2canvas!=='function') throw new Error('Chưa tải được thư viện xuất ảnh (html2canvas) - kiểm tra kết nối mạng rồi thử lại.');
   const cs=getComputedStyle(document.body);
-  const scaleSel=document.getElementById('anhScaleSelect');
-  const scale=scaleSel?(parseFloat(scaleSel.value)||2):2;
-  const canvas=await html2canvas(wrap,{backgroundColor:cs.getPropertyValue('--bg').trim()||'#fff', useCORS:true, scale});
+  const canvas=await html2canvas(wrap,{backgroundColor:cs.getPropertyValue('--bg').trim()||'#fff', useCORS:true, scale:2});
   const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
   if(!blob) throw new Error('Không tạo được ảnh PNG');
   const c=chart();
@@ -6154,6 +6142,23 @@ function computeKetCauStructuresRaw(mode){
       // Lưu ý: via có thể là 0 (cung Tý, chỉ số hợp lệ) - 0 là falsy trong JS nên phải so sánh với
       // null/undefined tường minh, không được dùng "found.via &&..." (sẽ bỏ sót đúng lúc via===0).
       if(found && found.via!=null && suppressed.has(found.via)) found={...found, suppressed:true};
+      // M ĐÃ là 1 nút THẬT SỰ nằm ngay trên mạch chính (spineTargets) - và chính bước hóa Kị GỐC của riêng M
+      // (found.p.i===0, dùng đúng Can của M) lại đáp trúng ĐÚNG điểm mà mạch chính CŨNG tiếp tục tới ngay sau
+      // vị trí của M (steps[spineIndexOf(M)+1]) - đây KHÔNG phải 1 điểm hội tụ ĐỘC LẬP mới, mà là CÙNG 1 sự
+      // kiện: mạch chính sở dĩ đi tiếp được từ M chính là VÌ dùng đúng Can của M (y hệt "trùng lặp phi hóa"
+      // bình thường), chỉ khác là bước tiếp đó rơi ĐÚNG vào Kị xuất đối cung (KXĐC)/niên kéo dài của M, một
+      // dạng "tiếp lực tự nhiên" mà computeSuppressed() không dò ra được (nó chỉ dò trên chainFor(idx) RAW của
+      // TỪNG idx, đo liên tục TỪ CHÍNH idx đó, không phải từ vị trí giữa mạch của root) - nếu không loại trừ,
+      // dòng hội tụ riêng của M sẽ LẶP LẠI y hệt đoạn mạch chính đã vẽ, đếm dư 1 Kị (vd Phúc Đức vừa nằm trên
+      // mạch chính nhờ KXĐC → Tài Bạch, vừa hiện thêm dòng hội tụ riêng "Phúc Đức —TK→ Tài Bạch" mô tả lại
+      // ĐÚNG cùng 1 cạnh đó). Vẫn coi như "suppressed" (không phải xóa hẳn) để memberSubChains bên dưới vẫn
+      // ghi nhận đủ đường đi riêng của M cho tab "cô lập kết cấu" vẽ đúng (phần VẼ vốn không sai, chỉ phần chữ
+      // mô tả/đếm bị dư).
+      if(letter==='D' && found && !found.suppressed && found.via==null && !found.onRoot && found.p && found.p.i===0 && spineIndexOf.has(M)){
+        const mSpineIdx=spineIndexOf.get(M);
+        const nextSpineStep=steps[mSpineIdx+1];
+        if(nextSpineStep && nextSpineStep.to===found.p.to) found={...found, suppressed:true};
+      }
       touchInfo[M]=found;
     });
     // M chỉ "đi nhờ" hợp lệ qua 1 cung trung gian (via) nếu điểm via chạm vào mạch chính KHÔNG PHẢI là bước
