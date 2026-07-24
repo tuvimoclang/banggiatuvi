@@ -248,7 +248,12 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .cg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
 .cg-btn{position:relative;padding:6px 5px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.68rem;font-weight:400}
 .cg-btn.active{background:var(--panel);color:var(--accent);border-color:var(--accent)}
-.cg-btn.topic-hl{box-shadow:inset 0 0 0 2px var(--accent)}
+/* Viền XÁM (không phải xanh) cho cung được Chủ đề gợi ý nhưng CHƯA bấm chọn thật - viền xanh (.active, xem
+   trên) chỉ dành riêng cho cung đã THẬT SỰ bấm chọn, tránh nhầm "gợi ý" với "đã chọn". */
+.cg-btn.topic-hl{box-shadow:inset 0 0 0 2px var(--muted)}
+/* Đã bấm chọn thật (.active) thì bỏ hẳn viền xám của topic-hl - chỉ còn 1 viền xanh duy nhất, tránh chồng
+   2 viền (xanh ngoài + xám trong) nhìn rối mắt như 2 khung lồng nhau. */
+.cg-btn.active.topic-hl{box-shadow:none}
 .cg-btn.disabled{opacity:.35;cursor:not-allowed}
 .topic-popup{position:absolute;top:100%;right:0;margin-top:6px;background:var(--panel);border:1px solid var(--border-lt);border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.18);padding:6px;z-index:50;width:190px}
 .topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
