@@ -3865,16 +3865,21 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     if(next.to===prev.from && next.letter===prev.letter && next.star===prev.star) break; // quay lui đúng bước vừa đi
     // Bay vòng về ĐÚNG triệu nhân cung (startIdx): THÔNG THƯỜNG cung đó đã "phóng Kị đi mất" từ đầu, không
     // còn tọa Kị nữa, nên không tính là còn lực để chuyển tiếp - dừng NGAY TRƯỚC bước này (không vẽ cạnh quay
-    // lại gốc). NGOẠI LỆ: nếu lý do buộc tiếp tục ở đúng bước VỪA RỒI (prev) là "gặp niên cùng loại kết cấu"
-    // (đồng tinh diệu, không phải trùng lặp/tự hóa) - đây là 1 nguồn năng lượng ĐỘC LẬP hẳn với root, dùng
-    // đúng Can của prev.to (không phải Can của root) để bay tới, root chỉ đơn thuần là ĐÍCH tình cờ trùng với
-    // chính nó - vẫn phải vẽ đủ cạnh quay về root (vd Mệnh phi Lộc → Điền Trạch —CK→ Tử Nữ [Liêm Trinh, niên
-    // A] —CK→ Mệnh: bước cuối dùng Can Tử Nữ, do niên A thúc buộc, không phải Mệnh tự "phóng" Kị lần 2). Chỉ
-    // cho phép quay về root ĐÚNG 1 LẦN như vậy (returnedToRootOnce) - tránh vòng lặp dài vô nghĩa nếu vô tình
-    // lặp lại điều kiện này nhiều lần.
-    const prevIsNienMatch = c.thMap[prev.star]===firstLetter;
+    // lại gốc). NGOẠI LỆ: nếu lý do buộc tiếp tục ở đúng bước VỪA RỒI (prev) là 1 nguồn năng lượng ĐỘC LẬP hẳn
+    // với root - gặp niên cùng loại kết cấu (đồng tinh diệu), HOẶC bản thân prev.to tự hóa Lộc/Kị xuất (Kị xuất
+    // đối cung/tự hóa Lộc xuất đồng tinh diệu, xem mustContinueKy) - dùng đúng Can của prev.to (không phải Can
+    // của root) để bay tới, root chỉ đơn thuần là ĐÍCH tình cờ trùng với chính nó - vẫn phải vẽ đủ cạnh quay về
+    // root (vd Mệnh phi Lộc → Điền Trạch —CK→ Tử Nữ [Liêm Trinh, niên A] —CK→ Mệnh: bước cuối dùng Can Tử Nữ,
+    // do niên A thúc buộc, không phải Mệnh tự "phóng" Kị lần 2). Trước đây CHỈ xét niên (prevIsNienMatch riêng,
+    // gọi thẳng c.thMap[prev.star]===firstLetter), bỏ sót đúng trường hợp tự hóa Lộc/Kị xuất - khiến 1 cung
+    // đáp tới nhờ tự hóa mà lại tình cờ bay tiếp về ĐÚNG root bị chặn đứng hẳn (không đi tiếp được nữa), dù rõ
+    // ràng đó cũng là 1 nguồn năng lượng độc lập y hệt niên, chỉ khác lý do kích hoạt - dùng thẳng
+    // mustContinueKy(prev,firstLetter) (đã bao gồm niên lẫn tự hóa) thay vì chỉ kiểm tra niên. Chỉ cho phép
+    // quay về root ĐÚNG 1 LẦN như vậy (returnedToRootOnce) - tránh vòng lặp dài vô nghĩa nếu vô tình lặp lại
+    // điều kiện này nhiều lần.
+    const prevIsIndependentSource = mustContinueKy(prev,firstLetter);
     if(next.to===startIdx){
-      if(!prevIsNienMatch || returnedToRootOnce) break;
+      if(!prevIsIndependentSource || returnedToRootOnce) break;
       returnedToRootOnce = true;
     }
     const key=next.to+':'+next.star;
@@ -6000,18 +6005,16 @@ function computeKetCauStructuresRaw(mode){
     const spineRealMembers=new Set();
     steps.forEach((step,i)=>{
       if(i===0 && rootSelfLoop) return; // đã ghi ở dòng tiêu đề, không lặp lại "→ chính nó"
-      // Niên Kị: tính ngay từ bước phi Kị GỐC (i=0), không cần đợi tới chuyển Kị - "Điền phi kỵ là 1 kỵ, có
-      // niên D thì cũng +1 kỵ" (không cần đồng tinh diệu). Kết cấu Lộc vẫn giữ nguyên chỉ tính từ i>=1.
-      let bonus={add:0,tags:[],nienHit:false};
-      if(i>=1 || (letter==='D' && !rootSelfLoop)){
-        bonus=pointBonus(step.to,step.star,i,seenBonus,nienCap,step.from);
-        total+=bonus.add;
-        if(bonus.nienHit) nienBonusNode={to:step.to,star:step.star};
-      }else{
-        // i=0 của kết cấu Lộc: không cộng điểm, nhưng vẫn ghi nhãn niên A nếu có, để không mất thông tin.
-        const tag=nienTagFor(step.to,step.star);
-        if(tag) bonus={add:0,tags:[tag],nienHit:false};
-      }
+      // Niên A/D: tính ngay từ bước phi hóa GỐC (i=0), không cần đợi tới chuyển Kị - "Điền phi Lộc/Kị là 1
+      // Lộc/Kị, có niên cùng loại thì cũng +1" - áp dụng ĐỒNG NHẤT cho cả kết cấu Lộc lẫn Kị. Trước đây kết
+      // cấu Lộc bị loại trừ riêng i=0 (chỉ tính từ i>=1), khiến 1 cung mang niên A đáp trúng NGAY bước hóa
+      // Lộc gốc (chưa kịp chuyển Kị) bị bỏ sót không cộng điểm - vd "Huynh Đệ (hóa Lộc) → Thiên Di (niên A)
+      // —CK→ Mệnh (tự hóa Lộc) —CK→ Tài Bạch" đáng lẽ 3 Lộc (gốc + niên A + tự hóa Lộc) nhưng chỉ ra 2 (thiếu
+      // đúng phần niên A ở bước đầu). Không đụng gì tới cách xử lý "triệu nhân cung TỰ tọa niên" (rootSelfLoop/
+      // nienOverlapIdx phía trên/dưới) - đó là 1 nhánh riêng biệt, độc lập với bonus tại TARGET của bước i=0.
+      const bonus=pointBonus(step.to,step.star,i,seenBonus,nienCap,step.from);
+      total+=bonus.add;
+      if(bonus.nienHit) nienBonusNode={to:step.to,star:step.star};
       const hasNextStep = i+1<steps.length;
       // "Trùng lặp phi hóa" CHỈ áp dụng cho cung THẬT SỰ được bấm chọn tay (realAnchorSet) - KHÔNG áp dụng
       // cho cung chỉ được "gộp tự động" (mergeInAuto, vd tự hóa cùng chữ kết cấu) - dù cung đó CŨNG được coi
@@ -6099,7 +6102,16 @@ function computeKetCauStructuresRaw(mode){
           // vẫn coi bước i=1 này là phần đóng góp CỦA RIÊNG M, được đối chiếu với mạch chính (kể cả các điểm
           // vừa được bơm lực/truy Lộc thêm vào) y hệt p0 (vd Thiên Di tự hóa Lộc xuất rồi CK sang đúng điểm
           // mà mạch chính cũng vừa đáp tới nhờ 1 thành viên khác truy Lộc vào).
-          else if(!found && p0.to===M && pts[1] && !pts[1].isTrungLap && steps.some(s=>s.to===pts[1].to && s.star===pts[1].star)){
+          // ĐIỀU KIỆN THÊM !steps.some(s=>s.to===M): loại trừ đúng trường hợp M đã LÀ 1 nút CÓ SẴN ngay trên
+          // mạch chính của root (tức root cũng đáp qua M bằng 1 NGÔI SAO KHÁC hẳn, rồi CK tiếp) - bước CK từ M
+          // (flyFrom(M,'D')) CHỈ phụ thuộc vào Can của M, không phụ thuộc ngôi sao nào vừa "đáp tới" M, nên nếu
+          // không loại trừ, "pts[1] khớp mạch chính" sẽ LUÔN đúng bất cứ khi nào M nằm giữa mạch chính - dù
+          // ngôi sao M tự hóa (p0.star) hoàn toàn KHÁC ngôi sao mà root thực sự dùng để đáp tới M (2 sự kiện
+          // không liên quan, chỉ trùng cung chứ không trùng sao) - gây cộng dư 1 Lộc/Kị và vẽ thêm 1 dòng hội
+          // tụ sai (vd Mệnh hóa Lộc → Thiên Di [sao Thiên Đồng] —CK→ Tật Ách..., trong khi Thiên Di tự hóa Lộc
+          // lại là sao Thiên Lương - khác tinh diệu - lẽ ra phải tách thành kết cấu riêng, không được gộp
+          // chung/cộng thêm điểm vào kết cấu của Mệnh chỉ vì tình cờ CK tiếp theo tính ra trùng cung đích).
+          else if(!found && p0.to===M && !steps.some(s=>s.to===M) && pts[1] && !pts[1].isTrungLap && steps.some(s=>s.to===pts[1].to && s.star===pts[1].star)){
             found={p:pts[1], via:null};
           }
         }
