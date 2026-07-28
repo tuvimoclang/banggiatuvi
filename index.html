@@ -430,9 +430,9 @@ body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color
 .ln{position:absolute;bottom:3px;left:6px;font-size:.65rem;color:var(--muted);text-align:left;line-height:1.4}
 .ln-age{cursor:pointer}
 .ln-age:hover{color:var(--accent);text-decoration:underline}
-.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.71rem;font-weight:600;color:#e63946;line-height:1.3;z-index:3}
-.ln-chuc{position:absolute;bottom:15px;right:5px;font-size:.63rem;font-weight:600;color:#2563eb;line-height:1.3;z-index:3}
-.lg-chuc{position:absolute;bottom:27px;right:5px;font-size:.63rem;font-weight:600;color:#16a34a;line-height:1.3;z-index:3}
+.dv-chuc{position:absolute;bottom:2px;right:5px;font-size:.78rem;font-weight:600;color:#e63946;line-height:1.1;z-index:3}
+.ln-chuc{position:absolute;bottom:18px;right:5px;font-size:.7rem;font-weight:600;color:#2563eb;line-height:1.1;z-index:3}
+.lg-chuc{position:absolute;bottom:32px;right:5px;font-size:.63rem;font-weight:600;color:#16a34a;line-height:1.1;z-index:3}
 .cung.dv-menh-bg{background:#ffe1ec}
 body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-info{margin-top:2px}
@@ -3851,6 +3851,7 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
   // vì tình cờ đi ngang 1 cung Thể/Dụng khác giữa chừng.
   let trungLapBroken = false;
   let returnedToRootOnce = false;
+  let revisitedOnce = false;
   const MAX_STEPS=20;
   while(steps.length<MAX_STEPS){
     // Trùng lặp phi hóa (chỉ kết cấu Kị): bước chuyển Kị vừa thêm (prev) dùng đúng Can của 1 cung Thể/Dụng
@@ -3881,9 +3882,32 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     if(next.to===startIdx){
       if(!prevIsIndependentSource || returnedToRootOnce) break;
       returnedToRootOnce = true;
+      // Đánh dấu "revisit" - CHỈ để bước này KHÔNG được vẽ mũi tên trên lá số (xem drawPhiHoaChain), tránh
+      // vẽ 1 mũi tên chạy NGƯỢC lại đúng đường vừa đi qua (từ điểm cuối quay thẳng về root, trong khi trục
+      // chính đã có sẵn 1 mũi tên chạy TỪ root ra), trông như 2 mũi tên chồng/song song vô nghĩa giữa đúng 2
+      // cung đó - dữ liệu (steps) vẫn giữ nguyên đủ, không đổi gì tới cách đếm điểm Lộc/Kị hay dòng chữ mô tả
+      // kết cấu, chỉ ẩn riêng phần vẽ mũi tên của bước này.
+      next.isRevisit = true;
     }
+    // Đã đi qua đúng điểm này rồi (revisit) - THÔNG THƯỜNG dừng luôn để tránh vòng lặp (2 cung tự "đá" Kị qua
+    // lại nhau vô hạn). NGOẠI LỆ giống hệt "quay vòng về root" phía trên: nếu lý do buộc tiếp tục ở bước VỪA
+    // RỒI (prev) là 1 nguồn năng lượng ĐỘC LẬP (niên cùng loại/tự hóa Lộc-Kị xuất, xem prevIsIndependentSource
+    // phía trên) thì vẫn phải vẽ đủ cạnh revisit đó 1 LẦN (revisitedOnce) trước khi dừng hẳn - vd Tử Nữ hóa Lộc
+    // → Tật Ách —CK→ Huynh Đệ (niên A): Huynh Đệ BẮT BUỘC chuyển Kị tiếp dù điểm tới trùng lại đúng Tật Ách đã
+    // đi qua trước đó (khác nguồn: lần đầu do Tử Nữ tự phóng, lần này do niên A ở Huynh Đệ thúc buộc) - không
+    // được dừng NGAY TRƯỚC khi vẽ cạnh này chỉ vì trùng điểm, mất hẳn đúng 1 bước niên A đáng lẽ phải có. An
+    // toàn không lặp vô hạn: lần lặp KẾ TIẾP, prev sẽ là đúng điểm đã revisit (y hệt 1 bước đã có từ trước),
+    // nên mustContinueKy(prev,...) cho ra kết quả y hệt lần đầu gặp điểm đó (input giống hệt) - nếu lần đầu đã
+    // dừng ở đó thì lần lặp lại cũng tự dừng ngay ở đầu vòng lặp, không cần "revisitedOnce" phải chặn thêm.
     const key=next.to+':'+next.star;
-    if(visited.has(key)) break; // đã đi qua đúng điểm này rồi - dừng, tránh vòng lặp
+    if(visited.has(key)){
+      if(!prevIsIndependentSource || revisitedOnce) break;
+      revisitedOnce = true;
+      // Đánh dấu "revisit" - xem giải thích đầy đủ ở nhánh "quay vòng về root" phía trên (cùng lý do: bước
+      // này chỉ cần TÍNH ĐIỂM/HIỂN THỊ CHỮ, không cần vẽ thêm 1 mũi tên chạy ngược lại đúng điểm đã có sẵn
+      // mũi tên khác dẫn tới, tránh trông như 2 mũi tên chồng/song song vô nghĩa giữa đúng 2 cung đó).
+      next.isRevisit = true;
+    }
     visited.add(key);
     next.color=hoaArrowColor('D');
     steps.push(next);
@@ -3927,13 +3951,21 @@ function dedupSharedContinuations(chains,realAnchorSet){
 // Niên Kị (quick fly, 1 nhịp) đáp vào 1 cung mà chính Can cung đó lại "Kị xuất đối cung" (tự hóa Kị bay
 // thẳng sang đối cung) - cung đó vẫn còn dư năng lượng, phải tự động vẽ tiếp đường Kị xuất đối cung đó,
 // không dừng lại ở đúng 1 nhịp như bình thường. Dùng chung mustContinueKy để nhất quán với chuỗi Thể/Dụng.
-function extendNienKyQuickChain(ch){
+// structureLetter (tham số): chữ GỐC THẬT SỰ của cả kết cấu đang xem (A khi đang ở kết cấu Lộc/cat, D khi
+// đang ở kết cấu Kị/hung) - KHÔNG phải chữ D máy móc dùng để bay (chuyển Kị luôn bay bằng Can D bất kể kết
+// cấu gốc là gì). Trước đây gọi thẳng mustContinueKy(prev,'D') bất kể đang xem kết cấu Lộc hay Kị, khiến 1
+// chuỗi niên Lộc (bấm "N.Lộc") vẫn bị coi là "gặp niên D thì tiếp tục CK" - SAI, vì niên D (niên Kị) không
+// liên quan gì tới năng lượng Lộc đang truy; phải xét niên A mới đúng lúc đang ở kết cấu Lộc. Đồng thời GHI
+// ĐÈ structureLetter của chuỗi trả về thành đúng chữ gốc này (không giữ 'D' cũ) - để phiHoaGlowSet/
+// tuHoaGlowSet/showPhiHoaMeaningForStep (đều đọc chain.structureLetter) tô sáng/tra ý nghĩa đúng theo Lộc,
+// không lầm sang Kị, khi chuỗi niên này đang nằm trong ngữ cảnh kết cấu Lộc.
+function extendNienKyQuickChain(ch,structureLetter){
   if(!ch || ch.structureLetter!=='D') return ch;
   let prev=ch.steps[ch.steps.length-1];
   const steps=ch.steps.slice();
   const visited=new Set(steps.map(s=>s.to+':'+s.star));
   let guard=0;
-  while(mustContinueKy(prev,'D') && guard<10){
+  while(mustContinueKy(prev,structureLetter) && guard<10){
     const next=flyFrom(prev.to,'D');
     if(!next) break;
     if(next.to===prev.from && next.letter===prev.letter && next.star===prev.star) break;
@@ -3945,7 +3977,7 @@ function extendNienKyQuickChain(ch){
     prev=next;
     guard++;
   }
-  return steps.length===ch.steps.length ? ch : {...ch, steps};
+  return {...ch, steps, structureLetter};
 }
 // Bọc ngoài KHÔNG BAO GIỜ ném lỗi, cùng lý do như renderGrid/redrawCanvas - hàm này luôn chạy TRƯỚC renderGrid/
 // redrawCanvas trong hầu hết mọi handler (toggleTheCung, flyNienHoa, quickFlyLetter...) - lỗi ở đây chắc chắn
@@ -3973,7 +4005,14 @@ function recomputePhiHoaChainsRaw(){
     // chỉ liên kết được với Thể qua trung gian (vd Huynh Đệ/Tử Nữ chỉ nối vào Thể=Tật Ách qua Lưỡng đầu kiến
     // Kị của Thiên Di, không đáp thẳng/đối cung với Tật Ách) bị lọc mất mũi tên khi bấm L.Kỵ, dù kết cấu bên
     // trái vẫn tính nó hợp lệ.
-    const validRoots=new Set(computeKetCauStructures(hcMode).flatMap(s=>s.memberIdxs||[s.anchorIdx]));
+    // Dùng realMembersOfKetCau(s) thay vì s.memberIdxs - memberIdxs (kết cấu Lộc) chỉ là NGUYÊN VẸN cả
+    // effectiveSelected (mọi cung Thể/Dụng đã chọn + tự động gộp), KHÔNG có nghĩa TỪNG cung trong đó thật sự
+    // hội tụ vào ĐÚNG root này - vd cung X, Y cùng chọn, cùng tình cờ hóa Lộc đáp tới 1 cung Z chung nhưng
+    // KHÁC tinh diệu (không liên quan gì tới nhau) vẫn bị liệt chung vào memberIdxs của kết cấu X chỉ vì cùng
+    // nằm trong effectiveSelected, khiến Dụng=Y bị coi là "hợp lệ" (validRoots) và mũi tên của Y vẫn hiện ra
+    // dù rõ ràng Y không hề thuộc kết cấu này - realMembersOfKetCau() mới đúng là tập hợp THẬT SỰ (root +
+    // convergences thật + spineRealMembers), khớp với cách hasThe()/vẽ mũi tên cô lập kết cấu đã dùng.
+    const validRoots=new Set(computeKetCauStructures(hcMode).flatMap(s=>[...realMembersOfKetCau(s)]));
     dungChains=dungChains.filter(ch=>validRoots.has(ch.from));
   }
   let chains=[...theChains, ...dungChains];
@@ -4021,7 +4060,7 @@ function recomputePhiHoaChainsRaw(){
     // SAU ĐÓ cũng được bấm chọn thêm làm Thể/Dụng thật (phi Lộc/Kị riêng, khác hẳn) - không được vì vậy mà
     // tự ý xóa mất mũi tên niên đang có. ABCD thường vẫn tính chuỗi riêng dù cung đã là Thể/Dụng (cho phép
     // xem thêm cả 4 chữ tại chính cung đó, không chặn theo yêu cầu).
-    let ch = isNienQuick ? extendNienKyQuickChain(computeSingleChain(idx,letter,true)) : computeSingleChain(idx,letter,true);
+    let ch = isNienQuick ? extendNienKyQuickChain(computeSingleChain(idx,letter,true), hcMode==='cat'?'A':'D') : computeSingleChain(idx,letter,true);
     if(ch && isNienQuick){
       // Nếu đoạn (hoặc cả) chuỗi niên D vừa tính TRÙNG với 1 đoạn chuyển Kị đã có sẵn trong 1 chuỗi Thể/Dụng
       // khác (cùng dùng Can của chính cung niên đó) thì cắt bỏ phần trùng - chỉ vẽ 1 mũi tên cho đoạn dùng
@@ -4034,7 +4073,14 @@ function recomputePhiHoaChainsRaw(){
       // trùng ngay từ bước đầu tiên, không đợi tới bước chuyển Kị mới trùng - phải loại luôn từ i=0, nếu
       // không sẽ vẽ chồng 2 mũi tên giống hệt nhau cho cùng 1 đoạn (điểm tính Kị vẫn cộng riêng ở kết cấu,
       // xem nienOverlapIdx - chỉ KHÔNG vẽ thêm mũi tên).
-      if(st.the.has(idx)||st.dung.has(idx)) usedFrom.add(idx);
+      // CHỈ đúng khi hcMode==='hung' (kết cấu Kị) - lúc đó chuỗi Thể/Dụng thường của idx CŨNG dùng letter='D'
+      // ở bước 0 (giống hệt chuỗi quick niên-D này). Ở kết cấu Lộc (hcMode==='cat'), chuỗi Thể/Dụng thường
+      // của idx dùng letter='A' (hóa Lộc) ở bước 0 - HOÀN TOÀN KHÁC chuỗi quick niên (luôn là letter='D', vì
+      // "gặp niên Lộc cũng bắt buộc chuyển Kị") - không hề trùng nhau, nên KHÔNG được coi là "đã dùng" ở đây.
+      // Trước đây áp dụng vô điều kiện khiến toàn bộ chuỗi "niên Lộc chuyển Kị" bị cắt sạch (break ngay i=0,
+      // steps rỗng, ch=null) mỗi khi cung niên Lộc đó cũng là Thể/Dụng - mất hẳn mũi tên dù bấm "N.Lộc" vẫn
+      // đang bật (chỉ còn cộng điểm ở kết cấu qua nienOverlapIdx, không còn vẽ được gì trên lá số nữa).
+      if(hcMode==='hung' && (st.the.has(idx)||st.dung.has(idx))) usedFrom.add(idx);
       const steps=[];
       for(let i=0;i<ch.steps.length;i++){
         const fromCung = i===0 ? ch.from : ch.steps[i-1].to;
@@ -5285,6 +5331,12 @@ function drawPhiHoaChain(ctx){
     const isSel=selectedPhiArrow && selectedPhiArrow.mode===hcMode && selectedPhiArrow.idx===ch.from;
     ch.steps.forEach(s=>{
       if(s.from===s.to) return;
+      // Bước "revisit" (xem computeSingleChain: quay lại ĐÚNG root hoặc 1 điểm đã đi qua, chỉ cho phép 1
+      // lần khi có nguồn năng lượng độc lập thúc buộc) - CHỈ cần tính điểm/hiển thị chữ trong khối kết cấu,
+      // KHÔNG vẽ thêm mũi tên chạy ngược lại đúng cặp cung đã có sẵn 1 mũi tên khác - nếu vẽ sẽ trông như 2
+      // mũi tên chồng/song song vô nghĩa giữa đúng 2 cung đó (1 xuôi, 1 ngược), dù chỉ là 1 sự kiện tính
+      // điểm, không phải 1 đường phi hóa mới thật sự cần minh họa riêng.
+      if(s.isRevisit) return;
       const pts=arrowEndpoints(s); if(!pts) return;
       entries.push({s,pts,isSel});
     });
@@ -5803,7 +5855,7 @@ function computeKetCauStructuresRaw(mode){
   const chainFor=idx=>{
     if(!(idx in chainCache)){
       chainCache[idx] = (idx===nienIdx)
-        ? extendNienKyQuickChain(computeSingleChain(idx,'D',true,realAnchorSet))
+        ? extendNienKyQuickChain(computeSingleChain(idx,'D',true,realAnchorSet), letter)
         : computeSingleChain(idx,letter,false,realAnchorSet);
     }
     return chainCache[idx];
@@ -5867,9 +5919,13 @@ function computeKetCauStructuresRaw(mode){
   // Tử Nữ trước đó) - phải kiểm tra computeTuHoaFor(fromIdx), TUYỆT ĐỐI không phải computeTuHoaFor(target).
   function detectBonusTags(target,star,i,fromIdx){
     const tags=[];
-    const cungHasNienD = letter==='D' && (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]==='D');
-    if(cungHasNienD) tags.push('niên D');
-    if(letter==='A' && c.thMap[star]==='A') tags.push('niên A');
+    // Niên A/D: chỉ cần CUNG ĐÍCH có BẤT KỲ sao nào mang niên cùng chữ là đủ +1 - không cần ĐÚNG NGAY sao
+    // vừa đáp tới (star) - áp dụng ĐỒNG NHẤT cho cả Lộc lẫn Kị. Trước đây kết cấu Kị đã nới lỏng kiểu này
+    // ("khác tinh diệu vẫn tính chung Kị - chỉ cần cùng cung có sao mang niên Kị"), nhưng kết cấu Lộc lại bắt
+    // buộc ĐÚNG SAO (c.thMap[star]==='A') mới tính - khiến 1 cung có 2 sao (vd Liêm Trinh đáp tới do phi Lộc,
+    // Phá Quân lại là sao mang niên A) bị bỏ sót +1 Lộc dù rõ ràng CUNG đó đang mang niên A, chỉ khác sao.
+    const cungHasNien = (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter);
+    if(cungHasNien) tags.push(letter==='D' ? 'niên D' : 'niên A');
     if(letter==='A'){
       const selfHoaA=computeTuHoaFor(target);
       if(selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===star)) tags.push('tự hóa Lộc');
@@ -5897,11 +5953,11 @@ function computeKetCauStructuresRaw(mode){
   // Ghi nhãn "niên A/D" thuần túy để HIỂN THỊ, không tính điểm/không đụng seen|nienCap - dùng cho bước i=0
   // của kết cấu Lộc (quy tắc chấm điểm chỉ tính niên từ i>=1 trở đi, nhưng vẫn nên GHI RÕ ngay tại i=0 nếu
   // đúng là cung đó có niên Lộc, để không mất thông tin dù không cộng điểm ở bước này).
+  // Đồng nhất với detectBonusTags: chỉ cần CUNG target có sao mang niên cùng chữ là đủ, không cần đúng
+  // ngay sao vừa đáp (tham số "star" giữ lại cho tương thích chữ ký gọi cũ, không dùng nữa).
   function nienTagFor(target,star){
-    if(letter==='D'){
-      return (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]==='D') ? 'niên D' : null;
-    }
-    return c.thMap[star]==='A' ? 'niên A' : null;
+    const has=(c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter);
+    return has ? (letter==='D'?'niên D':'niên A') : null;
   }
 
   // Tính 1 kết cấu với gốc "root" cố định, trong phạm vi "members"/"anchorSetForThis"/"suppressed" cho trước.
@@ -6343,7 +6399,32 @@ function computeKetCauStructuresRaw(mode){
     // cung đó vừa "phi" bình thường theo Can riêng (đã tính ở trên) vừa ĐỘC LẬP "tọa" thêm năng lượng niên,
     // nên phải cộng thêm 1 Kị riêng - ghi thành 1 dòng riêng cho rõ ràng, KHÔNG vẽ thêm mũi tên nào (mũi tên
     // niên trùng hệt mũi tên phi bình thường của chính cung đó, xem recomputePhiHoaChains đã tự lược bỏ).
-    if(nienOverlapIdx!=null && (root===nienOverlapIdx || members.includes(nienOverlapIdx)) && !nienCap.used){
+    // NGOẠI LỆ (không cộng): nếu cung mang niên - dù là ROOT hay 1 THÀNH VIÊN khác - tham gia kết cấu CHÍNH
+    // LÀ qua đúng bước hóa Lộc/Kị GỐC của riêng nó, BAY ĐI NƠI KHÁC ("cung số 1", không phải cung số 2/3/4
+    // được đáp qua sau, và không phải tự hóa tại chỗ) thì KHÔNG cộng thêm - "niên" và "hóa xuất gốc bay đi"
+    // lúc này là CÙNG 1 sự kiện duy nhất, không phải 2 nguồn độc lập:
+    //  - Nếu root===nienOverlapIdx: root tự nó bay đi (KHÔNG tự hóa/self-loop - self-loop đã tự xử lý riêng ở
+    //    rootSelfLoop/rootNienTag phía trên rồi, không đụng ở đây) - phần "1" nền tảng của root ("cung Triệu
+    //    nhân phi X = 1") ĐÃ LÀ đúng 1 Lộc/Kị của việc root bay đi đó rồi, root mang niên chỉ là mô tả THÊM
+    //    cho cùng 1 cung, không phải nguồn thứ 2.
+    //  - Nếu là 1 thành viên khác: cách nó tham gia là touchInfo[...].p.i===0 (bước hóa GỐC của chính nó,
+    //    không qua via/onRoot/suppressed) VÀ p.to khác chính nó (bay đi, không phải tự hóa tại chỗ - trường
+    //    hợp tự hóa tại chỗ KHÔNG được cộng điểm qua nhánh hội tụ bình thường - isSelfLoopHere - nên niên vẫn
+    //    PHẢI cộng, không thuộc ngoại lệ này) - phần "phi bình thường" của nó đã được cộng đủ 1 Lộc/Kị qua
+    //    nhánh hội tụ thành viên bình thường ở trên rồi (members.forEach), cộng thêm niên ở đây sẽ tính dư.
+    // Chỉ cộng thêm khi cung mang niên chạm vào kết cấu qua 1 bước KHÁC hẳn (via/onRoot/i>=1/tự hóa tại chỗ)
+    // - lúc đó niên mới đúng là nguồn thứ 2 thật, hoặc là nguồn điểm DUY NHẤT của cung đó.
+    let nienOverlapIsOwnBaseFlight = false;
+    if(nienOverlapIdx!=null){
+      if(root===nienOverlapIdx){
+        nienOverlapIsOwnBaseFlight = !rootSelfLoop;
+      }else{
+        const info = touchInfo[nienOverlapIdx];
+        nienOverlapIsOwnBaseFlight = !!(info && !info.suppressed && !info.onRoot && info.via==null
+          && info.p && info.p.i===0 && info.p.to!==nienOverlapIdx);
+      }
+    }
+    if(nienOverlapIdx!=null && (root===nienOverlapIdx || members.includes(nienOverlapIdx)) && !nienCap.used && !nienOverlapIsOwnBaseFlight){
       total+=1; nienCap.used=true;
       lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
     }
@@ -6353,12 +6434,16 @@ function computeKetCauStructuresRaw(mode){
   const structures=[];
 
   // ---- Cung KHÔNG được chọn nhưng bị 1 chuỗi đã chọn "đáp qua", mà bản thân nó lại có 1 trong 2 lý do sau
-  // để cũng là 1 triệu nhân bổ sung: (a) tự hóa cùng chữ với kết cấu, hoặc (b) [chỉ kết cấu Lộc] cung đó
-  // đang mang niên Lộc - vì "gặp niên Lộc" bắt buộc chuyển Kị, NHƯNG bản thân cung mang niên Lộc đó cũng có
-  // thể tự phi Lộc như 1 cung bình thường (dùng Can riêng của chính nó), song song với việc chuyển Kị.
-  // Với kết cấu Lộc, chỉ được GỘP vào nhóm chính khi ĐỒNG TINH DIỆU với đúng ngôi sao mà chuỗi đã chọn dùng
-  // để "đáp qua" cung đó; khác tinh diệu thì tách thành kết cấu RIÊNG (không tự merge). Với kết cấu Kị thì
-  // luôn gộp thẳng vào nhóm chính (không đòi đồng tinh diệu, "khác tinh diệu vẫn được").
+  // để cũng là 1 triệu nhân bổ sung: (a) [CHỈ kết cấu Lộc] tự hóa Lộc (đồng tinh diệu), hoặc (b) [chỉ kết
+  // cấu Lộc] cung đó đang mang niên Lộc - vì "gặp niên Lộc" bắt buộc chuyển Kị, NHƯNG bản thân cung mang
+  // niên Lộc đó cũng có thể tự phi Lộc như 1 cung bình thường (dùng Can riêng của chính nó), song song với
+  // việc chuyển Kị. Kết cấu Lộc chỉ được GỘP vào nhóm chính khi ĐỒNG TINH DIỆU với đúng ngôi sao mà chuỗi đã
+  // chọn dùng để "đáp qua" cung đó; khác tinh diệu thì tách thành kết cấu RIÊNG (không tự merge).
+  // Kết cấu Kị KHÔNG dùng lý do (a) này nữa - "tự hóa Kị ly tâm" (tọa tại chỗ) của 1 cung KHÔNG TỰ ĐỘNG biến
+  // cung đó thành triệu nhân bổ sung/được +1 Kị chỉ vì tình cờ bị chuỗi đã chọn "đáp qua" - phải THẬT SỰ là 1
+  // cung Thể/Dụng đã bấm chọn tay, hoặc chạm vào kết cấu qua niên D/KXĐC/trùng lặp phi hóa (đã xử lý ở nơi
+  // khác) mới được tính. Trước đây `tuHoaMatch` áp dụng chung cho cả 2 chữ (Lộc bắt "same" đồng tinh diệu,
+  // Kị thì "letter==='D'" ép same=true VÔ ĐIỀU KIỆN, tức luôn gộp/luôn cộng dù khác sao) - tính dư/gộp nhầm.
   const selectedSet=new Set(selected);
   // Dùng riêng cho tham số "realAnchorSet" của evalRoot (nhãn "(trùng lặp)") - CHỈ Thể/Dụng thật, không gồm
   // cung niên A/D, cùng lý do đã giải thích ở khai báo realAnchorSet phía trên.
@@ -6369,11 +6454,11 @@ function computeKetCauStructuresRaw(mode){
     ch.steps.forEach(step=>{
       if(step.to===idx || selectedSet.has(step.to)) return;
       const selfHoa=computeTuHoaFor(step.to);
-      const tuHoaMatch=selfHoa.find(a=>a.type==='out'&&a.letter===letter);
+      const tuHoaMatch = letter==='A' ? selfHoa.find(a=>a.type==='out'&&a.letter==='A') : null;
       const nienLocMatch = letter==='A' && c.thMap[step.star]==='A';
       if(!tuHoaMatch && !nienLocMatch) return;
       let same;
-      if(tuHoaMatch) same = letter==='D' || tuHoaMatch.star===step.star;
+      if(tuHoaMatch) same = tuHoaMatch.star===step.star;
       else{
         const ownFly=flyFrom(step.to,letter);
         same = !!ownFly && ownFly.star===step.star;
@@ -6962,13 +7047,17 @@ function dualComputeSingleChain(c,startIdx,letter,singleStepOnly,realAnchorSet){
   }
   return {from:startIdx,steps,structureLetter:letter};
 }
-function dualExtendNienKyQuickChain(c,ch){
+// Cùng lỗi/cùng cách sửa như extendNienKyQuickChain bên lá số đơn: phải xét tiếp lực theo ĐÚNG chữ gốc của
+// kết cấu đang xem (structureLetter tham số, A/D theo hcMode), không hard-code 'D', và phải ghi đè lại
+// structureLetter trả về (không giữ 'D' cũ) để dualPhiHoaLetter (tra ý nghĩa) không bị lầm sang Kị khi đang
+// ở kết cấu Lộc.
+function dualExtendNienKyQuickChain(c,ch,structureLetter){
   if(!ch || ch.structureLetter!=='D') return ch;
   let prev=ch.steps[ch.steps.length-1];
   const steps=ch.steps.slice();
   const visited=new Set(steps.map(s=>s.to+':'+s.star));
   let guard=0;
-  while(dualMustContinueKy(c,prev,'D') && guard<10){
+  while(dualMustContinueKy(c,prev,structureLetter) && guard<10){
     const next=dualFlyFrom(c,prev.to,'D');
     if(!next) break;
     if(next.to===prev.from && next.letter===prev.letter && next.star===prev.star) break;
@@ -6980,7 +7069,7 @@ function dualExtendNienKyQuickChain(c,ch){
     prev=next;
     guard++;
   }
-  return steps.length===ch.steps.length ? ch : {...ch, steps};
+  return {...ch, steps, structureLetter};
 }
 function dualRecomputeChains(side){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
@@ -7007,7 +7096,7 @@ function dualRecomputeChains(side){
   chains=dedupSharedContinuations(chains, inst.hcMode==='hung' ? realAnchorSet : null);
   st.quick.forEach((qLetter,idx)=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
-    const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true)) : dualComputeSingleChain(c,idx,qLetter,true);
+    const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true),letter) : dualComputeSingleChain(c,idx,qLetter,true);
     if(ch) chains.push(ch);
   });
   inst.chains[inst.hcMode]=chains;
