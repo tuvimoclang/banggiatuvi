@@ -335,7 +335,7 @@ body.theme-dark .can-letter-btn.active.can-letter-D{background:var(--gold);color
 .ban-tuvi{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border-lt);background:var(--border-lt)}
 /* min-height +10px/cung x 4 hàng = lá số cao thêm ~40px (~1cm) theo chiều dọc - lưới không đặt
    grid-template-rows nên các hàng tự giãn theo min-height này của .cung. */
-.cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:142px;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
+.cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:142px;min-width:0;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
 .cung:hover{background:var(--hover)}
 .cung.sel-ring{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
 .cung.hl-daivan{outline:2px solid var(--red);outline-offset:-2px}
@@ -363,9 +363,24 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 .cung.lapcuc-anchor{outline:3px solid var(--accent);outline-offset:-3px;z-index:2}
 
 .sao-chinh-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;margin:5px 0 3px}
-.sao-phu-wrap{display:grid;grid-template-columns:repeat(2,auto);justify-content:center;gap:1px 10px}
+/* Mặc định: phụ tinh xếp bảng 2 cột (auto-flow 2/hàng), MỖI CỘT canh lề trái riêng (justify-items:start) để
+   cột 2 luôn thẳng hàng dọc qua nhiều hàng thay vì so le theo độ dài chữ của cột 1 mỗi hàng - nhưng cả khối 2
+   cột canh GIỮA so với chính tinh phía trên (justify-content:center). Sao lẻ (chỉ 1, hoặc dư ra) chiếm trọn 2
+   cột + tự canh giữa, giống hệt cách chính tinh canh giữa. */
+.sao-phu-wrap{display:grid;grid-template-columns:repeat(2,auto);justify-content:center;justify-items:start;gap:1px 8px}
+.sao-phu-wrap>.sao.phu:last-child:nth-child(odd){grid-column:1/-1;justify-self:center}
+/* layoutPhuWrap() đo lại sau khi vẽ: nếu bảng 2 cột cần rộng hơn bề ngang khả dụng của cung (vd 2 sao tên dài
+   kèm badge tứ hóa cùng lúc), bỏ hẳn layout 2 cột, chuyển qua xếp dọc 1 cột - MỖI sao 1 dòng, canh giữa như
+   chính tinh (không canh trái) - TUYỆT ĐỐI không cho phép nới rộng cung theo chiều ngang. */
+.sao-phu-wrap.phu-wrap-list{display:flex;flex-direction:column;align-items:center;gap:1px}
 .sao{font-size:.8rem;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;color:var(--text);cursor:pointer;position:relative}
 .sao.chinh{font-weight:500;font-size:.93rem}
+/* Chính tinh phải canh giữa theo ĐÚNG tên sao so với tên cung chức năng phía trên - badge niên hóa/tứ hóa
+   mệnh (.th/.mth) không được tính vào bề rộng dùng để canh giữa (nếu không, sao nào có badge sẽ bị đẩy lệch
+   trái so với sao không badge). Đưa badge ra khỏi luồng bố cục bằng position:absolute, đậu ngay sát bên phải
+   tên sao - .sao-chinh-wrap vẫn canh giữa .sao.chinh như cũ, nhưng giờ bề rộng của nó chỉ còn tính theo
+   .sao-name (đã absolute thì không đóng góp vào kích thước box cha nữa). */
+.sao.chinh .th, .sao.chinh .mth{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:3px}
 .sao.phu{color:var(--muted);font-weight:500}
 /* Gạch dưới đặt trên .sao-name (span CHỈ bọc riêng tên sao) thay vì cả .sao - trước đây gạch trên .sao khiến
    nét tràn qua badge niên hóa/tứ hóa mệnh (.th/.mth, nằm cùng cấp SAU .sao-name) dù đã thử text-decoration:
@@ -382,10 +397,8 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 .sao.arrow-hover-ldkk{font-weight:700}
 .sao.arrow-hover-ldkk .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;text-decoration-color:red}
 body.plain-bw .sao,body.plain-bw .cung-chuc{color:#111 !important}
-body.plain-bw .can-hl{background:#fff !important;color:#000 !important;border:1px solid #000}
-body.plain-bw .b-than,body.plain-bw .b-menh{background:#fff !important;color:#000 !important;border:1px solid #000}
+body.plain-bw .b-menh{background:#fff !important;color:#000 !important;border:1px solid #000}
 body.plain-bw .cg-dot{background:#000 !important}
-body.plain-bw .dv-chuc,body.plain-bw .ln-chuc,body.plain-bw .lg-chuc{color:#000 !important}
 .phi-hover-badges{position:absolute;left:2px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:6}
 .cung:hover .phi-hover-badges{opacity:.55;pointer-events:auto}
 .phi-hover-badges:hover{opacity:1 !important}
@@ -404,10 +417,10 @@ body.theme-dark .phb-D{border:1px solid var(--gold)}
    đúng phần chữ tên sao, không đụng tới badge. display:inline-flex vẫn không đủ ngăn hẳn 1 số trình duyệt vẽ
    đường gạch của .sao tràn xuống dưới badge (do gạch chân của ancestor vẽ theo cùng layer text, không tính
    theo box con) - phải thêm position:relative + z-index để badge chắc chắn vẽ ĐÈ LÊN trên đường gạch đó.*/
-.th{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:.92rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
+.th{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:.8rem;font-weight:700;line-height:1;flex-shrink:0;text-decoration:none;position:relative;z-index:1}
 /* Lá số đơn giữ nguyên kích cỡ gốc (đẹp rồi, không đổi) - CHỈ thu nhỏ riêng cho lá số mini bên tab "2 Lá Số"
    cho gọn với lưới cung vốn đã nhỏ hơn ở đó. */
-.dual-side .th{width:16px;height:16px;font-size:.58rem}
+.dual-side .th{width:18px;height:18px;font-size:.68rem}
 .th-A{background:var(--green);color:#fff}
 .th-B{background:var(--red);color:#fff}
 .th-C{background:var(--blue);color:#fff}
@@ -420,10 +433,10 @@ body.theme-dark .th-D{background:var(--gold);color:#000;border-color:var(--gold)
 body.theme-dark .th-D.th-glow{box-shadow:0 0 7px 3px var(--gold)}
 /* Đổi màu (trắng đen): niên ABCD to hơn hẳn, TẤT CẢ 4 chữ đều cùng 1 màu đỏ (viền đỏ + chữ đỏ, nền trắng),
    không phân biệt theo từng chữ nữa. */
-body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:29px;height:29px;font-size:.94rem}
-body.plain-bw .dual-side .th{width:20px;height:20px;font-size:.68rem}
-.mth{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:.6rem;font-weight:700;line-height:1;flex-shrink:0;border:1.5px solid var(--text);background:var(--panel);color:var(--text)}
-body.show-menh-hoa .mth{display:inline-flex}
+body.plain-bw .th{background:#fff !important;color:var(--red) !important;border:1.5px solid var(--red) !important;width:25px;height:25px;font-size:.82rem}
+body.plain-bw .dual-side .th{width:21px;height:21px;font-size:.76rem}
+.mth{visibility:hidden;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:3px;font-size:.6rem;font-weight:700;line-height:1;flex-shrink:0;border:1.5px solid var(--text);background:var(--panel);color:var(--text)}
+body.show-menh-hoa .mth{visibility:visible}
 body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color:#000 !important}
 
 .dv{position:absolute;top:5px;right:7px;font-size:.84rem;color:var(--text);font-weight:500}
@@ -516,14 +529,21 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-hoa-mode-tab{flex:1;padding:3px 8px;border:1px solid var(--border-lt);border-radius:6px;background:var(--panel);cursor:pointer;font-size:.68rem;font-weight:700;color:var(--text2)}
 .dual-hoa-mode-tab.active.dual-hoa-cat{background:var(--green);color:#fff;border-color:var(--green)}
 .dual-hoa-mode-tab.active.dual-hoa-hung{background:var(--red-th);color:#fff;border-color:var(--red-th)}
-.dual-side{flex:1 1 0;min-width:340px;border:1px solid var(--border-lt);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:4px}
-.dual-mini-form{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding-bottom:6px;border-bottom:1px solid var(--border-lt)}
+.dual-side{flex:1 1 0;min-width:340px;border:1px solid var(--border-lt);border-radius:8px;padding:6px;display:flex;flex-direction:column;gap:3px}
+/* gap 4px->3px, padding-bottom 6px->5px: hàng ngày/tháng/năm/giờ/nút bấm vẫn xuống 2 dòng ở khung hẹp (thiếu
+   ~34px mới vừa 1 hàng - không đáng thu nhỏ ô nhập liệu/nút tới mức đó, dễ bị chật chội khó bấm), nhưng vẫn
+   tinh gọn thêm chút khoảng cách để đỡ tốn chiều cao (góp phần nhích khung lá số lên). */
+.dual-mini-form{display:flex;flex-wrap:wrap;gap:3px;align-items:center;padding-bottom:5px;border-bottom:1px solid var(--border-lt)}
 .dual-mini-form input,.dual-mini-form select{padding:4px 6px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.64rem;min-width:0}
 .dual-input-name{width:84px}
 .dual-input-sm{width:48px}
 .dual-input-year{width:58px}
 .dual-input-gio{width:66px}
 .dual-btn-sm{padding:4px 10px;font-size:.64rem;border-radius:4px}
+/* Gộp "Lưu Kho" + "Kho LS" thành 1 khối - .dual-mini-form đang flex-wrap nên khi hàng không đủ chỗ, 2 nút
+   này trước đây bị TÁCH RỜI (Lưu Kho ở lại hàng trên, Kho LS rớt xuống hàng dưới 1 mình, trông như lỗi). Gộp
+   vào 1 flex item chung thì cả cặp LUÔN xuống dòng cùng nhau (hoặc cùng ở lại), không bao giờ tách lẻ nữa. */
+.dual-btn-pair{display:inline-flex;gap:4px}
 .dual-input-country{width:88px}
 .dual-input-city{width:104px}
 .dual-input-tz{width:92px}
@@ -542,15 +562,21 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 [id^="dualNavDv_"].active{background:var(--red);color:#fff;border-color:var(--red)}
 [id^="dualNavLn_"].active{background:var(--blue);color:#fff;border-color:var(--blue)}
 [id^="dualNavLg_"].active{background:var(--green);color:#fff;border-color:var(--green)}
-.dual-cg-row{display:flex;flex-direction:column;gap:2px}
-.dual-cg-label{font-size:.56rem;color:var(--muted);font-weight:500}
-.dual-cg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;min-width:0}
-.dual-cg-btn{position:relative;font-size:.6rem;font-weight:400;padding:3px 2px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Thu gọn bảng THẾ/DỤNG (tra nhanh Thiên Can) - trước đây cao ~114px, chiếm quá nhiều chỗ giữa thanh công cụ
+   và khung lá số bên tab "2 Lá Số"/"PLUS" khiến phải cuộn qua lại mới thấy được cả 2. Giảm padding/font/gap
+   (không đổi số lượng nút/chức năng) để còn khoảng ~70px, nhường chỗ cho khung lá số nhích lên. */
+.dual-cg-row{display:flex;flex-direction:column;gap:1px}
+.dual-cg-label{font-size:.5rem;color:var(--muted);font-weight:500;line-height:1.2}
+.dual-cg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;min-width:0}
+.dual-cg-btn{position:relative;font-size:.56rem;font-weight:400;padding:1px 2px;line-height:1.3;border:1px solid var(--border-lt);border-radius:3px;background:var(--panel);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dual-cg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .dual-cg-btn.active.mode-cat{background:var(--green);border-color:var(--green)}
 .dual-cg-btn.active.mode-hung{background:var(--red-th);border-color:var(--red-th)}
 .dual-cg-btn.disabled{opacity:.35}
-.dual-side .ban-wrap{padding:48px;max-width:none;width:100%}
+/* Padding ngang từng bớt xuống calc(32px - 1mm) để mũi tên ly tâm 18px vừa đủ chỗ không bị kẹp. Mũi tên tăng
+   thêm 1mm nữa (18px -> 22px, xem dualDrawTuHoaArrows) nên nới lại padding về 32px tròn cho đủ chỗ (22+margin
+   8=30 < 32) - vẫn còn dư chút xíu, không bị kẹp ở hướng nào. Trên/dưới giữ nguyên 48px. */
+.dual-side .ban-wrap{padding:48px 32px;max-width:none;width:100%}
 .dual-side .ban-wrap canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .dual-side .ban-wrap.drawing canvas{pointer-events:auto;cursor:crosshair}
 .dual-side .ban-tuvi{border:1px solid var(--border-lt);background:var(--border-lt)}
@@ -559,6 +585,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-side .cung-cc-top{font-size:.62rem;top:4px;left:5px}
 .dual-side .cung-chuc{font-size:.7rem;margin-bottom:3px}
 .dual-side .sao{font-size:.64rem;gap:2px}
+.dual-side .sao.chinh{font-size:.74rem}
 .dual-side .dv{font-size:.66rem;top:4px;right:5px}
 .dual-side .ln{font-size:.52rem;bottom:2px;left:5px}
 .dual-side .b-than{font-size:.5rem;padding:0 3px}
@@ -2040,6 +2067,11 @@ const CITIES=[
   {n:"Bangkok",c:"TH",tz:7},{n:"Singapore",c:"SG",tz:8},
 ];
 
+// Tên sao rút gọn khi HIỂN THỊ (chỉ đổi chữ hiện ra, KHÔNG đụng tới s.ten gốc - mọi tra cứu/tính toán tự hóa,
+// phi hóa, click chọn sao... vẫn dùng tên đầy đủ như cũ) - Văn Xương/Văn Khúc quá dài so với cung, viết tắt
+// bỏ chữ "Văn" cho gọn.
+const STAR_DISPLAY_ABBR={'Văn Xương':'Xương','Văn Khúc':'Khúc'};
+function displayStarName(ten){ return STAR_DISPLAY_ABBR[ten]||ten; }
 const DC=["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
 const CAN=["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
 const LAYOUT=[[5,6,7,8],[4,-1,-1,9],[3,-1,-1,10],[2,1,0,11]];
@@ -2782,10 +2814,10 @@ function tlsRenderGrid(){
       const dvTuoi=dh? dh.tuoiBatDau : '';
       const ln=c.daiHan&&c.chiNamSinh!==undefined&&c.chiNamSinh!==null? luuNienList(idx,c.chiNamSinh).join(',') : '';
       const hidden=tlsHiddenCung.has(idx);
-      let bgs=''; if(iT) bgs+='<span class="b-than">THÂN</span>';
+      let bgs=''; if(iT) bgs+='<span class="b-than">T</span>';
       const chinhs=stars.filter(s=>s.loai==='chinh');
       const phus=stars.filter(s=>s.loai==='phu');
-      const starSpan=(s,cls)=>`<span class="sao ${cls}">${s.ten}${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden):''}</span>`;
+      const starSpan=(s,cls)=>`<span class="sao ${cls}">${displayStarName(s.ten)}${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden):''}</span>`;
       const hlCls=(tlsSelectedDaiVanIdx!==null && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx] && c.daiHan[tlsSelectedDaiVanIdx].cung===idx)?' hl-daivan':'';
       const hlLnCls=(tlsSelectedLuuNienYear!==null && chiOfYear(tlsSelectedLuuNienYear)===idx)?' hl-luunien':'';
       const cungMatchesFilter=anyHoaFilterActive && relevantCungSet.has(idx);
@@ -2805,7 +2837,7 @@ function tlsRenderGrid(){
         <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
         ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
         ${chuc?`<div class="cung-chuc">${chuc}</div>`:''}
-        <div class="sao-chinh-wrap">${chinhs.map(s=>starSpan(s,'chinh')).join('')}</div>
+        <div class="sao-chinh-wrap">${chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh')).join('')}</div>
         <div class="sao-phu-wrap">${phus.map(s=>starSpan(s,'phu')).join('')}</div>
         <div class="ln">${ln}</div>
         <div class="dv-chuc" data-idx="${idx}"></div>
@@ -2824,7 +2856,7 @@ function tlsRenderGrid(){
         <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
         ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
         ${chuc?`<div class="cung-chuc">${chuc}${bgs}</div>`:''}
-        <div class="sao-chinh-wrap">${chinhs.map(s=>starSpan(s,'chinh')).join('')}</div>
+        <div class="sao-chinh-wrap">${chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh')).join('')}</div>
         <div class="sao-phu-wrap">${phus.map(s=>starSpan(s,'phu')).join('')}</div>
         <div class="ln">${ln}</div>
         <div class="dv-chuc" data-idx="${idx}"></div>
@@ -2833,6 +2865,8 @@ function tlsRenderGrid(){
     }
   }
   wrap.innerHTML=h;
+  layoutPhuWrap('atcPreviewGrid');
+  equalizeCungRowHeights('atcPreviewGrid');
   if(tlsSelectedDaiVanIdx!==null && c && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx]) tlsRenderDaiVanChuc(c.daiHan[tlsSelectedDaiVanIdx].cung);
   if(tlsSelectedLuuNienYear!==null) tlsRenderLuuNienChuc(chiOfYear(tlsSelectedLuuNienYear));
 }
@@ -3329,7 +3363,7 @@ function renderGridRaw(c){
       const dvTuoi=c.dvMap[idx]!==undefined?c.dvMap[idx]:'';
       const ln=luuNienList(idx,c.chiNamSinh).map(age=>`<span class="ln-age" onclick="onLuuNienAgeClick(event,${age})">${age}</span>`).join(',');
       let bgs='';
-      if(iT) bgs+='<span class="b-than">THÂN</span>';
+      if(iT) bgs+='<span class="b-than">T</span>';
       const chinhs=stars.filter(s=>s.loai==='chinh');
       const phus=stars.filter(s=>s.loai==='phu');
       const isTraced=(s)=>reverseFlightStar && reverseFlightStar.idx===idx && reverseFlightStar.star===s.ten;
@@ -3344,9 +3378,9 @@ function renderGridRaw(c){
         // đó (xem manualArrowUnderlineTargets), không phải trạng thái hover tạm thời.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
-          data-star="${s.ten}" onclick="event.stopPropagation();onStarClick(${idx},'${nameEsc}')"><span class="sao-name">${s.ten}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${picker}</span>`;
+          data-star="${s.ten}" onclick="event.stopPropagation();onStarClick(${idx},'${nameEsc}')"><span class="sao-name">${displayStarName(s.ten)}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${picker}</span>`;
       };
-      const chinhHtml=chinhs.map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
+      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
       // Cung "vô chính diệu" (không có chính tinh nào) mà vẫn thuộc lưỡng đầu kiến Kị - gạch đỏ tạm ở phụ
       // tinh thay thế, để không mất dấu (không thì cung đó sẽ không có sao nào được gạch cả).
       const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
@@ -3374,6 +3408,8 @@ function renderGridRaw(c){
     }
   }
   document.getElementById('banTuvi').innerHTML=h;
+  layoutPhuWrap('banTuvi');
+  equalizeCungRowHeights('banTuvi');
   applyCenterInfoVisibility();
   reapplyNavHighlights(c);
 }
@@ -3882,12 +3918,17 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     if(next.to===startIdx){
       if(!prevIsIndependentSource || returnedToRootOnce) break;
       returnedToRootOnce = true;
-      // Đánh dấu "revisit" - CHỈ để bước này KHÔNG được vẽ mũi tên trên lá số (xem drawPhiHoaChain), tránh
-      // vẽ 1 mũi tên chạy NGƯỢC lại đúng đường vừa đi qua (từ điểm cuối quay thẳng về root, trong khi trục
-      // chính đã có sẵn 1 mũi tên chạy TỪ root ra), trông như 2 mũi tên chồng/song song vô nghĩa giữa đúng 2
-      // cung đó - dữ liệu (steps) vẫn giữ nguyên đủ, không đổi gì tới cách đếm điểm Lộc/Kị hay dòng chữ mô tả
-      // kết cấu, chỉ ẩn riêng phần vẽ mũi tên của bước này.
-      next.isRevisit = true;
+      // CHỈ đánh dấu "revisit" (ẩn mũi tên) nếu cạnh này TRÙNG THẬT SỰ với 1 cạnh ĐÃ VẼ trước đó trong chính
+      // chuỗi này (cùng 2 cung VÀ cùng đúng ngôi sao - mới đúng là 1 mũi tên chạy ngược lại đè lên mũi tên cũ,
+      // trông như 2 mũi tên chồng/song song vô nghĩa). Trước đây ẩn VÔ ĐIỀU KIỆN hễ quay về root, kể cả khi
+      // đây là 1 cạnh HOÀN TOÀN MỚI (root đã bay qua NHIỀU cung trung gian khác trước khi quay về, cạnh cuối
+      // này nối 2 cung CHƯA TỪNG nối trực tiếp với nhau trong chuỗi) - khiến 1 bước CK do niên/tự hóa thúc
+      // buộc "biến mất" không dấu vết nào trên lá số dù dòng chữ mô tả kết cấu vẫn ghi đúng, gây hiểu lầm là
+      // logic đếm bị sai (vd Điền Trạch hóa Lộc → Phúc Đức —CK→ Huynh Đệ [niên A] —CK→ Điền Trạch: cạnh cuối
+      // Huynh Đệ→Điền Trạch chưa hề tồn tại trước đó, không trùng gì với 2 cạnh Điền Trạch→Phúc Đức/Phúc
+      // Đức→Huynh Đệ, nên phải vẽ bình thường, không được ẩn).
+      const dupExisting = steps.some(s=>s.star===next.star && ((s.from===next.from&&s.to===next.to)||(s.from===next.to&&s.to===next.from)));
+      if(dupExisting) next.isRevisit = true;
     }
     // Đã đi qua đúng điểm này rồi (revisit) - THÔNG THƯỜNG dừng luôn để tránh vòng lặp (2 cung tự "đá" Kị qua
     // lại nhau vô hạn). NGOẠI LỆ giống hệt "quay vòng về root" phía trên: nếu lý do buộc tiếp tục ở bước VỪA
@@ -4166,7 +4207,10 @@ function tuHoaGlowSet(){
   const set=new Set();
   visiblePhiHoaChains().forEach(ch=>{
     const ml=ch.structureLetter;
-    if(ml!=='A' && ml!=='D') return;
+    // Trước đây chặn hẳn kết cấu B/C (bấm nhanh ABCD phi Quyền/Khoa) ngay từ đầu, khiến tự hóa ly tâm B/C
+    // không bao giờ được tô đậm dù cung đích khớp đúng - phi Quyền/Khoa cũng đáng sáng y hệt phi Lộc/Kị khi
+    // chạm đúng cung tự hóa cùng chữ (steps của chuỗi B/C luôn chỉ 1 bước, s.letter===ml sẵn nên vẫn khớp
+    // đúng logic bên dưới, không cần nhánh riêng).
     ch.steps.forEach(s=>{
       // Tô đậm tự hóa ly tâm nếu khớp 1 trong 2 cách: (1) đúng chữ THẬT SỰ của riêng bước này (s.letter) -
       // đoạn chuyển Kị (CK) trong 1 kết cấu Lộc vẫn luôn dùng chữ D (xem flyFrom/computeSingleChain), nên
@@ -4837,6 +4881,32 @@ function computeAllTuHoaArrows(){
   let arrows=[];
   for(let idx=0;idx<12;idx++) arrows=arrows.concat(computeTuHoaFor(idx));
   return arrows;
+}
+// Đo lại .sao-phu-wrap sau khi đã render vào DOM thật (CSS mặc định xếp bảng 2 cột, xem .sao-phu-wrap) - nếu
+// bảng 2 cột đó cần rộng hơn bề ngang khả dụng của cung (vd "Văn Xương" + "Văn Khúc" cùng mang badge tứ hóa),
+// bỏ hẳn 2 cột, chuyển qua class phu-wrap-list (xếp dọc, mỗi sao 1 dòng, canh giữa) - TUYỆT ĐỐI không cho
+// phép nới rộng cung theo chiều ngang dù tên sao dài cỡ nào. Reset class trước khi đo lại - nếu không, lần đo
+// sau sẽ đo nhầm bề rộng ĐÃ bị chuyển sang dạng liệt kê dọc (hẹp hơn hẳn) từ lần gọi trước.
+function layoutPhuWrap(containerId){
+  const wrap=document.getElementById(containerId); if(!wrap) return;
+  wrap.querySelectorAll('.sao-phu-wrap').forEach(spw=>{
+    spw.classList.remove('phu-wrap-list');
+    const avail=spw.getBoundingClientRect().width;
+    if(spw.scrollWidth>avail+0.5) spw.classList.add('phu-wrap-list');
+  });
+}
+// Ép TẤT CẢ cung (4 hàng) về cùng 1 chiều cao - nếu không, hàng nào có cung chứa nhiều phụ tinh (tự xuống
+// dòng do phu-row-stack) sẽ cao hơn hàng đối diện, khiến các đường tự hóa hướng tâm không còn cắt nhau đúng 1
+// điểm ở tâm bàn (2 đầu mút lệch nhau vài px do lệch hàng/cột). Reset minHeight trước khi đo lại - nếu không,
+// lần đo sau sẽ đo nhầm chiều cao ĐÃ bị ép từ lần gọi trước, chỉ tăng dần chứ không co lại được.
+function equalizeCungRowHeights(containerId){
+  const wrap=document.getElementById(containerId); if(!wrap) return;
+  const cells=Array.from(wrap.querySelectorAll(':scope > .cung:not(.center)'));
+  if(!cells.length) return;
+  cells.forEach(c=>{ c.style.minHeight=''; });
+  let maxH=0;
+  cells.forEach(c=>{ const h=c.getBoundingClientRect().height; if(h>maxH) maxH=h; });
+  cells.forEach(c=>{ c.style.minHeight=maxH+'px'; });
 }
 // Vị trí (hàng,cột) của mỗi cung trong lưới 4x4, theo LAYOUT
 const CELL_POS={5:[0,0],6:[0,1],7:[0,2],8:[0,3],4:[1,0],9:[1,3],3:[2,0],10:[2,3],2:[3,0],1:[3,1],0:[3,2],11:[3,3]};
@@ -6088,6 +6158,11 @@ function computeKetCauStructuresRaw(mode){
       // xuất phát bước này (step.from===step.to, vd Phu Thê tự hóa Kị xuất nên Can của nó bay ra lại đáp
       // ngay về chính nó) - ghi rõ "tự hóa xuất" thay vì lặp lại y hệt tên cung 2 lần liền ("—CK→ Phu Thê"
       // ngay sau khi vừa ghi "Phu Thê" ở bước trước, đọc như đáp lại đúng cung đó lần 2 gây khó hiểu).
+      // Chữ hiển thị PHẢI dùng đúng chữ THẬT SỰ của riêng bước này (step.letter, luôn là D cho mọi bước
+      // chuyển Kị i>=1) - KHÔNG dùng "letter" (chữ gốc của cả kết cấu, vd A cho kết cấu Lộc). Trước đây dùng
+      // nhầm "letter" khiến 1 điểm tự hóa KỊ xuất giữa mạch (vd Thiên Di tự hóa Kị xuất ngay sau khi vừa nhận
+      // hóa Lộc từ Phụ Mẫu) bị ghi sai thành "tự hóa Lộc/A xuất", dù bản chất đó là 1 tự hóa KỊ hoàn toàn khác,
+      // không liên quan gì tới Lộc đang truy.
       const isMidSpineSelfLoop = i>0 && step.from===step.to;
       if(step.bomLucFrom!=null){
         // Bước này CHỈ tồn tại nhờ 1 cung khác truy Lộc/Kị bơm lực (không phải tự nhiên chuyển Kị tiếp được) -
@@ -6097,7 +6172,7 @@ function computeKetCauStructuresRaw(mode){
         spine += `<br>↓ ${label(step.bomLucFrom)} ${convTag}<br>→ ${targetHtml}`;
       }
       else if(bonus.tags.includes('KXĐC')) spine += `<br>↓ KXĐC<br>→ ${targetHtml}`;
-      else if(isMidSpineSelfLoop) spine += `: tự hóa ${letter} xuất${tagStr}`;
+      else if(isMidSpineSelfLoop) spine += `: tự hóa ${step.letter} xuất${tagStr}`;
       else if(i===0) spine += (isNienRoot ? ` —CK→ ` : ` → `) + targetHtml;
       else spine += ` —CK→ ${targetHtml}`;
     });
@@ -6214,7 +6289,15 @@ function computeKetCauStructuresRaw(mode){
       // gây ra tình trạng tổng điểm khác nhau tùy chọn gốc nào, khiến chọn sai gốc hiển thị. Coi như suppressed.
       // Lưu ý: via có thể là 0 (cung Tý, chỉ số hợp lệ) - 0 là falsy trong JS nên phải so sánh với
       // null/undefined tường minh, không được dùng "found.via &&..." (sẽ bỏ sót đúng lúc via===0).
-      if(found && found.via!=null && suppressed.has(found.via)) found={...found, suppressed:true};
+      // NGOẠI LỆ: via bị "suppressed" CHÍNH VÌ chuỗi CỦA RIÊNG M tiếp tục xuyên qua nó (dùng Can của via để
+      // chuyển Kị tiếp - đúng cơ chế "trùng lặp phi hóa" bình thường của M), KHÔNG PHẢI bị 1 thành viên khác
+      // tiêu thụ - đây không phải trường hợp comment phía trên mô tả (via bị người khác "chiếm" trước), mà
+      // chính M vừa tạo ra sự trùng lặp đó nên đương nhiên vẫn phải tính via là 1 điểm chạm hợp lệ của M (vd
+      // Huynh Đệ hóa Kị chạm niên D ở Thiên Di rồi tự CK tiếp bằng Can Thiên Di - Thiên Di "suppressed" là do
+      // chính đoạn CK này của Huynh Đệ, không phải ai khác - trước đây vẫn xóa oan, mất hẳn dòng hội tụ/điểm
+      // của Huynh Đệ khi Thiên Di cũng là 1 cung Thể/Dụng khác đã chọn).
+      const selfCausedSuppress = found && found.via!=null && pts[found.p.i+1] && pts[found.p.i+1].isTrungLap;
+      if(found && found.via!=null && suppressed.has(found.via) && !selfCausedSuppress) found={...found, suppressed:true};
       // M ĐÃ là 1 nút THẬT SỰ nằm ngay trên mạch chính (spineTargets) - và chính bước hóa Kị GỐC của riêng M
       // (found.p.i===0, dùng đúng Can của M) lại đáp trúng ĐÚNG điểm mà mạch chính CŨNG tiếp tục tới ngay sau
       // vị trí của M (steps[spineIndexOf(M)+1]) - đây KHÔNG phải 1 điểm hội tụ ĐỘC LẬP mới, mà là CÙNG 1 sự
@@ -6244,7 +6327,20 @@ function computeKetCauStructuresRaw(mode){
       const info=touchInfo[M];
       if(!info || info.suppressed || info.onRoot || info.via==null) return;
       const viaInfo=touchInfo[info.via];
-      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0) touchInfo[M]=null;
+      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0){
+        // NGOẠI LỆ: "via bay đi nơi khác không liên quan" (Điền→Phúc Đức, Phúc Đức lại độc lập bay đi chỗ
+        // khác - loại bỏ đúng) KHÁC hẳn "via và M cùng tọa Kị chung ĐÚNG 1 cạnh vật lý" (M có 1 bước SAU
+        // found.p, dù bị đánh dấu trùng lặp vì dùng Can của via, lại đáp ĐÚNG tới nơi via tự bay tới - tức
+        // found.p không phải "đáp thẳng vào via rồi hết", mà via chính là TRẠM TRUNG CHUYỂN thật sự đưa M đi
+        // tiếp đúng hướng via cũng đang đi). Trường hợp sau, M vẫn có 1 nguồn tọa Kị ĐỘC LẬP thật sự (chính
+        // found.p, đáp vào via) nên không được xóa hẳn touchInfo - chỉ trường hợp trước mới xóa (trước đây
+        // xóa vô điều kiện hễ via.p.i===0, gộp nhầm cả 2 trường hợp làm 1, khiến 1 thành viên hội tụ ĐỘC LẬP
+        // thật sự - vd Huynh Đệ hóa Kị chạm niên D ở Thiên Di, mà Thiên Di lại CŨNG là 1 cung Thể/Dụng khác đã
+        // chọn - bị xóa oan mất hẳn +2 Kị/dòng mô tả, dù rõ ràng vẫn còn liên kết thật qua đúng via đó).
+        const ptsM=pointsFor(M, anchorSetForThis);
+        const sameEdgeReuse = ptsM.some(q=>q.isTrungLap && q.to===viaInfo.p.to);
+        if(!sameEdgeReuse) touchInfo[M]=null;
+      }
     });
     function resolveSpineIndex(M, guard){
       const info=touchInfo[M];
@@ -6299,7 +6395,7 @@ function computeKetCauStructuresRaw(mode){
             if(isTrungLapHere) otherDisp.unshift('trùng lặp');
             const tagStr = otherDisp.length ? ` (${otherDisp.join(', ')})` : '';
             const targetHtml = label(s.to)+tagStr;
-            if(s.from===s.to) flow += `: tự hóa ${letter} xuất${tagStr}`;
+            if(s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
             else if(hasKXDC) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
             else flow += (i===0 ? ` —TK→ ` : ` —CK→ `) + targetHtml;
             if(s.to===root || spineTargets.has(s.to)) rejoined=true;
@@ -6379,7 +6475,7 @@ function computeKetCauStructuresRaw(mode){
           const targetHtml = label(s.to)+tagStr;
           // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
           // thích tương tự ở mạch chính phía trên.
-          if(i>0 && s.from===s.to) flow += `: tự hóa ${letter} xuất${tagStr}`;
+          if(i>0 && s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
           else if(subKXDC[i]) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
           else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}` : ` → ${targetHtml}`;
           else flow += ` —CK→ ${targetHtml}`;
@@ -6851,8 +6947,10 @@ function buildDualSideHtml(side){
       <button class="pill-btn dual-btn-sm" id="dualLichBtn_${side}" data-val="duong" onclick="dualToggleLich('${side}')">DL</button>
       <button class="btn-dark dual-btn-sm" onclick="dualLapLaSo('${side}')">Lập</button>
       <button class="btn-outline dual-btn-sm" onclick="dualExportToSingle('${side}')" title="Chuyển lá số bên này sang tab Nhập Thông Tin">Chuyển</button>
-      <button class="btn-purple dual-btn-sm" onclick="luuKhoLaSo('dual${side}')">Lưu Kho</button>
-      <button class="btn-brown dual-btn-sm" onclick="openKhoLaSo('dual${side}')">Kho LS</button>
+      <span class="dual-btn-pair">
+        <button class="btn-purple dual-btn-sm" onclick="luuKhoLaSo('dual${side}')">Lưu Kho</button>
+        <button class="btn-brown dual-btn-sm" onclick="openKhoLaSo('dual${side}')">Kho LS</button>
+      </span>
     </div>
     <div class="dual-toolbar">
       <div class="hc-toggle">
@@ -7259,8 +7357,10 @@ function dualDrawTuHoaArrows(side,ctx,c){
   Object.keys(outGroups).forEach(fromKey=>{
     const from=Number(fromKey), group=outGroups[fromKey];
     const anchor=dualCellEdgeAnchor(side,from,'outer'); if(!anchor) return;
-    let end={x:anchor.x+anchor.dir.x*30, y:anchor.y+anchor.dir.y*30}; // 30px ~ 8mm
-    const margin=16;
+    // Riêng bên "2 Lá Số"/"PLUS": tăng thêm 1mm (18px -> 22px), vẫn ĐỒNG BỘ cho cả 4 hướng như nhau - đã nới
+    // lại padding ngang (xem .dual-side .ban-wrap) đủ chỗ cho 22px này không bị kẹp ở bất kỳ hướng nào.
+    let end={x:anchor.x+anchor.dir.x*22, y:anchor.y+anchor.dir.y*22};
+    const margin=8;
     end.x=Math.max(margin,Math.min(cvRect.width-margin,end.x));
     end.y=Math.max(margin,Math.min(cvRect.height-margin,end.y));
     const anyGlow=group.some(a=>tuGlow.has(a.from+':'+a.letter));
@@ -7292,7 +7392,9 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const lineColor = document.body.classList.contains('theme-dark')?'#fff':'#000';
     const dx=B.x-A.x, dy=B.y-A.y, len=Math.hypot(dx,dy)||1;
     const pt=(t)=>({x:A.x+dx*t, y:A.y+dy*t});
-    const clusterHalf=(n)=>((n-1)*11/2 + 5)/len;
+    // Riêng bên "2 Lá Số"/"PLUS": khoảng cách giữa các ký tự hướng tâm (vd "C D") rút ngắn lại (7 thay vì 11
+    // như lá số đơn) - canvas mini ở đây nhỏ hơn hẳn nên 2 ký tự sát nhau mới cân đối, tránh nhìn rời rạc.
+    const clusterHalf=(n)=>((n-1)*7/2 + 5)/len;
 
     let cursor=0;
     if(hasA){
@@ -7313,7 +7415,7 @@ function dualDrawTuHoaArrows(side,ctx,c){
       drawArrowHeadAt(ctx, A, -dx, -dy, lineColor);
       const c=pt(0.13);
       g.toA.forEach((L,i)=>{
-        const along=(i-(g.toA.length-1)/2)*11;
+        const along=(i-(g.toA.length-1)/2)*7;
         drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,11);
       });
     }
@@ -7321,7 +7423,7 @@ function dualDrawTuHoaArrows(side,ctx,c){
       drawArrowHeadAt(ctx, B, dx, dy, lineColor);
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
-        const along=(i-(g.toB.length-1)/2)*11;
+        const along=(i-(g.toB.length-1)/2)*7;
         drawLetterWithHalo(ctx,L,c.x+along,c.y,tuHoaBadgeColor(L),false,11);
       });
     }
@@ -7812,7 +7914,7 @@ function dualRenderGrid(side){
       const iT=idx===vT;
       const dvTuoi=c.dvMap[idx]!==undefined?c.dvMap[idx]:'';
       const ln=luuNienList(idx,c.chiNamSinh).map(age=>`<span class="ln-age" onclick="event.stopPropagation();dualOnLuuNienAgeClick('${side}',${age})">${age}</span>`).join(',');
-      let bgs=''; if(iT) bgs+='<span class="b-than">THÂN</span>';
+      let bgs=''; if(iT) bgs+='<span class="b-than">T</span>';
       const chinhs=stars.filter(s=>s.loai==='chinh');
       const phus=stars.filter(s=>s.loai==='phu');
       const nienGlow=inst.nienGlowTarget[inst.hcMode];
@@ -7827,9 +7929,9 @@ function dualRenderGrid(side){
         // Gạch dưới thủ công do vẽ mũi tên tay chạm tới sao này - giữ nguyên tới khi xóa mũi tên đó.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
-          data-star="${s.ten}" onclick="event.stopPropagation();dualOnStarClick('${side}',${idx},'${nameEsc}')"><span class="sao-name">${s.ten}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${pickerHtml}</span>`;
+          data-star="${s.ten}" onclick="event.stopPropagation();dualOnStarClick('${side}',${idx},'${nameEsc}')"><span class="sao-name">${displayStarName(s.ten)}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${pickerHtml}</span>`;
       };
-      const chinhHtml=chinhs.map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
+      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
       const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
       const phiCls = st.the.has(idx) ? ' phi-source' : (st.dung.has(idx) ? ' phi-dung' : '');
       const quickBadges=['A','B','C','D'].map(L=>
@@ -7850,6 +7952,8 @@ function dualRenderGrid(side){
     }
   }
   box.innerHTML=h;
+  layoutPhuWrap('dualBanTuvi_'+side);
+  equalizeCungRowHeights('dualBanTuvi_'+side);
   // Đo lại kích thước canvas NGAY sau khi dựng lưới - nội dung có thể đổi chiều cao (số sao mỗi cung khác
   // nhau) mỗi lần dựng lại, nếu không đo lại thì canvas cũ bị lệch kích thước, mũi tên vẽ sai vị trí/mất hẳn.
   dualSizeCanvas(side);
