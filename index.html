@@ -573,10 +573,10 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .dual-cg-btn.active.mode-cat{background:var(--green);border-color:var(--green)}
 .dual-cg-btn.active.mode-hung{background:var(--red-th);border-color:var(--red-th)}
 .dual-cg-btn.disabled{opacity:.35}
-/* Padding ngang từng bớt xuống calc(32px - 1mm) để mũi tên ly tâm 18px vừa đủ chỗ không bị kẹp. Mũi tên tăng
-   thêm 1mm nữa (18px -> 22px, xem dualDrawTuHoaArrows) nên nới lại padding về 32px tròn cho đủ chỗ (22+margin
-   8=30 < 32) - vẫn còn dư chút xíu, không bị kẹp ở hướng nào. Trên/dưới giữ nguyên 48px. */
-.dual-side .ban-wrap{padding:48px 32px;max-width:none;width:100%}
+/* Trên/dưới trước giữ nguyên 48px trong khi trái/phải đã giảm còn 32px - tạo khoảng trống thừa rõ rệt phía
+   trên/dưới khung so với 2 bên. Đưa về ĐỒNG NHẤT 32px cả 4 cạnh - vẫn đủ chỗ cho mũi tên ly tâm 22px + margin
+   8 (22+8=30 < 32) ở MỌI hướng, không bị kẹp, đồng thời khung lá số nhích lên/gọn lại thêm rõ rệt. */
+.dual-side .ban-wrap{padding:32px;max-width:none;width:100%}
 .dual-side .ban-wrap canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .dual-side .ban-wrap.drawing canvas{pointer-events:auto;cursor:crosshair}
 .dual-side .ban-tuvi{border:1px solid var(--border-lt);background:var(--border-lt)}
@@ -7366,8 +7366,11 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const anyGlow=group.some(a=>tuGlow.has(a.from+':'+a.letter));
     drawArrowLine(ctx,{x:anchor.x,y:anchor.y},end,tuHoaLetterColor(group[0].letter),anyGlow?4.2:1.6);
     const isHorizontal=anchor.dir.y===0;
-    const midX=(anchor.x+end.x)/2, midY=(anchor.y+end.y)/2;
-    const basePt=isHorizontal? {x:midX,y:Math.min(anchor.y,end.y)-12} : {x:Math.max(anchor.x,end.x)+12,y:midY};
+    // Chữ đặt gần GỐC (t=0.32, không phải trung điểm t=0.5) - mũi tên ngắn (22px) nên đầu mũi tên (~9-12px)
+    // chiếm gần nửa cuối; đặt chữ ở trung điểm cũ khiến chữ đè lên đúng phần đầu mũi tên, trông rối/như lỗi.
+    // Lùi chữ về gần gốc hơn để tránh hẳn vùng đầu mũi tên, dù mũi tên hướng nào cũng luôn tách bạch rõ ràng.
+    const nearX=anchor.x+(end.x-anchor.x)*0.32, nearY=anchor.y+(end.y-anchor.y)*0.32;
+    const basePt=isHorizontal? {x:nearX,y:Math.min(anchor.y,end.y)-12} : {x:Math.max(anchor.x,end.x)+12,y:nearY};
     const spacing=10, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
       const off=i*spacing-totalW/2;
