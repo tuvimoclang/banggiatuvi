@@ -387,7 +387,7 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
    none + position:relative+z-index trên badge (không đủ, vì ancestor vẽ line cùng layer text, không phải
    theo box con). Tách hẳn ra span riêng thì badge là SIBLING, không còn là mục tiêu bị "tràn" gạch nữa. */
 .sao.phi-target{font-weight:700;color:var(--text) !important}
-.sao.phi-target .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px}
+.sao.phi-target .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent)}
 .sao.star-traced{font-weight:700}
 .sao.star-traced .sao-name{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;text-decoration-color:var(--accent)}
 .sao.ldkk{font-weight:700}
@@ -2078,6 +2078,9 @@ const LAYOUT=[[5,6,7,8],[4,-1,-1,9],[3,-1,-1,10],[2,1,0,11]];
 const THE_LABELS=["Mệnh","Phụ","Phúc","Điền","Sự","Giao"];
 const DUNG_LABELS=["Di","Tật","Tài","Tử","Phu","Huynh"];
 const CUNG_CHUC_FULL=["Mệnh","Phụ Mẫu","Phúc Đức","Điền Trạch","Sự Nghiệp","Giao Hữu","Thiên Di","Tật Ách","Tài Bạch","Tử Nữ","Phu Thê","Huynh Đệ"];
+// Tên viết tắt 1 chữ khi GHI DÒNG MÔ TẢ KẾT CẤU (computeKetCauStructuresRaw) - CHỈ áp dụng cho phần chữ mô tả
+// kết cấu, KHÔNG đụng tới cungChucOf() gốc (vẫn giữ tên đầy đủ ở tiêu đề cung/lưới 12 cung như cũ).
+const CUNG_SHORT_LABEL={'Mệnh':'Mệnh','Phụ Mẫu':'Phụ','Phúc Đức':'Phúc','Điền Trạch':'Điền','Sự Nghiệp':'Sự','Giao Hữu':'Giao','Thiên Di':'Di','Tật Ách':'Tật','Tài Bạch':'Tài','Tử Nữ':'Tử','Phu Thê':'Thê','Huynh Đệ':'Huynh'};
 const SHORT_CHUC=[...THE_LABELS,...DUNG_LABELS];
 
 const TU_HOA={
@@ -2126,6 +2129,10 @@ let drawColor='#c0392b';
 let drawLineWidth=2;
 let drawFontSize=14;
 let selectedPhiArrow=null; // {mode,idx} - cung sở hữu mũi tên phi hóa đang được chọn trên lá số (để xóa bằng phím Del)
+// Danh sách {s,pts,isSel,isReverse} sau khi đã qua đủ các bước spreadDivergingOrigins/spreadParallelArrows/
+// spreadConvergingEndpoints/nudgeCloseArrowsApart ở lần vẽ gần nhất (drawPhiHoaChain) - dùng CHUNG cho
+// hitTestPhiArrow/hitTestArrowHandle để dò trúng đúng theo tọa độ THẬT đang hiển thị, không phải tọa độ thô.
+let lastPhiHoaEntries=[];
 let selectedShapeIdx=null; // index trong mảng shapes[] của nét vẽ tay (mũi tên/ô vuông/chữ) đang được chọn - double-click để chọn, Del/Backspace để xóa, đồng hóa với cách xóa mũi tên phi hóa.
 // Vị trí đầu/đuôi mũi tên phi hóa do người dùng tự kéo chỉnh, khóa theo "mode:from:to:letter" để vẫn giữ được sau khi tính lại chain.
 let arrowOverrides={};
@@ -4152,7 +4159,19 @@ function ketCauIsoChains(s){
   const out=[];
   const addStructure=st=>{
     if(st.chainSteps && st.chainSteps.length) out.push({from:st.anchorIdx, steps:st.chainSteps, structureLetter:letter});
+    // Bỏ qua memberSubChains nào mà TOÀN BỘ các cạnh (từ cung + đến cung + đúng tinh diệu) của nó đã có sẵn
+    // TRONG chính st.chainSteps rồi - đây là trường hợp "trùng lặp phi hóa" thật (Can của 1 cung Thể/Dụng bị
+    // bước SAU của CHÍNH mạch root tái dùng để chuyển Kị tiếp, vd Mệnh→Phúc Đức→Tử Nữ... đã là 1 mạch DUY
+    // NHẤT - Phúc Đức chỉ là 1 điểm trùng lặp TRÊN mạch đó) - vẽ thêm sẽ ra 2 mũi tên chồng khít lên nhau cho
+    // đúng cùng 1 cạnh. KHÔNG được chỉ so sánh theo TÊN CUNG (spineRealMembers) - 1 cung có thể vừa là ĐÍCH
+    // ĐẾN của mạch chính (root bay TỚI nó) vừa CÓ RIÊNG 1 mạch hội tụ ĐỘC LẬP khác đi TỪ nó theo hướng khác
+    // hẳn (vd Di bay tới Điền Trạch qua Giao Hữu, NHƯNG Điền Trạch lại độc lập tự phi Kị sang Tật Ách rồi CK
+    // ngược lại - 2 cạnh HOÀN TOÀN khác nhau dù cùng "chạm" đúng cung Điền Trạch) - so theo tên cung sẽ xóa
+    // oan mất nhánh hội tụ thật sự này. Phải so khớp ĐÚNG TỪNG CẠNH một mới chính xác.
+    const spineEdgeSet=new Set((st.chainSteps||[]).map(e=>e.from+'>'+e.to+':'+e.star));
     (st.memberSubChains||[]).forEach(sub=>{
+      const allInSpine = sub.steps && sub.steps.length>0 && sub.steps.every(e=>spineEdgeSet.has(e.from+'>'+e.to+':'+e.star));
+      if(allInSpine) return;
       if(sub.steps && sub.steps.length) out.push({from:sub.idx, steps:sub.steps, structureLetter:letter});
     });
   };
@@ -4166,14 +4185,21 @@ function visiblePhiHoaChains(){
   const s=computeKetCauStructures(hcMode)[isoIdx];
   if(!s) return [];
   const isoChains=ketCauIsoChains(s);
-  const isoRealAnchorSet=new Set([...hcState[hcMode].the,...hcState[hcMode].dung]);
   // Trùng đoạn chuyển Kị GIỮA CHÍNH các thành viên trong kết cấu đang cô lập (vd Phúc Đức và Tật Ách cùng
   // đáp vào Phu Thê rồi cùng CK tiếp Tài Bạch - đoạn CK đó dùng chung 1 Can nên là 1 đoạn duy nhất) - dedup
   // NGAY TRONG PHẠM VI nhóm cô lập này (không dùng lại mảng dedup toàn cục hcState.chains, vốn có thể đã gán
   // "quyền sở hữu" đoạn dùng chung đó cho 1 cung KHÁC ngoài nhóm này, gây mất hẳn đoạn đó khi cô lập riêng).
-  // CHỈ truyền isoRealAnchorSet cho kết cấu Kị - xem giải thích đầy đủ tại định nghĩa dedupSharedContinuations
-  // (kết cấu Lộc truyền vào sẽ chặn nhầm 2 cung cùng phi Lộc "bắt cặp" với nhau ở cả 2 chiều).
-  return dedupSharedContinuations(isoChains, hcMode==='hung' ? isoRealAnchorSet : null);
+  // LUÔN truyền null (không đánh dấu SẴN mọi cung Thể/Dụng là "đã dùng" trước khi xử lý) - khác hẳn ngữ cảnh
+  // toàn cục (recomputePhiHoaChainsRaw, nơi MỖI cung Thể/Dụng chắc chắn có 1 chuỗi ĐỘC LẬP riêng trong mảng
+  // chờ "nhận" quyền vẽ đoạn dùng chung), ở đây mạch chính CỦA GỐC (s.chainSteps) đã tự nhiên đi xuyên suốt
+  // qua nhiều cung Thể/Dụng khác (Mệnh, Thê...) trong CÙNG 1 chuỗi liên tục - nếu đánh dấu sẵn Mệnh là "đã
+  // dùng" TRƯỚC KHI xử lý chính chuỗi của gốc, chuỗi gốc sẽ bị cắt cụt NGAY SAU bước đầu (tưởng nhầm đoạn
+  // Mệnh→... là "trùng lặp với 1 chuỗi khác" dù thực ra chưa hề có chuỗi nào khác được vẽ) - mất hẳn phần đuôi
+  // (vd Huynh Đệ→Thiên Di→Phu Thê) mà KHÔNG cung nào khác thay thế vẽ lại, dù dòng chữ kết cấu vẫn mô tả đủ.
+  // Đánh dấu THEO THỜI GIAN THỰC (usedFrom.add ngay trong vòng lặp, xem dedupSharedContinuations) vẫn đủ để
+  // bắt đúng trường hợp 2 GỐC ĐỘC LẬP thật sự cùng đáp chung 1 đoạn đuôi (chuỗi xử lý trước "giữ" đoạn đó,
+  // chuỗi xử lý sau mới bị cắt) - chỉ bỏ phần đánh dấu SẴN gây cắt oan chuỗi của chính gốc.
+  return dedupSharedContinuations(isoChains, null);
 }
 function phiHoaTargetSet(){
   const set=new Set();
@@ -4347,17 +4373,21 @@ function showPhiHoaMeaningForStep(hit){
   document.querySelectorAll('.ph-hoa-btn').forEach(b=>b.classList.toggle('active', b.dataset.hoa===phiHoaLetter));
   renderPhiHoaLookup();
 }
+// Dò theo ĐÚNG tọa độ đã xòe/né (lastPhiHoaEntries, ghi lại từ lần vẽ gần nhất) thay vì tự tính lại
+// arrowEndpoints() thô - xem giải thích đầy đủ tại nơi gán lastPhiHoaEntries trong drawPhiHoaChain.
 function hitTestPhiArrowStep(x,y){
   const threshold=8;
-  for(const ch of hcState[hcMode].chains){
-    for(let i=0;i<ch.steps.length;i++){
-      const s=ch.steps[i];
-      if(s.from===s.to) continue;
-      const pts=arrowEndpoints(s); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold) return {step:s, chain:ch, stepIndex:i};
-    }
+  // Lấy đúng đoạn GẦN NHẤT trong ngưỡng (không phải đoạn đầu tiên gặp trong mảng) - 2 bước liên tiếp của
+  // CÙNG 1 chuỗi (vd Thể->Dụng rồi Dụng chuyển Kị tiếp) thường gần như thẳng hàng nhau, khiến 1 điểm bấm gần
+  // đoạn SAU vẫn lọt vào ngưỡng của đoạn TRƯỚC - nếu trả về ngay bước đầu tiên khớp, dễ bắt trúng NHẦM đoạn kề
+  // bên thay vì đúng đoạn người dùng đang nhắm.
+  let best=null, bestDist=Infinity;
+  for(const e of lastPhiHoaEntries){
+    if(e.isReverse || !e.chain) continue;
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  return null;
+  return best ? {step:best.s, chain:best.chain, stepIndex:best.stepIndex} : null;
 }
 let phiHoaLetter=null;
 function buildPhiHoaSelects(){
@@ -5136,27 +5166,15 @@ function manualArrowUnderlineTargets(){
   shapes.forEach(sh=>{ if(sh.type==='arrow' && sh.underlineTarget) set.add(sh.underlineTarget.idx+':'+sh.underlineTarget.star); });
   return set;
 }
-// Nhãn chữ trên thân mũi tên phi hóa: khoanh tròn viền màu, nền trắng/đen tùy theme (giống thiết kế tham chiếu).
-function drawArrowLetterBadge(ctx,text,x,y,color){
-  const r=5; // ~2mm đường kính
-  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.fillStyle = document.body.classList.contains('theme-dark') ? '#000' : '#fff';
-  ctx.fill();
-  ctx.lineWidth=1.1; ctx.strokeStyle=color; ctx.stroke();
-  ctx.font='bold 7px Segoe UI';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle=color;
-  ctx.fillText(text,x,y+0.5);
-  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
-}
+// Mũi tên thon dần: đuôi mỏng (điểm), thân dày dần tới ~1.2mm ngay trước đầu mũi tên, rồi 1 đầu tam giác nhọn riêng.
 // Mũi tên thon dần: đuôi mỏng (điểm), thân dày dần tới ~1.2mm ngay trước đầu mũi tên, rồi 1 đầu tam giác nhọn riêng.
 function drawSkitchArrow(ctx,p1,p2,color,widthScale){
   const scale=widthScale||1;
   const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
   const ux=dx/len, uy=dy/len, px=-uy, py=ux;
-  const headLen=Math.min(12,len*0.6); // chiều dài đầu mũi tên (tam giác nhọn) - co lại khi mũi tên rất ngắn để không bị lật hình
+  const headLen=Math.min(16,len*0.65); // chiều dài đầu mũi tên (tam giác nhọn) - co lại khi mũi tên rất ngắn để không bị lật hình
   const shaftHalfWidth=2.9*scale; // độ dày tối đa của thân (~1.2mm ở scale mặc định), ngay tại gốc đầu mũi tên
-  const headHalfWidth=5.2*scale;
+  const headHalfWidth=6.6*scale;
   const baseX=p2.x-ux*headLen, baseY=p2.y-uy*headLen;
   ctx.fillStyle=color;
   // Thân: hình thang thon dần từ đuôi (độ dày 0) tới gốc đầu mũi tên (độ dày tối đa)
@@ -5177,11 +5195,6 @@ function drawPhiHoaArrow(ctx,fromIdx,toIdx,star,letter,color,p1In,p2In){
   const p1=p1In || (r1?{x:r1.cx,y:r1.cy}:null); if(!p1) return null;
   const p2=p2In || starAnchor(toIdx,star); if(!p2) return null;
   drawSkitchArrow(ctx,p1,p2,color);
-  const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
-  const ux=dx/len, uy=dy/len;
-  const backDist=Math.min(18,len*0.85);
-  const backX=p2.x-ux*backDist, backY=p2.y-uy*backDist; // ~7mm cách đầu mũi tên, nằm ngay trên thân (không lệch bên)
-  drawArrowLetterBadge(ctx,letter,backX,backY,color);
   return {p1,p2};
 }
 // Điểm đến gần nhất trên đoạn thẳng (x1,y1)-(x2,y2), dùng để dò trúng mũi tên khi bấm chuột.
@@ -5243,49 +5256,58 @@ function deleteSelectedShape(){
   const c=chart(); if(c) renderGrid(c);
   redrawCanvas();
 }
+// Vị trí đầu/đuôi MẶC ĐỊNH (chưa tính override đã kéo chỉnh) - dùng làm cơ sở ỔN ĐỊNH cho các bước gộp
+// nhóm/giãn cách (spreadDivergingOrigins...) bên dưới, để việc kéo chỉnh 1 mũi tên KHÔNG làm thay đổi số
+// lượng/thành phần nhóm của các mũi tên khác (xem giải thích đầy đủ tại nơi override được áp dụng SAU CÙNG
+// trong drawPhiHoaChain/dualRedrawCanvas - đúng lỗi người dùng báo: "kéo 1 mũi tên thì mũi tên khác cũng bị
+// dịch chuyển theo").
+function arrowDefaultEndpointsFor(from,to,star){
+  const r1=cellRect(from);
+  const p1=r1?{x:r1.cx,y:r1.cy}:null;
+  const p2=starAnchor(to,star);
+  if(!p1||!p2) return null;
+  return {p1,p2};
+}
 // Vị trí đầu/đuôi thực tế của 1 bước phi hóa: đuôi (p1) luôn cố định là tâm cung nguồn (không kéo được),
 // chỉ đầu mũi tên (p2) mới dùng override đã kéo chỉnh nếu có.
 function arrowEndpointsFor(from,to,star,letter,modeKey){
-  const r1=cellRect(from);
-  const defP1=r1?{x:r1.cx,y:r1.cy}:null;
-  const defP2=starAnchor(to,star);
-  if(!defP1||!defP2) return null;
+  const def=arrowDefaultEndpointsFor(from,to,star); if(!def) return null;
   const ov=arrowOverrides[arrowKey(modeKey,from,to,letter)];
-  return {p1:defP1, p2:(ov&&ov.p2)||defP2};
+  return {p1:def.p1, p2:(ov&&ov.p2)||def.p2};
 }
-function arrowEndpoints(s){ return arrowEndpointsFor(s.from,s.to,s.star,s.letter,hcMode); }
 // Cung sở hữu mũi tên phi hóa gần điểm bấm nhất (Thể hoặc 1 Dụng), null nếu không trúng.
+// Dò theo ĐÚNG tọa độ đã xòe/né (lastPhiHoaEntries) - xem giải thích đầy đủ tại nơi gán lastPhiHoaEntries
+// trong drawPhiHoaChain. Chỉ xét các mũi tên phi hóa thường (không phải truy ngược) - đúng phạm vi cũ.
 function hitTestPhiArrow(x,y){
   const threshold=8;
-  for(const ch of hcState[hcMode].chains){
-    for(const s of ch.steps){
-      if(s.from===s.to) continue;
-      const pts=arrowEndpoints(s); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold) return ch.from;
-    }
+  // Lấy đoạn GẦN NHẤT trong ngưỡng, không phải đoạn đầu tiên gặp - xem giải thích đầy đủ ở hitTestArrowHandle.
+  let best=null, bestDist=Infinity;
+  for(const e of lastPhiHoaEntries){
+    if(e.isReverse || !e.chain) continue;
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  return null;
+  return best ? best.chain.from : null;
 }
 // Đuôi mũi tên cố định tại tâm cung nguồn. Bấm vào thân trên hoặc đầu mũi tên đều chỉ chỉnh đầu (p2)
 // -> kéo dài/ngắn, đổi hướng tự do, đuôi không di chuyển. Áp dụng cho cả mũi tên phi hóa lẫn mũi tên truy ngược.
+// Dò theo ĐÚNG tọa độ đã xòe/né (lastPhiHoaEntries) - trước đây tự tính lại arrowEndpoints() thô nên bấm/kéo
+// đúng ngay trên đường vẽ ra (đặc biệt các mũi tên nằm ngang, hay bị spreadDivergingOrigins/nudgeCloseArrowsApart
+// dịch theo trục dọc) lại không trúng.
 function hitTestArrowHandle(x,y){
   const threshold=10;
-  for(const ch of hcState[hcMode].chains){
-    for(const s of ch.steps){
-      if(s.from===s.to) continue;
-      const pts=arrowEndpoints(s); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold){
-        return {from:s.from,to:s.to,letter:s.letter,end:'p2',modeKey:hcMode};
-      }
-    }
+  // Lấy đoạn GẦN NHẤT trong ngưỡng, KHÔNG PHẢI đoạn đầu tiên gặp trong mảng - 2 bước liên tiếp của cùng 1
+  // chuỗi (VD Thể hóa Lộc -> Dụng rồi Dụng chuyển Kị tiếp) thường gần như thẳng hàng nhau (đầu đoạn trước =
+  // đuôi đoạn sau), khiến 1 điểm bấm ngay giữa đoạn SAU vẫn lọt vào ngưỡng của đoạn TRƯỚC. Trả về ngay đoạn
+  // đầu tiên khớp (như trước đây) sẽ bắt NHẦM đoạn kề bên - đúng lỗi người dùng báo: "kéo mũi tên chuyển kỵ
+  // thì mũi tên [Lộc] kia lại chạy theo" (thực ra là do bắt nhầm ngay từ lúc bấm, không phải do 2 mũi tên bị
+  // ràng buộc với nhau).
+  let best=null, bestDist=Infinity;
+  for(const e of lastPhiHoaEntries){
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  for(const a of reverseFlightArrows){
-    const pts=arrowEndpointsFor(a.from,a.to,a.star,a.letter,'reverse'); if(!pts) continue;
-    if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold){
-      return {from:a.from,to:a.to,letter:a.letter,end:'p2',modeKey:'reverse'};
-    }
-  }
-  return null;
+  return best ? {from:best.s.from,to:best.s.to,letter:best.s.letter,end:'p2',modeKey:best.isReverse?'reverse':hcMode} : null;
 }
 // Nhiều mũi tên phi hóa (từ các cung Thể/Dụng khác nhau) có thể cùng đáp về đúng 1 điểm (cùng 1 sao) - nếu
 // vẽ y nguyên, đầu mũi tên/badge chữ sẽ chồng khít lên nhau tại điểm đó, trông như chỉ có 1 đường dù thực
@@ -5312,12 +5334,53 @@ function segmentsOverlapClosely(p,q){
   const overlap=Math.min(alen,Math.max(tb1,tb2))-Math.max(0,Math.min(tb1,tb2));
   return overlap>10; // phải chồng nhau 1 đoạn đủ dài (>10px), không tính 2 đường chỉ chạm mép nhau
 }
+// Nhiều mũi tên phi hóa CÙNG xuất phát từ 1 cung sẽ dùng chung ĐÚNG 1 điểm neo cố định (tâm hình học cellRect,
+// không phân biệt có bao nhiêu mũi tên xuất phát từ đó) - khiến các mũi tên đó bó chặt vào nhau ngay từ gốc,
+// chỉ tõe ra dần khi đủ xa, làm các bước xử lý hình học phía sau (spreadParallelArrows/nudgeCloseArrowsApart)
+// khó tách chúng ra rõ ràng ngay từ đầu. Tõe nhẹ các điểm xuất phát TRÙNG NHAU này ra quanh đúng điểm neo gốc,
+// sắp theo hướng mỗi mũi tên sẽ đi tới (để không tự cắt chéo nhau ngay từ gốc) - chạy TRƯỚC mọi bước xử lý
+// hình học khác để chúng tính toán trên đúng vị trí đã tách.
+function spreadDivergingOrigins(entries){
+  const n=entries.length;
+  const parent=Array.from({length:n},(_,i)=>i);
+  const find=x=>{ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; };
+  const union=(x,y)=>{ const rx=find(x),ry=find(y); if(rx!==ry) parent[rx]=ry; };
+  const thresh=2; // điểm xuất phát cách nhau dưới ngưỡng này (thực tế luôn là 0 - cùng 1 cung, cùng cellRect) coi là "cùng gốc"
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    // entries[].pts ở bước này LUÔN là tọa độ MẶC ĐỊNH (chưa áp override kéo tay - xem arrowDefaultEndpointsFor/
+    // nơi override được áp SAU CÙNG trong drawPhiHoaChain) nên việc gộp nhóm ở đây ổn định tuyệt đối, không phụ
+    // thuộc mũi tên nào đang/đã bị kéo chỉnh - kéo 1 mũi tên sẽ không bao giờ làm đổi số lượng/thành phần nhóm
+    // (và do đó không làm dịch chuyển) của các mũi tên khác (đúng lỗi người dùng báo).
+    const dx=entries[i].pts.p1.x-entries[j].pts.p1.x, dy=entries[i].pts.p1.y-entries[j].pts.p1.y;
+    if(Math.hypot(dx,dy)<thresh) union(i,j);
+  }
+  const groups={};
+  for(let i=0;i<n;i++){ const r=find(i); (groups[r]=groups[r]||[]).push(i); }
+  Object.values(groups).forEach(idxs=>{
+    if(idxs.length<2) return;
+    const cx=entries[idxs[0]].pts.p1.x, cy=entries[idxs[0]].pts.p1.y;
+    const spreadR=9.4; // ~2.5mm bán kính - 2 điểm xuất phát đối nhau cách nhau đúng ~5mm (không vượt quá)
+    idxs.sort((a,b)=>{
+      const angA=Math.atan2(entries[a].pts.p2.y-cy, entries[a].pts.p2.x-cx);
+      const angB=Math.atan2(entries[b].pts.p2.y-cy, entries[b].pts.p2.x-cx);
+      return angA-angB;
+    });
+    idxs.forEach((i,k)=>{
+      // Chia cho idxs.length (KHÔNG trừ 1) - đây là chia đều quanh CẢ VÒNG TRÒN (360°), khác hẳn kiểu chia
+      // cho (length-1) dùng ở nửa vòng cung của spreadConvergingEndpoints: nếu lỡ trừ 1, điểm cuối (k=length-1)
+      // sẽ ra đúng góc 360°=0°, TRÙNG KHÍT lại đúng điểm đầu (k=0) thay vì dàn đều.
+      const ang = (k/idxs.length)*Math.PI*2;
+      entries[i].pts={p1:{x:cx+Math.cos(ang)*spreadR, y:cy+Math.sin(ang)*spreadR}, p2:entries[i].pts.p2};
+    });
+  });
+}
 function spreadParallelArrows(entries){
   const n=entries.length;
   const parent=Array.from({length:n},(_,i)=>i);
   const find=x=>{ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; };
   const union=(x,y)=>{ const rx=find(x),ry=find(y); if(rx!==ry) parent[rx]=ry; };
   for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    // pts ở đây là tọa độ MẶC ĐỊNH (ổn định, chưa áp override) - xem giải thích đầy đủ ở spreadDivergingOrigins.
     // Gộp nhóm nếu HOẶC chung đúng 1 cặp cung (VD Lộc A->B và chuyển Kỵ B->A - luôn phải tách dù điểm neo
     // sao trong từng cung khác nhau chút ít khiến 2 đường không thật sự song song), HOẶC 2 đường chồng lấn
     // lên nhau về mặt hình học (VD 1 mũi tên dài đi xuyên qua đúng đoạn của 1 mũi tên ngắn khác cặp cung).
@@ -5329,7 +5392,10 @@ function spreadParallelArrows(entries){
   for(let i=0;i<n;i++){ const r=find(i); (groups[r]=groups[r]||[]).push(i); }
   Object.values(groups).forEach(idxs=>{
     if(idxs.length<2) return;
-    const gap=18.75; // ~5mm (đồng bộ tỉ lệ 30px~8mm đã dùng cho mũi tên ly tâm)
+    const gap=36; // ~9.6mm - tăng từ 18.75 (~5mm) vì nhiều mũi tên hội tụ cùng lúc (3 hướng trở lên) vẫn còn
+    // bị 1-2 cặp kề nhau quá sát (do spreadConvergingEndpoints chạy SAU không còn "khớp điểm" nữa để tự xòe
+    // thêm, một khi spreadParallelArrows đã lỡ dịch chuyển các điểm này trước rồi) - nới rộng gap chung này
+    // để mọi cặp trong nhóm đều cách nhau rõ rệt hơn, không riêng gì trường hợp chỉ 2 mũi tên.
     // Dùng CHUNG 1 hướng vuông góc tham chiếu cho cả nhóm (lấy từ mũi tên đầu tiên),
     // để 2 mũi tên đi ngược chiều nhau (VD Lộc A->B và chuyển Kỵ B->A) không bị triệt tiêu độ lệch.
     const ref=entries[idxs[0]].pts;
@@ -5342,19 +5408,74 @@ function spreadParallelArrows(entries){
     });
   });
 }
+// Sau khi đã xử lý các trường hợp trùng khít hẳn (spreadParallelArrows, ngưỡng rất sát <6px) hoặc hội tụ
+// đúng 1 điểm (spreadConvergingEndpoints), vẫn còn trường hợp 2 mũi tên chạy GẦN như song song (đặc biệt khi
+// gần nằm ngang) nhưng không đủ sát để 2 hàm trên coi là "đè lên nhau" - nhìn vẫn rất khó phân biệt. Đẩy nhẹ
+// mỗi cặp như vậy ra xa nhau thêm đúng 0.8mm (~3px) mỗi bên - đủ để mắt tách được 2 đường riêng biệt mà không
+// xê dịch nhiều so với vị trí gốc (khác hẳn spreadParallelArrows vốn đẩy hẳn 5mm cho trường hợp chồng khít).
+// entries được đẩy vào theo ĐÚNG thứ tự "vẽ trước/sau" (Thể trước Dụng, và trong 1 chuỗi thì bước gốc i=0
+// luôn trước các bước chuyển Kị i>=1 - xem thứ tự forEach ở drawPhiHoaChain/dualRedrawCanvas) - tức entries[i]
+// với i<j LUÔN là mũi tên "đi trước" so với entries[j]. Khi 2 đường gần song song (hoặc chạy ngược chiều
+// nhau trên cùng 1 hành lang - vd 1 cung hóa Lộc sang X rồi X chuyển Kị quay ngược lại gần đúng đường vừa đi
+// qua) và ở quá sát nhau, CHỈ đẩy đường đi SAU (entries[j]) tách ra, giữ nguyên vị trí đường đi TRƯỚC
+// (entries[i]) - đúng tinh thần "mũi tên sau né mũi tên trước", không phải chia đều cho cả 2 bên như trước.
+function nudgeCloseArrowsApart(entries){
+  const minGap=19; // ~5mm (3.75px/mm) - tăng từ 12px (~3.2mm) theo yêu cầu khoảng cách tối thiểu giữa 2 mũi tên
+  for(let i=0;i<entries.length;i++){
+    for(let j=i+1;j<entries.length;j++){
+      // pts ở đây là tọa độ MẶC ĐỊNH (ổn định, chưa áp override) - xem giải thích đầy đủ ở spreadDivergingOrigins.
+      const p=entries[i].pts, q=entries[j].pts;
+      const adx=p.p2.x-p.p1.x, ady=p.p2.y-p.p1.y, alen=Math.hypot(adx,ady)||1;
+      const bdx=q.p2.x-q.p1.x, bdy=q.p2.y-q.p1.y, blen=Math.hypot(bdx,bdy)||1;
+      const cross=Math.abs(adx*bdy-ady*bdx)/(alen*blen);
+      if(cross>0.15) continue; // chỉ xét các cặp gần như song song/ngược chiều (lệch góc dưới ~8.5 độ)
+      const ux=adx/alen, uy=ady/alen, px=-uy, py=ux;
+      const dist=(q.p1.x-p.p1.x)*px+(q.p1.y-p.p1.y)*py; // khoảng cách vuông góc CÓ DẤU giữa 2 đường
+      const absDist=Math.abs(dist);
+      // đã đủ xa (>=0.8mm, khỏi cần đẩy) hoặc gần như trùng khít (thuộc phạm vi spreadParallelArrows, bỏ qua
+      // để tránh đẩy chồng 2 lần lên cùng 1 cặp).
+      if(absDist>=minGap || absDist<0.5) continue;
+      const tb1=(q.p1.x-p.p1.x)*ux+(q.p1.y-p.p1.y)*uy;
+      const tb2=(q.p2.x-p.p1.x)*ux+(q.p2.y-p.p1.y)*uy;
+      const overlap=Math.min(alen,Math.max(tb1,tb2))-Math.max(0,Math.min(tb1,tb2));
+      if(overlap<8) continue; // 2 đường chỉ tình cờ gần nhau ở 1 đầu mút, không thật sự chạy song song
+      const need=minGap-absDist, sign=dist>=0?1:-1;
+      entries[j].pts={p1:{x:q.p1.x+px*need*sign,y:q.p1.y+py*need*sign}, p2:{x:q.p2.x+px*need*sign,y:q.p2.y+py*need*sign}};
+    }
+  }
+}
+// Gộp nhóm "hội tụ" theo KHOẢNG CÁCH (union-find), không phải khớp đúng tuyệt đối từng pixel như trước
+// (Math.round trùng khít) - 2 mũi tên nhắm vào 2 SAO KHÁC NHAU nhưng nằm sát nhau (vd "Cự Môn" và 1 sao phụ
+// ngay cạnh, cách nhau vài px) trước đây KHÔNG được coi là "cùng hội tụ" nên không hề bị xòe tách, trông như
+// đâm thẳng vào nhau/đè lên nhau ngay tại đó - đúng lỗi người dùng báo ("mũi tên hướng về đúng sao khiến các
+// mũi tên không giữ khoảng cách").
 function spreadConvergingEndpoints(entries){
-  const byTarget={};
-  entries.forEach(e=>{
-    const key=Math.round(e.pts.p2.x)+','+Math.round(e.pts.p2.y);
-    (byTarget[key]=byTarget[key]||[]).push(e);
-  });
-  Object.values(byTarget).forEach(group=>{
-    if(group.length<2) return;
-    const cx=group[0].pts.p2.x, cy=group[0].pts.p2.y;
-    const spreadR=9;
-    group.forEach((e,i)=>{
-      const ang=(i/group.length)*Math.PI*2;
-      e.pts={p1:e.pts.p1, p2:{x:cx+Math.cos(ang)*spreadR, y:cy+Math.sin(ang)*spreadR}};
+  const n=entries.length;
+  const parent=Array.from({length:n},(_,i)=>i);
+  const find=x=>{ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; };
+  const union=(x,y)=>{ const rx=find(x),ry=find(y); if(rx!==ry) parent[rx]=ry; };
+  const thresh=14; // ~4.7mm - 2 điểm đến cách nhau dưới ngưỡng này coi như "cùng 1 chỗ", cần xòe tách ra
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    // pts ở đây là tọa độ MẶC ĐỊNH (ổn định, chưa áp override) - xem giải thích đầy đủ ở spreadDivergingOrigins.
+    const dx=entries[i].pts.p2.x-entries[j].pts.p2.x, dy=entries[i].pts.p2.y-entries[j].pts.p2.y;
+    if(Math.hypot(dx,dy)<thresh) union(i,j);
+  }
+  const groups={};
+  for(let i=0;i<n;i++){ const r=find(i); (groups[r]=groups[r]||[]).push(i); }
+  Object.values(groups).forEach(idxs=>{
+    if(idxs.length<2) return;
+    // Tâm xòe = trung bình các điểm đến trong nhóm (không lấy cứng điểm đầu tiên - công bằng hơn khi các
+    // điểm vốn không trùng khít tuyệt đối mà chỉ ở gần nhau).
+    let cx=0,cy=0; idxs.forEach(i=>{cx+=entries[i].pts.p2.x; cy+=entries[i].pts.p2.y;});
+    cx/=idxs.length; cy/=idxs.length;
+    const spreadR=9.4; // ~2.5mm bán kính - 2 điểm đối nhau cách nhau đúng ~5mm (không vượt quá)
+    // Chỉ xòe trong nửa vòng cung HƯỚNG XUỐNG/NGANG (0..π, sin luôn >=0) - điểm gốc (cx,cy) đã được
+    // starAnchor tính toán để nằm AN TOÀN dưới tên sao. Xòe đủ 360° sẽ khiến 1 vài hướng (nửa trên, sin<0) đẩy
+    // điểm đến ngược LÊN, đè lại lên đúng chữ tên sao vừa né được.
+    idxs.forEach((i,k)=>{
+      const t = idxs.length>1 ? k/(idxs.length-1) : 0;
+      const ang = t*Math.PI; // 0 (phải, ngang) -> π (trái, ngang), quét qua π/2 (thẳng xuống) ở giữa
+      entries[i].pts={p1:entries[i].pts.p1, p2:{x:cx+Math.cos(ang)*spreadR, y:cy+Math.sin(ang)*spreadR}};
     });
   });
 }
@@ -5399,7 +5520,7 @@ function drawPhiHoaChain(ctx){
   // trùng cho cung KHÁC kết cấu đang cô lập).
   visiblePhiHoaChains().forEach(ch=>{
     const isSel=selectedPhiArrow && selectedPhiArrow.mode===hcMode && selectedPhiArrow.idx===ch.from;
-    ch.steps.forEach(s=>{
+    ch.steps.forEach((s,stepIndex)=>{
       if(s.from===s.to) return;
       // Bước "revisit" (xem computeSingleChain: quay lại ĐÚNG root hoặc 1 điểm đã đi qua, chỉ cho phép 1
       // lần khi có nguồn năng lượng độc lập thúc buộc) - CHỈ cần tính điểm/hiển thị chữ trong khối kết cấu,
@@ -5407,8 +5528,14 @@ function drawPhiHoaChain(ctx){
       // mũi tên chồng/song song vô nghĩa giữa đúng 2 cung đó (1 xuôi, 1 ngược), dù chỉ là 1 sự kiện tính
       // điểm, không phải 1 đường phi hóa mới thật sự cần minh họa riêng.
       if(s.isRevisit) return;
-      const pts=arrowEndpoints(s); if(!pts) return;
-      entries.push({s,pts,isSel});
+      // pts dùng tọa độ MẶC ĐỊNH (chưa áp override kéo tay) để mọi bước gộp nhóm/giãn cách bên dưới luôn ổn
+      // định - override chỉ được áp SAU CÙNG, không ảnh hưởng gì tới các mũi tên KHÁC (xem giải thích đầy đủ
+      // tại arrowDefaultEndpointsFor). Mỗi bước luôn ĐỘC LẬP hoàn toàn - không tự động nối/khớp điểm với bước
+      // khác trong cùng chuỗi (dù liên tiếp về mặt ý nghĩa), để kéo chỉnh 1 mũi tên không bao giờ kéo theo
+      // mũi tên khác.
+      const pts=arrowDefaultEndpointsFor(s.from,s.to,s.star); if(!pts) return;
+      const override=arrowOverrides[arrowKey(hcMode,s.from,s.to,s.letter)];
+      entries.push({s,pts,isSel,chain:ch,stepIndex,override});
     });
   });
   // Gộp cả mũi tên "truy ngược" vào chung 1 lượt gom nhóm/giãn cách với mũi tên phi hóa thường,
@@ -5416,17 +5543,30 @@ function drawPhiHoaChain(ctx){
   // nên khi trùng cùng 1 cặp cung với 1 đường phi hóa thì vẫn đè khít lên nhau dù đã có giãn cách.
   reverseFlightArrows.forEach(a=>{
     if(a.from===a.to) return;
-    const pts=arrowEndpointsFor(a.from,a.to,a.star,a.letter,'reverse'); if(!pts) return;
-    entries.push({s:a,pts,isSel:false});
+    const pts=arrowDefaultEndpointsFor(a.from,a.to,a.star); if(!pts) return;
+    const override=arrowOverrides[arrowKey('reverse',a.from,a.to,a.letter)];
+    entries.push({s:a,pts,isSel:false,isReverse:true,override});
   });
+  spreadDivergingOrigins(entries);
   spreadParallelArrows(entries);
   spreadConvergingEndpoints(entries);
+  nudgeCloseArrowsApart(entries);
+  // Áp override đã kéo tay SAU CÙNG (đầu mũi tên p2 CHỈ áp dụng ở bước này) - đảm bảo việc kéo 1 mũi tên
+  // không hề tham gia vào các phép tính gộp nhóm/giãn cách ở trên, nên không thể làm dịch chuyển mũi tên khác.
+  entries.forEach(e=>{ if(e.override) e.pts={p1:e.pts.p1, p2:e.override.p2}; });
+  // Lưu lại ĐÚNG tọa độ đã xòe/né (không phải tọa độ thô ban đầu) để hitTestPhiArrow/hitTestArrowHandle dò
+  // trúng đúng với đường THẬT SỰ đang hiển thị - trước đây 2 hàm đó tự tính lại arrowEndpoints() thô, không
+  // qua các bước spreadDivergingOrigins/spreadParallelArrows/spreadConvergingEndpoints/nudgeCloseArrowsApart
+  // ở trên, nên khi đường bị dịch đi (đặc biệt các mũi tên nằm ngang, dễ bị né/xòe theo trục dọc) thì bấm/kéo
+  // đúng ngay trên đường vẽ ra lại không trúng.
+  lastPhiHoaEntries=entries;
   entries.forEach(({s,pts,isSel})=>{
     if(isSel){
       // Giảm mỏng + nhạt (từ 16px/.55 xuống 7px/.4) - trước đây viền cam đè lấn hẳn màu mũi tên phi hóa thật
       // bên trong (vd đỏ phi Quyền), nhìn như mũi tên bị mờ/ám cam thay vì chỉ là dấu hiệu "đang chọn".
       ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7; ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(pts.p1.x,pts.p1.y); ctx.lineTo(pts.p2.x,pts.p2.y); ctx.stroke(); ctx.restore();
+      ctx.beginPath(); ctx.moveTo(pts.p1.x,pts.p1.y);
+      ctx.lineTo(pts.p2.x,pts.p2.y); ctx.stroke(); ctx.restore();
     }
     drawPhiHoaArrow(ctx,s.from,s.to,s.star,s.letter,s.color,pts.p1,pts.p2);
   });
@@ -5567,6 +5707,7 @@ function onOff(el,mouseType,touchType,handler,opts){
     });
     const wrap=document.getElementById('banWrap');
     let justDraggedArrow=false;
+    let dragStartPt=null;
     // Kéo đầu/đuôi 1 mũi tên phi hóa để tự chỉnh vị trí theo ý muốn.
     onOff(wrap,'mousedown','touchstart',e=>{
       if(drawTool) return;
@@ -5574,7 +5715,7 @@ function onOff(el,mouseType,touchType,handler,opts){
       const {clientX,clientY}=clientPointFrom(e);
       const x=clientX-r.left, y=clientY-r.top;
       const handle=hitTestArrowHandle(x,y);
-      if(handle){ draggingArrowHandle=handle; e.preventDefault(); }
+      if(handle){ draggingArrowHandle=handle; dragStartPt={x,y}; e.preventDefault(); }
     },{passive:false});
     onOff(window,'mousemove','touchmove',e=>{
       if(!draggingArrowHandle) return;
@@ -5582,12 +5723,15 @@ function onOff(el,mouseType,touchType,handler,opts){
       const r=cv.getBoundingClientRect();
       const {clientX,clientY}=clientPointFrom(e);
       const x=clientX-r.left, y=clientY-r.top;
+      // Bỏ qua các cử động cực nhỏ ngay sau mousedown (rung tay/chuột khi người dùng chỉ định BẤM CHỌN, không
+      // thực sự kéo) - tránh ghi đè arrowOverrides chỉ vì 1 cú bấm tưởng như đứng yên.
+      if(dragStartPt && Math.hypot(x-dragStartPt.x,y-dragStartPt.y)<4) return;
       const key=arrowKey(draggingArrowHandle.modeKey,draggingArrowHandle.from,draggingArrowHandle.to,draggingArrowHandle.letter);
       arrowOverrides[key]={p2:{x,y}};
       redrawCanvas();
     },{passive:false});
     onOff(window,'mouseup','touchend',()=>{
-      if(draggingArrowHandle){ draggingArrowHandle=null; justDraggedArrow=true; }
+      if(draggingArrowHandle){ draggingArrowHandle=null; dragStartPt=null; justDraggedArrow=true; }
     });
     // Bấm (đơn hoặc double-click) vào 1 mũi tên phi hóa HOẶC 1 nét vẽ tay (mũi tên/ô vuông/chữ, không ở chế
     // độ đang vẽ) để CHỌN vùng; bấm Del/Backspace mới thực sự xóa - đồng hóa 2 cơ chế chọn+xóa làm một.
@@ -5880,6 +6024,22 @@ function toggleHoaFilter(mode){
 // nhớ gọi invalidate ở ĐÚNG MỌI nơi hcState/nienGlowTarget có thể đổi (undo/redo, đổi lá số...) - tự phát
 // hiện thay đổi, không có rủi ro hiển thị kết cấu CŨ do lỡ sót 1 điểm invalidate.
 let _ketCauCache={hung:{sig:null,result:null}, cat:{sig:null,result:null}};
+// Phân biệt Lưỡng Đầu Kiến Kị (LĐKK) và Kị Xuất Đối Cung (KXĐC) khi xét 1 cặp đối cung (a,b) đều đang "tọa
+// Kị": KXĐC là 1 bước chuyển Kị BÌNH THƯỜNG, tự nhiên đi từ 1 cung X sang ĐÚNG đối cung của X (X hóa Kị/
+// chuyển Kị tới X+6) - CHỈ là 1 mạch phi Kị duy nhất "đi ngang qua" đúng 2 điểm đối nhau, KHÔNG phải 2 nguồn
+// Kị độc lập gặp nhau, nên KHÔNG được tính là LĐKK (không dùng để ghép 2 kết cấu/gạch đỏ như lưỡng đầu kiến
+// Kị thật). Ví dụ: Mệnh hóa Kị → Sự Nghiệp, Sự Nghiệp CK → Phu Thê (KXĐC vì Phu là đối cung của Sự) - cặp
+// Sự/Phu này CHỈ là KXĐC, không tính LĐKK, TRỪ KHI 1 trong 2 đầu còn có thêm ÍT NHẤT 1 lý do khác, độc lập
+// với đúng cạnh nối trực tiếp đó, khiến nó tọa Kị (vd có thêm 1 cung khác ngoài Sự cũng chuyển Kị tới Phu) -
+// lúc đó cạnh Sự-Phu vừa là KXĐC (bước chuyển Kị tự nhiên) vừa là LĐKK (2 nguồn Kị độc lập cùng gặp đối
+// cung nhau). reasonsA/reasonsB: Map cung idx -> mảng lý do (xem landingReasonsOf trong
+// computeKetCauStructuresRaw/luongDauKienKyCungSet), mỗi lý do là {kind:'the'}/{kind:'manual'} (luôn độc
+// lập, không bao giờ bị loại) hoặc {kind:'step',from,to} (1 bước chuyển Kị thật, from!==to).
+function isGenuineLdkkPair(reasonsA,reasonsB,a,b){
+  const remainA=(reasonsA.get(a)||[]).filter(r=>!(r.kind==='step'&&r.from===b));
+  const remainB=(reasonsB.get(b)||[]).filter(r=>!(r.kind==='step'&&r.from===a));
+  return remainA.length>0 && remainB.length>0;
+}
 function computeKetCauStructures(mode){
   const st=hcState[mode];
   const nien=nienGlowTarget[mode];
@@ -5914,7 +6074,7 @@ function computeKetCauStructuresRaw(mode){
   const selected=[...st.the, ...st.dung];
   if(nienIdx!=null) selected.push(nienIdx);
   if(!selected.length) return [];
-  const label=idx=>cungChucOf(idx,c.vM);
+  const label=idx=>{ const full=cungChucOf(idx,c.vM); return CUNG_SHORT_LABEL[full]||full; };
   const chainCache={};
   // realAnchorSet dùng riêng cho cơ chế "trùng lặp phi hóa" (dùng chung Can 1 cung Thể/Dụng THẬT SỰ đã bấm
   // chọn tay) - CHỈ gồm Thể/Dụng thật, KHÔNG gồm cung niên A/D (nienIdx): cung niên chỉ là 1 triệu nhân cung
@@ -6029,6 +6189,12 @@ function computeKetCauStructuresRaw(mode){
     const has=(c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter);
     return has ? (letter==='D'?'niên D':'niên A') : null;
   }
+  // Tên THẬT SỰ của ngôi sao đang mang niên A/D tại 1 cung (nếu có) - dùng để so sánh đồng/khác tinh diệu với
+  // 1 sao khác đang tự hóa tại CÙNG cung đó (xem rootNienSameStar trong evalRoot).
+  function nienStarNameAt(target){
+    const s=(c.data.saoCung[String(target)]||[]).find(s2=>c.thMap[s2.ten]===letter);
+    return s ? s.ten : null;
+  }
 
   // Tính 1 kết cấu với gốc "root" cố định, trong phạm vi "members"/"anchorSetForThis"/"suppressed" cho trước.
   // Thành viên khác chạm thẳng vào mạch chính (spine của root) thì gắn nhánh trực tiếp; nếu chỉ chạm vào 1
@@ -6102,12 +6268,19 @@ function computeKetCauStructuresRaw(mode){
     // nữa ở khối "niên trùng đúng cung Thể/Dụng" phía cuối evalRoot - trong khi thực chất chỉ có 1 nguồn niên
     // duy nhất, tự hóa ly tâm bản thân nó KHÔNG cộng điểm (xem giải thích phía trên), chỉ niên mới đáng +1.
     if(rootSelfLoop && rootNienTag){ total+=1; nienCap.used=true; }
+    // Lộc bắt buộc ĐỒNG TINH DIỆU: nếu niên A rơi vào 1 sao KHÁC hẳn sao đang tự hóa xuất tại CHÍNH cung root
+    // (vd Giao Hữu vừa có Thiên Đồng mang niên A, vừa có Cự Môn tự hóa Lộc xuất - 2 sao khác nhau), đây là 2
+    // nguồn Lộc ĐỘC LẬP, KHÔNG được viết gộp chung 1 dòng "niên A + tự hóa Lộc xuất" như đang mang cùng 1 sao
+    // (dễ hiểu lầm) - vẫn cộng đủ +1 (2 nguồn thật, không phải trùng), nhưng phải TÁCH thành 1 dòng riêng.
+    // Kị thì KHÔNG cần đồng tinh diệu (giữ nguyên hành vi gộp chung như cũ, xem comment gốc phía trên).
+    const rootNienStarName = rootSelfLoop && rootNienTag ? nienStarNameAt(root) : null;
+    const rootNienSameStar = letter==='D' || (rootNienStarName===steps[0].star);
     // Ghi vắn tắt theo dòng chảy: "Cung (hóa Lộc/Kị) → Đích —CK→ Đích2 ...". Bước 0 = hóa (dùng Can gốc),
     // từ bước 1 trở đi luôn là CK (chuyển Kị, dùng Can cung vừa đáp). Riêng KXĐC (Kị xuất đối cung) xuống
     // dòng, chĩa mũi tên xuống (↓ KXĐC) để tách biệt khỏi luồng CK bình thường.
     const isNienRoot = root===nienIdx;
     const rootTag = rootSelfLoop
-      ? (rootNienTag ? `${rootNienTag} + tự hóa ${letter} xuất` : `tự hóa ${letterName} - ${steps[0].star}`)
+      ? (rootNienTag && rootNienSameStar ? `${rootNienTag} - ${steps[0].star} + tự hóa ${letter} xuất` : `tự hóa ${letterName} xuất - ${steps[0].star}`)
       : (isNienRoot ? `niên ${mode==='cat'?'A':'D'}` : `hóa ${letterName}`);
     let spine = `<b>${label(root)}</b> (${rootTag})`;
     // Nhãn "trùng lặp" thuộc về CHÍNH cung vừa đáp (step.to), không phải cung kế tiếp - đây là cung mà Can
@@ -6152,7 +6325,10 @@ function computeKetCauStructuresRaw(mode){
       if(!isSelectedHere) stillConsecutive=false;
       const otherTags=bonus.tags.filter(t=>t!=='KXĐC');
       if(isTrungLapCung) otherTags.unshift('trùng lặp');
-      const tagStr = otherTags.length ? ` (${otherTags.join(', ')})` : '';
+      // Luôn kèm tên sao đích trong ngoặc (yêu cầu người dùng) - để nhìn ra ngay đồng/khác tinh diệu giữa các
+      // điểm chạm mà không cần dò lại dữ liệu gốc. Đặt lên ĐẦU danh sách (trước cả "trùng lặp"/"niên...").
+      otherTags.unshift(step.star);
+      const tagStr = ` (${otherTags.join(', ')})`;
       const targetHtml = `${label(step.to)}${tagStr}`;
       // Tự hóa xuất TẠI CHỖ ngay GIỮA mạch chính (không phải ở gốc, i>=1) - cung vừa đáp lại đúng CŨNG là cung
       // xuất phát bước này (step.from===step.to, vd Phu Thê tự hóa Kị xuất nên Can của nó bay ra lại đáp
@@ -6176,7 +6352,21 @@ function computeKetCauStructuresRaw(mode){
       else if(i===0) spine += (isNienRoot ? ` —CK→ ` : ` → `) + targetHtml;
       else spine += ` —CK→ ${targetHtml}`;
     });
-    const lines=[`<li class="hoa-spine">${spine}</li>`];
+    // Ghi kèm điểm Lộc/Kị TÍCH LŨY của dòng mạch chính ngay tại đây (yêu cầu người dùng: mỗi dòng đều thấy rõ
+    // đóng góp bao nhiêu Lộc/Kị, không chỉ tổng cuối cùng) - "total" tại thời điểm này đã gồm đủ: 1 (nền) +
+    // niên tại root nếu root tự hóa xuất + mọi điểm cộng dọc mạch chính (niên/tự hóa Lộc/KXĐC) vừa tính xong
+    // trong steps.forEach phía trên, TRƯỚC KHI xét tới bất kỳ thành viên hội tụ nào (M) - đúng nghĩa "điểm của
+    // riêng dòng 1".
+    const lettAbbr = letter==='A' ? 'L' : 'K';
+    const lines=[`<li class="hoa-spine">${spine} [${total}${lettAbbr}]</li>`];
+    // Niên A/D rơi vào 1 sao KHÁC hẳn sao đang tự hóa xuất tại root (xem rootNienSameStar phía trên) - ghi rõ
+    // thành 1 dòng riêng (đã cộng +1 ở trên rồi, dòng này chỉ để hiển thị, không cộng thêm lần nữa). Ghi theo
+    // đúng dòng chảy thật (niên → CK → đích) như mọi dòng hội tụ khác, không giải thích dài dòng - steps[1] là
+    // đúng nơi Can của root chuyển Kị tới (root tự hóa xuất VÀ mang niên đều dùng CHUNG 1 Can duy nhất của
+    // chính root, nên niên A cũng tất yếu "chuyển Kị" ra đúng CÙNG 1 điểm đó, dù khác sao khởi phát).
+    if(rootSelfLoop && rootNienTag && !rootNienSameStar && steps[1]){
+      lines.push(`<li class="hoa-sub hoa-plus">⤷ niên ${letter==='D'?'D':'A'} (${rootNienStarName}) —CK→ ${label(steps[1].to)} (${steps[1].star}) [+1${lettAbbr}]</li>`);
+    }
     // Kết cấu Lộc bắt buộc đồng tinh diệu giữa các cung liên kết (trừ Kị xuất đối cung, đã xử lý riêng ở
     // mustContinueKy) - kể cả khi M đáp thẳng vào ĐÚNG cung gốc, vẫn phải đúng sao mà gốc tự hóa/hóa Lộc ra,
     // không được miễn trừ chỉ vì gốc là cung Thể/Dụng thật sự đã bấm chọn (vd Mệnh phi Thiên Đồng hóa Lộc về
@@ -6367,6 +6557,9 @@ function computeKetCauStructuresRaw(mode){
       if(M===root) return;
       const info=touchInfo[M];
       if(!info) return;
+      // Chụp lại điểm TRƯỚC khi xử lý M - so sánh với "total" SAU khi xử lý xong để biết đúng dòng của M vừa
+      // rồi đóng góp bao nhiêu Lộc/Kị (yêu cầu người dùng: mỗi dòng hội tụ đều ghi rõ "+X" của riêng nó).
+      const totalBeforeMember=total;
       if(info.suppressed){
         // Vẫn ghi rõ đủ đường đi riêng của M (kể cả trùng lặp bên trong đường đó) cho tới đúng điểm nó
         // "chập" vào mạch chính - không chỉ ghi gọn "trùng lặp (đã tính)" - vd "Tử Nữ —TK→ Phúc Đức (trùng
@@ -6393,7 +6586,9 @@ function computeKetCauStructuresRaw(mode){
             const hasKXDC = dispTags.includes('KXĐC');
             const otherDisp = dispTags.filter(t=>t!=='KXĐC');
             if(isTrungLapHere) otherDisp.unshift('trùng lặp');
-            const tagStr = otherDisp.length ? ` (${otherDisp.join(', ')})` : '';
+            // Luôn kèm tên sao đích trong ngoặc (yêu cầu người dùng) - xem giải thích tương tự ở mạch chính.
+            otherDisp.unshift(s.star);
+            const tagStr = ` (${otherDisp.join(', ')})`;
             const targetHtml = label(s.to)+tagStr;
             if(s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
             else if(hasKXDC) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
@@ -6440,7 +6635,9 @@ function computeKetCauStructuresRaw(mode){
         subSteps.forEach((s,i)=>{
           if(i===0 && memberSelfLoopStart){
             const selfHoaA=letter==='A' ? computeTuHoaFor(s.to) : [];
-            subTags[i]= selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===s.star) ? ['tự hóa Lộc'] : [];
+            const selfTag = selfHoaA.some(a=>a.type==='out'&&a.letter==='A'&&a.star===s.star) ? ['tự hóa Lộc'] : [];
+            // Luôn kèm tên sao trong ngoặc (yêu cầu người dùng) - xem giải thích tương tự ở mạch chính.
+            subTags[i]=[s.star, ...selfTag];
             return;
           }
           const {add,tags,nienHit}=pointBonus(s.to, s.star, i, seenBonus, nienCap, s.from);
@@ -6455,6 +6652,8 @@ function computeKetCauStructuresRaw(mode){
           if(!(s.to===root || realAnchorSet.has(s.to))) mStillConsecutive=false;
           const otherTags=dispTags.filter(t=>t!=='KXĐC');
           if(isTrungLapSub) otherTags.unshift('trùng lặp');
+          // Luôn kèm tên sao trong ngoặc (yêu cầu người dùng) - xem giải thích tương tự ở mạch chính.
+          otherTags.unshift(s.star);
           subTags[i]=otherTags;
           subKXDC[i]=dispTags.includes('KXĐC');
         });
@@ -6485,7 +6684,8 @@ function computeKetCauStructuresRaw(mode){
       // Không hiển thị dòng "đã tính trong nền" nữa (theo yêu cầu) - vẫn giữ subSteps/memberSubChains để tab
       // "cô lập kết cấu" vẽ đúng, chỉ bỏ dòng chữ mô tả khi M đáp thẳng vào gốc (info.onRoot).
       if(!info.onRoot){
-        lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow}</li>`);
+        const memberDelta=total-totalBeforeMember;
+        lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow} [+${memberDelta}${lettAbbr}]</li>`);
       }
       if(!isSelfLoopHere) memberSubChains.push({idx:M, steps:subSteps});
       const spineIdx=resolveSpineIndex(M, new Set([M]));
@@ -6702,10 +6902,46 @@ function computeKetCauStructuresRaw(mode){
   // thành 1 kết cấu chung, tổng Kị = tổng của cả 2 cộng lại (không phải chỉ +1 như hội tụ thường).
   // Cung tọa Kị "đầy đủ" của 1 kết cấu = hợp của TOÀN BỘ cung đáp trong chuỗi riêng của MỌI thành viên
   // (không chỉ riêng root) - vì 1 kết cấu đã gộp nhiều Thể/Dụng thì mỗi thành viên đều có "tọa Kị" riêng.
-  const fullLandingSetOf=s=>{
+  // Bước "tự hóa Kị xuất/ly tâm" TẠI CHỖ (st.from===st.to, cung tự phóng Kị rồi tự nhận lại đúng chính nó)
+  // KHÔNG được tính là "tọa Kị" cho mục đích lưỡng đầu kiến Kị - lực Kị loại này rất yếu (chỉ luận tượng tại
+  // chỗ, không thật sự lan tỏa), không đủ để ghép cặp đối cung. Cung đó CHỈ thực sự "tọa Kị" nếu có 1 cung
+  // KHÁC (trong tập hợp Thể/Dụng) chuyển Kị ĐẾN nó - lúc đó tự khắc có 1 bước khác (st.from khác cung này)
+  // cũng đáp st.to đúng vào cung này, được tính bình thường.
+  // Map cung idx -> mảng lý do khiến cung đó "tọa Kị" trong PHẠM VI 1 kết cấu s - dùng isGenuineLdkkPair để
+  // phân biệt LĐKK thật với KXĐC (xem giải thích đầy đủ tại định nghĩa isGenuineLdkkPair phía trên).
+  const landingReasonsOf=s=>{
+    const map=new Map();
+    const add=(idx,reason)=>{ if(!map.has(idx)) map.set(idx,[]); map.get(idx).push(reason); };
+    (s.memberIdxs||[s.anchorIdx]).forEach(m=>{
+      // Cung Thể tự thân LUÔN được coi là "tọa Kị" (Thể là chủ thể khởi Kỵ của cả kết cấu, không cần đợi
+      // có chuỗi nào "đáp" tới nó mới tính là tọa Kị) - CHỈ áp dụng cho Thể, KHÔNG áp dụng cho Dụng (Dụng chỉ
+      // thực sự tọa Kị khi có 1 chuỗi thật sự đáp thẳng vào nó, xem điều kiện step.from!==step.to bên dưới).
+      // VD: Điền là Thể, Mệnh là Dụng, Mệnh hóa Kị đến Tử Nữ (đối cung của Điền, dù Tử tự hóa Kị xuất tại
+      // đó không truy tiếp nữa) - kết cấu này vẫn có 1 Kị nhờ LĐKK giữa Tử Nữ và chính Điền (Thể), dù Điền
+      // không hề có chuỗi riêng nào đáp ngược lại đúng vị trí của chính nó.
+      if(st.the.has(m)) add(m,{kind:'the'});
+      const ch=chainFor(m); if(ch) ch.steps.forEach(step=>{ if(step.from!==step.to) add(step.to,{kind:'step',from:step.from,to:step.to}); });
+    });
+    return map;
+  };
+  // Tập hợp TOÀN BỘ cạnh (from:to:star) trong chuỗi riêng của mọi thành viên 1 kết cấu - dùng để phát hiện
+  // trường hợp 1 "kết cấu cô lập" (thường do niên A/D tự động phát hiện, VD Huynh mang niên D) mà TOÀN BỘ
+  // cạnh của nó đã nằm SẴN trong chuỗi của 1 kết cấu KHÁC - do Can của nó bị 1 gốc khác "tái sử dụng" giữa
+  // chừng nhưng KHÔNG được nhận diện là trùng lặp (computeSuppressed đòi hỏi đoạn trung gian phải LIÊN TỤC
+  // toàn cung Thể/Dụng thật, gãy đoạn nếu có cung trung gian không được chọn - xem selfEdgeReused phía trên).
+  // Kết cấu cô lập kiểu này KHÔNG mang thêm thông tin Kị nào mới - ghép nó vào qua Lưỡng đầu kiến Kị sẽ tính
+  // TRÙNG đúng cạnh đã có sẵn trong kết cấu kia (double-count), không phải 1 nguồn Kị độc lập thứ 2 thật sự
+  // (VD Huynh mang niên D nằm giữa chuỗi Mệnh→Điền→Huynh→Sự: cạnh Huynh→Sự của "kết cấu Huynh" y hệt cạnh
+  // cuối trong chuỗi Mệnh, ghép qua LĐKK sẽ cộng dư +1 Kị đã tính rồi).
+  const chainEdgesOf=s=>{
     const set=new Set();
-    (s.memberIdxs||[s.anchorIdx]).forEach(m=>{ const ch=chainFor(m); if(ch) ch.steps.forEach(st=>set.add(st.to)); });
+    (s.memberIdxs||[s.anchorIdx]).forEach(m=>{ const ch=chainFor(m); if(ch) ch.steps.forEach(step=>{ if(step.from!==step.to) set.add(step.from+':'+step.to+':'+step.star); }); });
     return set;
+  };
+  const isFullySubsumedEdges=(a,b)=>{
+    if(a.size===0) return false;
+    for(const e of a) if(!b.has(e)) return false;
+    return true;
   };
   if(letter==='D' && structures.length>1){
     // Lặp lại tới khi 1 lượt quét trọn không còn gộp thêm được cặp nào nữa (fixed-point) - 1 lượt quét duy
@@ -6724,9 +6960,17 @@ function computeKetCauStructuresRaw(mode){
         for(let j=i+1;j<structures.length;j++){
           if(used.has(j)) continue;
           const other=structures[j];
-          const setA=fullLandingSetOf(combo), setB=fullLandingSetOf(other);
+          // Kết cấu nào có TOÀN BỘ cạnh đã nằm sẵn trong kết cấu kia (thường là 1 kết cấu cô lập do niên A/D
+          // tự động phát hiện, trùng khít 1 đoạn cuối chuỗi của kết cấu kia) thì không mang thêm thông tin Kị
+          // nào mới - không ghép qua LĐKK để tránh cộng dư đúng cạnh đã tính rồi (xem giải thích đầy đủ ở
+          // chainEdgesOf/isFullySubsumedEdges phía trên).
+          if(isFullySubsumedEdges(chainEdgesOf(combo),chainEdgesOf(other)) || isFullySubsumedEdges(chainEdgesOf(other),chainEdgesOf(combo))) continue;
+          const reasonsA=landingReasonsOf(combo), reasonsB=landingReasonsOf(other);
           let pair=null;
-          for(const a of setA){ if(setB.has((a+6)%12)){ pair={a,b:(a+6)%12}; break; } }
+          for(const a of reasonsA.keys()){
+            const b=(a+6)%12;
+            if(reasonsB.has(b) && isGenuineLdkkPair(reasonsA,reasonsB,a,b)){ pair={a,b}; break; }
+          }
           if(!pair) continue;
           used.add(j);
           changed=true;
@@ -6752,15 +6996,15 @@ function computeKetCauStructuresRaw(mode){
   // (đã cùng 1 kết cấu, không phải 2 kết cấu độc lập gộp lại nên không "tổng" gì thêm).
   if(letter==='D'){
     structures.forEach(s=>{
-      const landingSet=fullLandingSetOf(s);
+      const reasons=landingReasonsOf(s);
       // Chuẩn hóa key KHÔNG phân biệt thứ tự a/b (cặp từ bước gộp Lưỡng đầu kiến Kị ở trên có thể lưu theo
       // thứ tự ngược - a là điểm của "combo", b là điểm của "other" - không nhất thiết a<b) - nếu không chuẩn
       // hóa sẽ bị coi nhầm là cặp MỚI, ghi trùng lặp 2 dòng cho đúng 1 cặp lưỡng đầu kiến Kị.
       const normKey=(x,y)=>Math.min(x,y)+':'+Math.max(x,y);
       const existing=new Set((s.luongDauPairs||[]).map(p=>normKey(p.a,p.b)));
-      for(const a of landingSet){
+      for(const a of reasons.keys()){
         const b=(a+6)%12;
-        if(a<b && landingSet.has(b) && !existing.has(normKey(a,b))){
+        if(a<b && reasons.has(b) && !existing.has(normKey(a,b)) && isGenuineLdkkPair(reasons,reasons,a,b)){
           (s.luongDauPairs=s.luongDauPairs||[]).push({a,b});
           existing.add(normKey(a,b));
           // Ghi rõ ngay trong kết cấu bằng gạch nối + ký hiệu LĐKK (không cộng thêm điểm - đã cùng 1 kết cấu
@@ -6792,15 +7036,25 @@ function computeKetCauStructuresRaw(mode){
 function luongDauKienKyCungSet(mode,includeManualArrows=true){
   const set=new Set();
   if(mode!=='hung') return set;
-  const landingSet=new Set();
-  (hcState[mode].chains||[]).forEach(ch=>ch.steps.forEach(s=>landingSet.add(s.to)));
+  const reasons=new Map();
+  const add=(idx,reason)=>{ if(!reasons.has(idx)) reasons.set(idx,[]); reasons.get(idx).push(reason); };
+  // Cung Thể tự thân LUÔN được coi là "tọa Kị" (Thể là chủ thể khởi Kỵ của cả kết cấu, không cần đợi có
+  // chuỗi nào "đáp" tới nó mới tính) - xem giải thích đầy đủ ở landingReasonsOf trong computeKetCauStructures.
+  (hcState[mode].the||new Set()).forEach(idx=>add(idx,{kind:'the'}));
+  // Bỏ qua bước "tự hóa Kị xuất/ly tâm" tại chỗ (s.from===s.to) - lực Kị loại này rất yếu, không tính là
+  // "tọa Kị" để ghép lưỡng đầu kiến Kị, trừ khi có 1 cung KHÁC thật sự chuyển Kị tới. Giữ lại {from,to} của
+  // từng bước (không chỉ mỗi "to") để isGenuineLdkkPair phân biệt được LĐKK thật với KXĐC (1 bước chuyển Kị
+  // BÌNH THƯỜNG chạy thẳng từ 1 cung sang ĐÚNG đối cung của nó, KHÔNG phải 2 nguồn Kị độc lập gặp nhau) - xem
+  // giải thích đầy đủ ở isGenuineLdkkPair/landingReasonsOf trong computeKetCauStructures, cùng quy tắc, áp
+  // dụng đồng bộ cho cả phần hiển thị gạch đỏ này lẫn phần tính điểm kết cấu.
+  (hcState[mode].chains||[]).forEach(ch=>ch.steps.forEach(s=>{ if(s.from!==s.to) add(s.to,{kind:'step',from:s.from,to:s.to}); }));
   // Kết cấu vẽ tay (mũi tên tự do bên tool phải, chỉ có ở lá số đơn - KHÔNG áp dụng cho lá số 2 bên dual vì
   // "shapes" là mảng chung của lá số đơn, không tách theo side) cũng tính là 1 đường Kỵ đáp xuống, để lưỡng
   // đầu kiến Kỵ tự nhận ra được cả khi người dùng tự vẽ kết cấu thay vì dùng Thể/Dụng tự động.
-  if(includeManualArrows) shapes.forEach(sh=>{ if(sh.type==='arrow' && sh.underlineTarget) landingSet.add(sh.underlineTarget.idx); });
-  for(const a of landingSet){
+  if(includeManualArrows) shapes.forEach(sh=>{ if(sh.type==='arrow' && sh.underlineTarget) add(sh.underlineTarget.idx,{kind:'manual'}); });
+  for(const a of reasons.keys()){
     const b=(a+6)%12;
-    if(a<b && landingSet.has(b)){ set.add(a); set.add(b); }
+    if(a<b && reasons.has(b) && isGenuineLdkkPair(reasons,reasons,a,b)){ set.add(a); set.add(b); }
   }
   return set;
 }
@@ -7432,15 +7686,13 @@ function dualDrawTuHoaArrows(side,ctx,c){
     }
   });
 }
-// Đuôi (p1) luôn cố định tại tâm cung nguồn; đầu (p2) dùng override đã kéo chỉnh nếu có (port của
-// arrowEndpointsFor, tách riêng theo side).
-function dualArrowEndpointsFor(side,from,to,star,letter,modeKey){
+// Tọa độ MẶC ĐỊNH (chưa áp override) - port của arrowDefaultEndpointsFor, tách riêng theo side.
+function dualArrowDefaultEndpointsFor(side,from,to,star){
   const r1=dualCellRect(side,from);
-  const defP1=r1?{x:r1.cx,y:r1.cy}:null;
-  const defP2=dualStarAnchor(side,to,star);
-  if(!defP1||!defP2) return null;
-  const ov=dualInst[side].arrowOverrides[arrowKey(modeKey,from,to,letter)];
-  return {p1:defP1, p2:(ov&&ov.p2)||defP2};
+  const p1=r1?{x:r1.cx,y:r1.cy}:null;
+  const p2=dualStarAnchor(side,to,star);
+  if(!p1||!p2) return null;
+  return {p1,p2};
 }
 // Chuỗi phi hóa "đang hiển thị" của ĐÚNG nhánh hcMode hiện tại bên side này - toàn bộ Thể/Dụng đã chọn bình
 // thường, HOẶC chỉ riêng cung thuộc kết cấu đang cô lập nếu có (bấm đúp 1 tab kết cấu) - y hệt
@@ -7470,22 +7722,33 @@ function dualRedrawCanvas(side,preview){
   const entries=[];
   chains.forEach(ch=>{
     const isSel=selSide && selSide.mode===inst.hcMode && selSide.idx===ch.from;
-    ch.steps.forEach(s=>{
+    ch.steps.forEach((s,stepIndex)=>{
       if(s.from===s.to) return;
-      const pts=dualArrowEndpointsFor(side,s.from,s.to,s.star,s.letter,inst.hcMode);
+      // pts dùng tọa độ MẶC ĐỊNH để mọi bước gộp nhóm/giãn cách ổn định - override chỉ áp SAU CÙNG, xem
+      // giải thích đầy đủ ở drawPhiHoaChain (lá số đơn).
+      const pts=dualArrowDefaultEndpointsFor(side,s.from,s.to,s.star);
       if(!pts) return;
-      entries.push({s,pts,isSel,isReverse:false});
+      const override=inst.arrowOverrides[arrowKey(inst.hcMode,s.from,s.to,s.letter)];
+      entries.push({s,pts,isSel,isReverse:false,chain:ch,stepIndex,override});
     });
   });
   // Gộp mũi tên "truy ngược" vào chung 1 lượt gom nhóm/giãn cách với mũi tên phi hóa thường - xem giải
   // thích tương tự ở drawPhiHoaChain bên lá số đơn (trước đây vẽ riêng nên không được giãn cách khi trùng cặp cung).
   dualReverseFlightArrows[side].forEach(a=>{
     if(a.from===a.to) return;
-    const pts=dualArrowEndpointsFor(side,a.from,a.to,a.star,a.letter,'reverse'); if(!pts) return;
-    entries.push({s:a,pts,isSel:false,isReverse:true});
+    const pts=dualArrowDefaultEndpointsFor(side,a.from,a.to,a.star); if(!pts) return;
+    const override=inst.arrowOverrides[arrowKey('reverse',a.from,a.to,a.letter)];
+    entries.push({s:a,pts,isSel:false,isReverse:true,override});
   });
+  spreadDivergingOrigins(entries);
   spreadParallelArrows(entries);
   spreadConvergingEndpoints(entries);
+  nudgeCloseArrowsApart(entries);
+  // Áp override đã kéo tay SAU CÙNG - xem giải thích đầy đủ ở drawPhiHoaChain (lá số đơn).
+  entries.forEach(e=>{ if(e.override) e.pts={p1:e.pts.p1, p2:e.override.p2}; });
+  // Lưu lại ĐÚNG tọa độ đã xòe/né để dualHitTestPhiArrow/dualHitTestArrowHandle dò trúng đúng theo tọa độ
+  // THẬT đang hiển thị - xem giải thích đầy đủ tại lastPhiHoaEntries (lá số đơn).
+  inst.lastEntries=entries;
   entries.forEach(({s,pts,isSel,isReverse})=>{
     const {p1,p2}=pts;
     if(isSel){
@@ -7497,27 +7760,23 @@ function dualRedrawCanvas(side,preview){
     // giờ đã gán đúng cho s.color, y hệt lá số đơn (drawPhiHoaChain dùng thẳng s.color, không tự đoán lại).
     const color = s.color || cs.getPropertyValue('--green').trim();
     drawSkitchArrow(ctx,p1,p2,color);
-    const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
-    const ux=dx/len, uy=dy/len;
-    const backDist=Math.min(18,len*0.85);
-    drawArrowLetterBadge(ctx,s.letter,p2.x-ux*backDist,p2.y-uy*backDist,color);
   });
   [...inst.shapes, ...(preview?[preview]:[])].forEach(sh=>drawShape(ctx,sh));
 }
-// Kéo đầu mũi tên phi hóa (đuôi cố định) - port của hitTestArrowHandle, scoped theo side.
+// Kéo đầu mũi tên phi hóa (đuôi cố định) - port của hitTestArrowHandle, scoped theo side. Dò theo ĐÚNG tọa độ
+// đã xòe/né (inst.lastEntries, ghi lại từ lần vẽ gần nhất) thay vì tự tính lại arrowEndpointsFor thô - xem
+// giải thích đầy đủ tại lastPhiHoaEntries (lá số đơn).
 function dualHitTestArrowHandle(side,x,y){
   const threshold=10;
   const inst=dualInst[side];
-  for(const ch of (inst.chains[inst.hcMode]||[])){
-    for(const s of ch.steps){
-      if(s.from===s.to) continue;
-      const pts=dualArrowEndpointsFor(side,s.from,s.to,s.star,s.letter,inst.hcMode); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold){
-        return {from:s.from,to:s.to,letter:s.letter,modeKey:inst.hcMode};
-      }
-    }
+  // Lấy đoạn GẦN NHẤT trong ngưỡng, không phải đoạn đầu tiên gặp - xem giải thích đầy đủ ở hitTestArrowHandle
+  // (lá số đơn) - cùng lỗi bắt nhầm đoạn kề bên khi 2 bước liên tiếp gần như thẳng hàng.
+  let best=null, bestDist=Infinity;
+  for(const e of (inst.lastEntries||[])){
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  return null;
+  return best ? {from:best.s.from,to:best.s.to,letter:best.s.letter,modeKey:best.isReverse?'reverse':inst.hcMode} : null;
 }
 let dualDraggingArrowHandle={A:null,B:null,C:null,D:null};
 // -- Undo/redo riêng từng bên (port của cloneHcState/pushHcAction/undoDraw/redoDraw) --
@@ -7753,30 +8012,32 @@ function dualPickReverseLetter(side,idx,starName,letter){
   dualRenderGrid(side);
   dualRedrawCanvas(side);
 }
+// Dò theo ĐÚNG tọa độ đã xòe/né (inst.lastEntries) - xem giải thích đầy đủ tại lastPhiHoaEntries (lá số đơn).
 function dualHitTestPhiArrow(side,x,y){
   const threshold=8;
   const inst=dualInst[side];
-  for(const ch of (inst.chains[inst.hcMode]||[])){
-    for(const s of ch.steps){
-      if(s.from===s.to) continue;
-      const pts=dualArrowEndpointsFor(side,s.from,s.to,s.star,s.letter,inst.hcMode); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold) return ch.from;
-    }
+  // Lấy đoạn GẦN NHẤT trong ngưỡng, không phải đoạn đầu tiên gặp - xem giải thích đầy đủ ở hitTestArrowHandle
+  // (lá số đơn).
+  let best=null, bestDist=Infinity;
+  for(const e of (inst.lastEntries||[])){
+    if(e.isReverse || !e.chain) continue;
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  return null;
+  return best ? best.chain.from : null;
 }
 function dualHitTestPhiArrowStep(side,x,y){
   const threshold=8;
   const inst=dualInst[side];
-  for(const ch of (inst.chains[inst.hcMode]||[])){
-    for(let i=0;i<ch.steps.length;i++){
-      const s=ch.steps[i];
-      if(s.from===s.to) continue;
-      const pts=dualArrowEndpointsFor(side,s.from,s.to,s.star,s.letter,inst.hcMode); if(!pts) continue;
-      if(distToSegment(x,y,pts.p1.x,pts.p1.y,pts.p2.x,pts.p2.y)<=threshold) return {step:s, chain:ch, stepIndex:i};
-    }
+  // Lấy đoạn GẦN NHẤT trong ngưỡng, không phải đoạn đầu tiên gặp - xem giải thích đầy đủ ở hitTestArrowHandle
+  // (lá số đơn).
+  let best=null, bestDist=Infinity;
+  for(const e of (inst.lastEntries||[])){
+    if(e.isReverse || !e.chain) continue;
+    const d=distToSegment(x,y,e.pts.p1.x,e.pts.p1.y,e.pts.p2.x,e.pts.p2.y);
+    if(d<=threshold && d<bestDist){ bestDist=d; best=e; }
   }
-  return null;
+  return best ? {step:best.s, chain:best.chain, stepIndex:best.stepIndex} : null;
 }
 // Port của showPhiHoaMeaningForStep - dùng chung bảng tra "TƯỢNG PHI HÓA" (1 bảng chung cho 2 bên CÙNG 1
 // tab). side A/B thuộc tab "2 Lá Số" (panelId '') , side C/D thuộc tab "PLUS" (panelId '2').
@@ -7814,23 +8075,27 @@ function wireDualCanvasDrag(side){
   if(!cv||!wrap||cv.dataset.dragWired) return;
   cv.dataset.dragWired='1';
   let justDraggedArrow=false;
+  let dragStartPt=null;
   wrap.addEventListener('mousedown',e=>{
     const r=cv.getBoundingClientRect();
     const x=e.clientX-r.left, y=e.clientY-r.top;
     const handle=dualHitTestArrowHandle(side,x,y);
-    if(handle){ dualDraggingArrowHandle[side]={...handle, before:dualCloneHcState(side)}; e.preventDefault(); }
+    if(handle){ dualDraggingArrowHandle[side]={...handle, before:dualCloneHcState(side)}; dragStartPt={x,y}; e.preventDefault(); }
   });
   window.addEventListener('mousemove',e=>{
     const handle=dualDraggingArrowHandle[side]; if(!handle) return;
     const r=cv.getBoundingClientRect();
     const x=e.clientX-r.left, y=e.clientY-r.top;
+    // Bỏ qua cử động cực nhỏ ngay sau mousedown (bấm chọn, không thực sự kéo) - xem giải thích đầy đủ ở
+    // bản lá số đơn (initCanvasEvents).
+    if(dragStartPt && Math.hypot(x-dragStartPt.x,y-dragStartPt.y)<4) return;
     const key=arrowKey(handle.modeKey,handle.from,handle.to,handle.letter);
     dualInst[side].arrowOverrides[key]={p2:{x,y}};
     dualRedrawCanvas(side);
   });
   window.addEventListener('mouseup',()=>{
     const handle=dualDraggingArrowHandle[side];
-    if(handle){ dualPushHcAction(side,handle.before); dualDraggingArrowHandle[side]=null; justDraggedArrow=true; }
+    if(handle){ dualPushHcAction(side,handle.before); dualDraggingArrowHandle[side]=null; dragStartPt=null; justDraggedArrow=true; }
   });
   const selectArrowAt=(x,y)=>{
     const hit=dualHitTestPhiArrow(side,x,y);
