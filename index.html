@@ -5172,9 +5172,9 @@ function drawSkitchArrow(ctx,p1,p2,color,widthScale){
   const scale=widthScale||1;
   const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
   const ux=dx/len, uy=dy/len, px=-uy, py=ux;
-  const headLen=Math.min(16,len*0.65); // chiều dài đầu mũi tên (tam giác nhọn) - co lại khi mũi tên rất ngắn để không bị lật hình
+  const headLen=Math.min(19,len*0.65); // chiều dài đầu mũi tên (tam giác nhọn) - co lại khi mũi tên rất ngắn để không bị lật hình
   const shaftHalfWidth=2.9*scale; // độ dày tối đa của thân (~1.2mm ở scale mặc định), ngay tại gốc đầu mũi tên
-  const headHalfWidth=6.6*scale;
+  const headHalfWidth=9.5*scale;
   const baseX=p2.x-ux*headLen, baseY=p2.y-uy*headLen;
   ctx.fillStyle=color;
   // Thân: hình thang thon dần từ đuôi (độ dày 0) tới gốc đầu mũi tên (độ dày tối đa)
@@ -5190,11 +5190,43 @@ function drawSkitchArrow(ctx,p1,p2,color,widthScale){
   ctx.lineTo(baseX-px*headHalfWidth, baseY-py*headHalfWidth);
   ctx.closePath(); ctx.fill();
 }
-function drawPhiHoaArrow(ctx,fromIdx,toIdx,star,letter,color,p1In,p2In){
+// Màu chữ trong khoanh tròn nhãn chữ trên thân mũi tên (nền LUÔN đen, xem drawArrowLetterBadge): D dùng
+// trắng (chữ đen sẽ chìm mất trên nền đen, vì hoaArrowColor('D') mặc định là đen/vàng tùy theme) - A/B/C vẫn
+// giữ đúng màu riêng vốn đủ tương phản trên nền đen (A xanh lá, B đỏ, C xanh dương).
+function arrowLetterBadgeColor(letter){
+  // D và A đều dùng trắng cho rõ nét trên nền đen (hoaArrowColor('A') xanh lá bị mờ/khó đọc ở cỡ chữ nhỏ) -
+  // B/C vẫn giữ đúng màu riêng (đỏ/xanh dương), vốn đã đủ tương phản.
+  return (letter==='D'||letter==='A') ? '#fff' : hoaArrowColor(letter);
+}
+// Nhãn chữ trên thân mũi tên phi hóa: khoanh tròn nền đen, cách đầu mũi tên ~1.3cm - đại diện cho loại
+// hóa (Lộc/Quyền/Khoa/Kị) của mũi tên, kể cả các bước chuyển Kị nối tiếp.
+// isChuyenKy: bước chuyển Kị (nối tiếp, không phải bước hóa GỐC của chính Thể/Dụng) - nền đổi sang tím
+// (#6d28d9, giống màu badge "T" đánh dấu Thân) để phân biệt rõ với bước hóa ban đầu (nền đen).
+// scale: dùng để thu nhỏ đồng bộ cho lá số mini bên tab "2 Lá Số"/"PLUS" (xem dualArrowScale) - mặc định 1
+// (đúng kích cỡ gốc) cho lá số đơn.
+function drawArrowLetterBadge(ctx,text,x,y,isChuyenKy,scale){
+  const sc=scale||1;
+  const r=7.5*sc; // ~4mm đường kính (ở scale=1)
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=isChuyenKy ? '#6d28d9' : '#000';
+  ctx.fill();
+  ctx.font='bold '+(7*sc)+'px Segoe UI';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=isChuyenKy ? '#fff' : arrowLetterBadgeColor(text);
+  ctx.fillText(text,x,y+0.5*sc);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+function drawPhiHoaArrow(ctx,fromIdx,toIdx,star,letter,color,p1In,p2In,isChuyenKy,scale){
+  const sc=scale||1;
   const r1=cellRect(fromIdx);
   const p1=p1In || (r1?{x:r1.cx,y:r1.cy}:null); if(!p1) return null;
   const p2=p2In || starAnchor(toIdx,star); if(!p2) return null;
-  drawSkitchArrow(ctx,p1,p2,color);
+  drawSkitchArrow(ctx,p1,p2,color,sc);
+  const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
+  const ux=dx/len, uy=dy/len;
+  const backDist=Math.min(49*sc,len*0.85); // ~1.3cm cách đầu mũi tên (ở scale=1), nằm ngay trên thân
+  const backX=p2.x-ux*backDist, backY=p2.y-uy*backDist;
+  drawArrowLetterBadge(ctx,letter,backX,backY,isChuyenKy,sc);
   return {p1,p2};
 }
 // Điểm đến gần nhất trên đoạn thẳng (x1,y1)-(x2,y2), dùng để dò trúng mũi tên khi bấm chuột.
@@ -5560,7 +5592,7 @@ function drawPhiHoaChain(ctx){
   // ở trên, nên khi đường bị dịch đi (đặc biệt các mũi tên nằm ngang, dễ bị né/xòe theo trục dọc) thì bấm/kéo
   // đúng ngay trên đường vẽ ra lại không trúng.
   lastPhiHoaEntries=entries;
-  entries.forEach(({s,pts,isSel})=>{
+  entries.forEach(({s,pts,isSel,stepIndex})=>{
     if(isSel){
       // Giảm mỏng + nhạt (từ 16px/.55 xuống 7px/.4) - trước đây viền cam đè lấn hẳn màu mũi tên phi hóa thật
       // bên trong (vd đỏ phi Quyền), nhìn như mũi tên bị mờ/ám cam thay vì chỉ là dấu hiệu "đang chọn".
@@ -5568,7 +5600,8 @@ function drawPhiHoaChain(ctx){
       ctx.beginPath(); ctx.moveTo(pts.p1.x,pts.p1.y);
       ctx.lineTo(pts.p2.x,pts.p2.y); ctx.stroke(); ctx.restore();
     }
-    drawPhiHoaArrow(ctx,s.from,s.to,s.star,s.letter,s.color,pts.p1,pts.p2);
+    // stepIndex>0 = bước chuyển Kị nối tiếp (không phải bước hóa gốc của Thể/Dụng) - đổi màu nhãn sang tím.
+    drawPhiHoaArrow(ctx,s.from,s.to,s.star,s.letter,s.color,pts.p1,pts.p2,stepIndex>0);
   });
 }
 function drawLine(ctx,p1,p2,color){
@@ -7561,6 +7594,18 @@ function dualCellRect(side,idx){
   const left=cr.left-wr.left, top=cr.top-wr.top;
   return {left,top,right:left+cr.width,bottom:top+cr.height,cx:left+cr.width/2,cy:top+cr.height/2};
 }
+// Tỉ lệ thu nhỏ mũi tên phi hóa (thân/đầu mũi tên/nhãn chữ) bên tab "2 Lá Số"/"PLUS" - lá số mini ở đây LUÔN
+// nhỏ hơn hẳn lá số đơn (2+ khung xếp cạnh nhau trong cùng khung nhìn), nếu vẫn vẽ mũi tên/nhãn chữ đúng
+// kích cỡ tuyệt đối như lá số đơn sẽ trông quá to so với khung, ngộp hẳn 1 cung nhỏ. Đo theo ĐÚNG bề rộng 1
+// cung đang hiển thị (dualCellRect) so với 1 hằng số tham chiếu (bề rộng 1 cung điển hình bên lá số đơn ở màn
+// hình desktop thông thường) - tự thích ứng khi người dùng phóng to/thu nhỏ trình duyệt, không hard-code
+// cứng 1 số duy nhất (2 khung đều co giãn theo %, không phải kích thước cố định).
+const DUAL_ARROW_REF_CELL_W=187;
+function dualArrowScale(side){
+  const r=dualCellRect(side,0); if(!r) return 0.8;
+  const w=r.right-r.left; if(!w) return 0.8;
+  return Math.max(0.4, Math.min(1, w/DUAL_ARROW_REF_CELL_W));
+}
 function dualStarAnchor(side,idx,starName){
   const cvEl=document.getElementById('dualCanvas_'+side);
   const cell=document.querySelector(`#dualBanWrap_${side} .cung[data-idx="${idx}"]`);
@@ -7749,17 +7794,24 @@ function dualRedrawCanvas(side,preview){
   // Lưu lại ĐÚNG tọa độ đã xòe/né để dualHitTestPhiArrow/dualHitTestArrowHandle dò trúng đúng theo tọa độ
   // THẬT đang hiển thị - xem giải thích đầy đủ tại lastPhiHoaEntries (lá số đơn).
   inst.lastEntries=entries;
-  entries.forEach(({s,pts,isSel,isReverse})=>{
+  // Thu nhỏ đồng bộ thân/đầu mũi tên + nhãn chữ theo đúng tỉ lệ lá số mini bên này (xem dualArrowScale) -
+  // lá số càng nhỏ (nhiều khung xếp cạnh nhau) thì mũi tên càng thu nhỏ tương ứng, không bị "ngộp" khung.
+  const arrScale=dualArrowScale(side);
+  entries.forEach(({s,pts,isSel,isReverse,stepIndex})=>{
     const {p1,p2}=pts;
     if(isSel){
-      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7; ctx.lineCap='round';
+      ctx.save(); ctx.strokeStyle='rgba(255,152,0,.4)'; ctx.lineWidth=7*arrScale; ctx.lineCap='round';
       ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke(); ctx.restore();
     }
     // Trước đây bỏ qua hẳn s.color (chỉ set cho isReverse) - mọi mũi tên phi Thể/Dụng thường (letter B/C/D)
     // đều bị vẽ chung 1 màu đen/vàng, mất bảng màu riêng theo cung (phiKyColorForCung) mà dualComputeSingleChain
     // giờ đã gán đúng cho s.color, y hệt lá số đơn (drawPhiHoaChain dùng thẳng s.color, không tự đoán lại).
     const color = s.color || cs.getPropertyValue('--green').trim();
-    drawSkitchArrow(ctx,p1,p2,color);
+    drawSkitchArrow(ctx,p1,p2,color,arrScale);
+    const dx=p2.x-p1.x, dy=p2.y-p1.y, len=Math.hypot(dx,dy)||1;
+    const ux=dx/len, uy=dy/len;
+    const backDist=Math.min(49*arrScale,len*0.85); // ~1.3cm cách đầu mũi tên (ở scale=1)
+    drawArrowLetterBadge(ctx,s.letter,p2.x-ux*backDist,p2.y-uy*backDist,stepIndex>0,arrScale);
   });
   [...inst.shapes, ...(preview?[preview]:[])].forEach(sh=>drawShape(ctx,sh));
 }
