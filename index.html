@@ -6071,7 +6071,19 @@ let _ketCauCache={hung:{sig:null,result:null}, cat:{sig:null,result:null}};
 function isGenuineLdkkPair(reasonsA,reasonsB,a,b){
   const remainA=(reasonsA.get(a)||[]).filter(r=>!(r.kind==='step'&&r.from===b));
   const remainB=(reasonsB.get(b)||[]).filter(r=>!(r.kind==='step'&&r.from===a));
-  return remainA.length>0 && remainB.length>0;
+  if(!remainA.length || !remainB.length) return false;
+  // CẢ HAI đầu chỉ toàn lý do "the" (Thể tự thân tọa Kị, xem landingReasonsOf) - KHÔNG được coi là LĐKK thật.
+  // "the" là lý do CỐ ĐỊNH, luôn đúng bất kể Can/chuỗi phi Kị nào (Thể là Thể thì luôn tọa Kị) - 2 cung Thể
+  // tình cờ CHỌN đúng 1 cặp đối cung nhau (vd Mệnh + Thân LUÔN đối nhau theo đúng vị trí, không phải ngẫu
+  // nhiên) sẽ trơ trẽn thỏa remainA/remainB>0 ở ĐÂY dù chẳng có dòng Kị nào thật sự BAY tới/hội tụ tại đó cả -
+  // trước đây thiếu điều kiện này khiến CHỈ CẦN chọn 2 Thể đối nhau (vd Mệnh+Thiên Di, rất phổ biến) là tự
+  // động ghép kết cấu + cộng dư Kị, dù 2 chuỗi phi Kị của chúng bay đi 2 hướng hoàn toàn khác nhau, không hề
+  // "gặp" nhau. Phải có ÍT NHẤT 1 đầu mang lý do ĐỘNG thật sự (kind !=='the': 1 chuỗi phi Kị KHÁC thật sự
+  // đáp/bay tới đúng điểm này) thì mới là "2 nguồn Kị độc lập gặp nhau" đúng nghĩa - giữ nguyên đúng tinh thần
+  // ví dụ gốc phía trên (Điền là Thể "the"-only, Mệnh CÓ chuỗi thật đáp tới Tử Nữ đối diện Điền: 1 bên the, 1
+  // bên động, vẫn genuine).
+  const hasDynamic=arr=>arr.some(r=>r.kind!=='the');
+  return hasDynamic(remainA) || hasDynamic(remainB);
 }
 function computeKetCauStructures(mode){
   const st=hcState[mode];
