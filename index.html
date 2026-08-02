@@ -2107,12 +2107,26 @@ let crossGroupsCache=[];
 let tuHoaCrossVisible=true; // ẩn/hiện các đường tự hóa hướng tâm (cross, nối 2 cung đối nhau)
 // Thể/Dụng tích lũy (không loại trừ nhau) - lưu riêng cho mỗi tab Hung/Cát để đổi qua lại vẫn còn nguyên,
 // tiện so sánh 2 biểu đồ. the/dung đều là tập hợp nhiều cung (chọn thêm không cần xóa cung cũ),
-// nhưng 1 cung không thể vừa là Thể vừa là Dụng cùng lúc. quick = Map(idx->letter) cho các lần bấm nhanh
-// A/B/C/D khi hover 1 cung (độc lập với Thể/Dụng). chains = kết quả tính phi hóa.
+// nhưng 1 cung không thể vừa là Thể vừa là Dụng cùng lúc. quick = Map(idx->Set(letter)) cho các lần bấm
+// nhanh A/B/C/D khi hover 1 cung (độc lập với Thể/Dụng) - 1 cung có thể bấm nhanh ĐỒNG THỜI nhiều chữ ABCD
+// cùng lúc (Set, không phải 1 chữ duy nhất) - bấm thêm 1 chữ khác không còn làm mất mũi tên của chữ đã bấm
+// trước đó. chains = kết quả tính phi hóa.
 let hcState={
   hung:{the:new Set(), dung:new Set(), quick:new Map(), chains:[]},
   cat:{the:new Set(), dung:new Set(), quick:new Map(), chains:[]}
 };
+// Giúp thao tác trên "quick" (Map(idx->Set(letter))) gọn & nhất quán ở mọi nơi gọi tới - xem giải thích đầy
+// đủ ở khai báo hcState phía trên.
+function quickHas(st,idx,letter){ const s=st.quick.get(idx); return !!s && s.has(letter); }
+function quickToggle(st,idx,letter){
+  const s=st.quick.get(idx);
+  if(s && s.has(letter)){ s.delete(letter); if(s.size===0) st.quick.delete(idx); }
+  else{ if(s) s.add(letter); else st.quick.set(idx,new Set([letter])); }
+}
+// Deep-clone quick Map - PHẢI tạo Set MỚI cho từng idx (không chỉ new Map(map) nông), nếu không bản clone
+// (dùng cho undo/redo - xem cloneHcState/dualCloneHcState) sẽ CHIA SẺ CHUNG đúng object Set với bản gốc, khiến
+// sửa "before" (snapshot cũ) vô tình sửa luôn cả state hiện tại đang dùng, làm hỏng undo.
+function cloneQuickMap(map){ return new Map([...map].map(([k,v])=>[k,new Set(v)])); }
 // Sao (không phải cả cung) đang được "phát sáng" vì vừa bấm nút N.Lộc/N.Kỵ - chỉ là chỉ báo hiển thị tạm
 // thời (không cần lưu undo/redo), tự xóa khi bấm lại để bỏ chọn.
 let nienGlowTarget={hung:null, cat:null};
@@ -2143,8 +2157,8 @@ let draggingArrowHandle=null; // {from,to,letter} - đang kéo chỉnh đầu m�
 let actionLog=[]; let actionRedoLog=[];
 function cloneHcState(){
   return {
-    hung:{the:new Set(hcState.hung.the), dung:new Set(hcState.hung.dung), quick:new Map(hcState.hung.quick), chains:hcState.hung.chains},
-    cat:{the:new Set(hcState.cat.the), dung:new Set(hcState.cat.dung), quick:new Map(hcState.cat.quick), chains:hcState.cat.chains}
+    hung:{the:new Set(hcState.hung.the), dung:new Set(hcState.hung.dung), quick:cloneQuickMap(hcState.hung.quick), chains:hcState.hung.chains},
+    cat:{the:new Set(hcState.cat.the), dung:new Set(hcState.cat.dung), quick:cloneQuickMap(hcState.cat.quick), chains:hcState.cat.chains}
   };
 }
 // Giới hạn độ dài actionLog (undo) - mỗi lần bấm Thể/Dụng/quick-fly/vẽ tay/xóa nét đều push thêm 1 mục (nhiều
@@ -3207,8 +3221,8 @@ function snapshotViewState(){
     shapes:JSON.parse(JSON.stringify(shapes)),
     arrowOverrides:JSON.parse(JSON.stringify(arrowOverrides)),
     hcState:{
-      hung:{the:[...hcState.hung.the], dung:[...hcState.hung.dung], quick:[...hcState.hung.quick.entries()]},
-      cat:{the:[...hcState.cat.the], dung:[...hcState.cat.dung], quick:[...hcState.cat.quick.entries()]}
+      hung:{the:[...hcState.hung.the], dung:[...hcState.hung.dung], quick:[...hcState.hung.quick.entries()].map(([k,v])=>[k,[...v]])},
+      cat:{the:[...hcState.cat.the], dung:[...hcState.cat.dung], quick:[...hcState.cat.quick.entries()].map(([k,v])=>[k,[...v]])}
     }
   };
 }
@@ -3228,8 +3242,8 @@ function restoreViewState(snap){
   shapes=snap.shapes ? JSON.parse(JSON.stringify(snap.shapes)) : [];
   arrowOverrides=snap.arrowOverrides ? JSON.parse(JSON.stringify(snap.arrowOverrides)) : {};
   hcState=snap.hcState ? {
-    hung:{the:new Set(snap.hcState.hung.the), dung:new Set(snap.hcState.hung.dung), quick:new Map(snap.hcState.hung.quick), chains:[]},
-    cat:{the:new Set(snap.hcState.cat.the), dung:new Set(snap.hcState.cat.dung), quick:new Map(snap.hcState.cat.quick), chains:[]}
+    hung:{the:new Set(snap.hcState.hung.the), dung:new Set(snap.hcState.hung.dung), quick:new Map(snap.hcState.hung.quick.map(([k,v])=>[k,new Set(v)])), chains:[]},
+    cat:{the:new Set(snap.hcState.cat.the), dung:new Set(snap.hcState.cat.dung), quick:new Map(snap.hcState.cat.quick.map(([k,v])=>[k,new Set(v)])), chains:[]}
   } : {hung:{the:new Set(),dung:new Set(),quick:new Map(),chains:[]}, cat:{the:new Set(),dung:new Set(),quick:new Map(),chains:[]}};
   recomputePhiHoaChains();
 }
@@ -3374,14 +3388,16 @@ function renderGridRaw(c){
       if(iT) bgs+='<span class="b-than">T</span>';
       const chinhs=stars.filter(s=>s.loai==='chinh');
       const phus=stars.filter(s=>s.loai==='phu');
-      const isTraced=(s)=>reverseFlightStar && reverseFlightStar.idx===idx && reverseFlightStar.star===s.ten;
+      const isTraced=(s)=>reverseFlightSelections.some(sel=>sel.idx===idx && sel.star===s.ten);
       const isPicking=(s)=>starPickerFor && starPickerFor.idx===idx && starPickerFor.star===s.ten;
       const nienGlow=nienGlowTarget[hcMode];
       const isNienGlow=(s)=>nienGlow && nienGlow.idx===idx && nienGlow.star===s.ten;
       const starSpan=(s,cls)=>{
         const nameEsc=s.ten.replace(/'/g,"\\'");
-        const picker=isPicking(s)?`<span class="star-picker">${['A','B','C','D'].map(L=>
-          `<span class="phb phb-${L}" onclick="event.stopPropagation();pickReverseLetter(${idx},'${nameEsc}','${L}')">${L}</span>`).join('')}</span>`:'';
+        const picker=isPicking(s)?`<span class="star-picker">${['A','B','C','D'].map(L=>{
+          const active=reverseFlightSelections.some(sel=>sel.idx===idx && sel.star===s.ten && sel.letter===L);
+          return `<span class="phb phb-${L}${active?' phb-active':''}" onclick="event.stopPropagation();pickReverseLetter(${idx},'${nameEsc}','${L}')">${L}</span>`;
+        }).join('')}</span>`:'';
         // Gạch dưới thủ công do vẽ mũi tên tay (tool phải) chạm tới sao này - giữ nguyên tới khi xóa mũi tên
         // đó (xem manualArrowUnderlineTargets), không phải trạng thái hover tạm thời.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
@@ -3395,7 +3411,7 @@ function renderGridRaw(c){
       const hcSt=hcState[hcMode];
       const phiCls = hcSt.the.has(idx) ? ' phi-source' : (hcSt.dung.has(idx) ? ' phi-dung' : '');
       const quickBadges=['A','B','C','D'].map(L=>
-        `<span class="phb phb-${L}${hcSt.quick.get(idx)===L?' phb-active':''}" onclick="event.stopPropagation();quickFlyLetter(${idx},'${L}')">${L}</span>`
+        `<span class="phb phb-${L}${quickHas(hcSt,idx,L)?' phb-active':''}" onclick="event.stopPropagation();quickFlyLetter(${idx},'${L}')">${L}</span>`
       ).join('');
       const lapCls = (lapCucPicking ? ' lapcuc-pickable' : (idx===lapCucAnchor ? ' lapcuc-anchor' : '')) + (lapChuc!==null ? ' has-lapcuc' : '');
       h+=`<div class="cung${phiCls}${lapCls}" data-idx="${idx}" onclick="onCungClick(${idx})"
@@ -3517,10 +3533,11 @@ function flyFromCan(canTen){
   const st=hcState[hcMode];
   if(canPanelLetter==='B'||canPanelLetter==='C'){
     const before=cloneHcState();
-    const anySelected=idxs.some(idx=>st.quick.get(idx)===canPanelLetter);
+    const anySelected=idxs.some(idx=>quickHas(st,idx,canPanelLetter));
     idxs.forEach(idx=>{
       if(st.the.has(idx)||st.dung.has(idx)) return; // đã ở Thể/Dụng thì để nguyên, tránh trùng
-      if(anySelected) st.quick.delete(idx); else st.quick.set(idx,canPanelLetter);
+      if(anySelected){ const s=st.quick.get(idx); if(s){ s.delete(canPanelLetter); if(!s.size) st.quick.delete(idx); } }
+      else{ const s=st.quick.get(idx); if(s) s.add(canPanelLetter); else st.quick.set(idx,new Set([canPanelLetter])); }
     });
     recomputePhiHoaChains();
     pushHcAction(before);
@@ -3565,8 +3582,14 @@ function flyNienHoa(letter){
   // computeKetCauStructuresRaw), chỉ là KHÔNG được vẽ thêm mũi tên trùng (đã tự lược ở recomputePhiHoaChains) -
   // nên vẫn cho phép bấm chọn/bỏ chọn bình thường, chỉ khác ở chỗ không thêm mũi tên mới.
   const before=cloneHcState();
-  if(st.quick.get(idx)==='D'){ st.quick.delete(idx); nienGlowTarget[hcMode]=null; } // bấm lại để bỏ chọn
-  else { st.quick.set(idx,'D'); nienGlowTarget[hcMode]={idx,star}; }
+  if(quickHas(st,idx,'D')){ // bấm lại để bỏ chọn - chỉ tắt riêng chữ D, giữ nguyên các chữ ABC khác nếu có
+    const s=st.quick.get(idx); s.delete('D'); if(!s.size) st.quick.delete(idx);
+    nienGlowTarget[hcMode]=null;
+  }
+  else {
+    const s=st.quick.get(idx); if(s) s.add('D'); else st.quick.set(idx,new Set(['D']));
+    nienGlowTarget[hcMode]={idx,star};
+  }
   recomputePhiHoaChains();
   pushHcAction(before);
   renderGrid(c);
@@ -3592,7 +3615,7 @@ function renderCanGrid(){
       const cc=(c.data.tenCung[String(i)]||'').trim().split(' ')[0];
       if(cc===canTen) idxs.push(i);
     }
-    const active = idxs.some(idx=> isBC ? st.quick.get(idx)===canPanelLetter : (st.the.has(idx) || st.dung.has(idx)));
+    const active = idxs.some(idx=> isBC ? quickHas(st,idx,canPanelLetter) : (st.the.has(idx) || st.dung.has(idx)));
     return `<button class="can-btn${active?' active':''}" title="${canTen}" onclick="flyFromCan('${canTen}')">${canTen}</button>`;
   });
   while(cells.length<12) cells.push(`<span class="can-btn empty"></span>`);
@@ -3653,8 +3676,11 @@ function resetHcState(mode){
     Object.keys(arrowOverrides).forEach(k=>{ if(k.startsWith(m+':')) delete arrowOverrides[k]; });
     if(selectedPhiArrow && selectedPhiArrow.mode===m) selectedPhiArrow=null;
   });
+  // Truy ngược (reverseFlightSelections/Arrows) ĐỘC LẬP với Hung/Cát (không tách theo mode) - cùng lỗi như
+  // các mục phía trên: PHẢI xóa vô điều kiện (không chỉ trong nhánh if(!mode)) để nút "XÓA ALL" của TỪNG tab
+  // cũng xóa sạch được các mũi tên truy ngược đang hiển thị, không chỉ khi lập lá số mới.
+  reverseFlightSelections=[]; reverseFlightArrows=[]; starPickerFor=null;
   if(!mode){
-    reverseFlightStar=null; reverseFlightArrows=[]; starPickerFor=null;
     actionLog=[]; actionRedoLog=[];
   }
   const btnLKy=document.getElementById('btnLKy'), btnLLoc=document.getElementById('btnLLoc');
@@ -3771,8 +3797,12 @@ function flyFrom(idx,letter){
 }
 // -- Truy ngược: bấm 1 chính tinh/phụ tinh -> hiện 4 nút ABCD -> chọn 1 chữ mới truy ngược cung nào phi chữ đó vào sao --
 let starPickerFor=null; // {idx,star} - sao đang mở bảng chọn ABCD
-let reverseFlightStar=null; // {idx,star,letter} - lựa chọn truy ngược đang hiển thị
-let reverseFlightArrows=[]; // {from,to,letter,star,color}
+// Mỗi lần bấm 1 chữ ABCD trong bảng là BẬT/TẮT ĐỘC LẬP đúng lựa chọn đó (idx+star+letter) - KHÔNG thay thế
+// các lựa chọn đã bật trước đó (kể cả khác chữ của CÙNG 1 sao, hay khác sao/cung hẳn) - cho phép xem đồng
+// thời nhiều chiều truy ngược cùng lúc (vd vừa truy A vừa truy D cho cùng 1 sao). Trước đây chỉ giữ ĐÚNG 1
+// lựa chọn (reverseFlightStar) nên bấm sang chữ khác sẽ tự mất chữ vừa bật trước đó.
+let reverseFlightSelections=[]; // [{idx,star,letter}]
+let reverseFlightArrows=[]; // {from,to,letter,star,color} - gộp từ TẤT CẢ lựa chọn đang bật trong reverseFlightSelections
 function computeReverseFlights(targetIdx,starName,letterFilter){
   const c=chart(); if(!c) return [];
   const out=[];
@@ -3787,13 +3817,16 @@ function computeReverseFlights(targetIdx,starName,letterFilter){
   }
   return out;
 }
+function recomputeReverseFlightArrows(){
+  reverseFlightArrows = reverseFlightSelections.flatMap(sel=>computeReverseFlights(sel.idx,sel.star,sel.letter));
+}
 function onStarClick(idx,starName){
   starPickerFor = (starPickerFor && starPickerFor.idx===idx && starPickerFor.star===starName) ? null : {idx,star:starName};
   const c=chart(); if(c) renderGrid(c);
 }
-function cloneReverseState(){ return {star:reverseFlightStar, arrows:reverseFlightArrows.slice()}; }
+function cloneReverseState(){ return {selections:reverseFlightSelections.map(s=>({...s})), arrows:reverseFlightArrows.slice()}; }
 function applyReverseSnapshot(snap){
-  reverseFlightStar=snap.star;
+  reverseFlightSelections=snap.selections.map(s=>({...s}));
   reverseFlightArrows=snap.arrows.slice();
   const c=chart(); if(c) renderGrid(c);
 }
@@ -3802,12 +3835,10 @@ function applyReverseSnapshot(snap){
 // của riêng cung đó theo hcMode hiện tại, ra thêm 1 kết cấu Kị/Lộc không liên quan, sai với ý truy ngược).
 function pickReverseLetter(idx,starName,letter){
   const before=cloneReverseState();
-  if(reverseFlightStar && reverseFlightStar.idx===idx && reverseFlightStar.star===starName && reverseFlightStar.letter===letter){
-    reverseFlightStar=null; reverseFlightArrows=[];
-  }else{
-    reverseFlightStar={idx,star:starName,letter};
-    reverseFlightArrows=computeReverseFlights(idx,starName,letter);
-  }
+  const i=reverseFlightSelections.findIndex(s=>s.idx===idx && s.star===starName && s.letter===letter);
+  if(i>=0) reverseFlightSelections.splice(i,1); // bấm lại đúng chữ đã bật - chỉ tắt riêng chữ đó, giữ nguyên các chữ khác
+  else reverseFlightSelections.push({idx,star:starName,letter});
+  recomputeReverseFlightArrows();
   starPickerFor=null;
   pushAction({type:'reverse',before,after:cloneReverseState()});
   actionRedoLog=[];
@@ -4100,7 +4131,9 @@ function recomputePhiHoaChainsRaw(){
   // computeKetCauStructuresRaw), nên dù mũi tên trên lá số gộp lại vẽ 1 lần, đếm/lọc vẫn đúng là 2 kết cấu
   // riêng biệt như yêu cầu.
   chains=dedupSharedContinuations(chains, hcMode==='hung' ? realAnchorSet : null);
-  st.quick.forEach((letter,idx)=>{
+  // st.quick giờ là Map(idx->Set(letter)) - 1 cung có thể bấm nhanh ĐỒNG THỜI nhiều chữ ABCD, nên phải lặp
+  // qua TỪNG chữ trong Set của mỗi idx (mỗi chữ tính 1 chuỗi riêng độc lập, y hệt logic cũ cho 1 chữ).
+  st.quick.forEach((letters,idx)=>{ letters.forEach(letter=>{
    try{
     // Chỉ nới thêm 1 nhịp khi ĐÚNG là cung niên D vừa bấm nút "N.Kỵ"/"N.Lộc" (nienGlowTarget) - bấm nhanh
     // ABCD trên từng cung riêng lẻ (không phải nút niên) luôn chỉ đi đúng 1 đường, không tự ý chuyển Kị tiếp.
@@ -4140,7 +4173,7 @@ function recomputePhiHoaChainsRaw(){
     }
     if(ch) chains.push(ch);
    }catch(e){ console.error('quick-fly chain lỗi:', e); }
-  });
+  }); });
   st.chains=chains;
   renderHoaStructureBox();
 }
@@ -4873,8 +4906,7 @@ function quickFlyLetter(idx,letter){
   const c=chart(); if(!c) return;
   const st=hcState[hcMode];
   const before=cloneHcState();
-  if(st.quick.get(idx)===letter) st.quick.delete(idx); // bấm lại đúng chữ đó để bỏ chọn
-  else st.quick.set(idx,letter);
+  quickToggle(st,idx,letter); // bấm lại đúng chữ đó để bỏ CHỈ chữ đó, các chữ ABCD khác đã bật vẫn giữ nguyên
   recomputePhiHoaChains();
   pushHcAction(before);
   renderGrid(c);
@@ -6101,7 +6133,7 @@ function computeKetCauStructures(mode){
   const nien=nienGlowTarget[mode];
   const c=chart();
   const sig=(c?c.vM:'x')+'|'+[...st.the].sort((a,b)=>a-b).join(',')+'|'+[...st.dung].sort((a,b)=>a-b).join(',')+
-    '|'+[...st.quick.entries()].sort().join(',')+'|'+(nien?nien.idx+':'+nien.star:'');
+    '|'+[...st.quick.entries()].map(([k,v])=>k+':'+[...v].sort().join('')).sort().join(',')+'|'+(nien?nien.idx+':'+nien.star:'');
   const cache=_ketCauCache[mode];
   if(cache.sig===sig) return cache.result;
   let result;
@@ -7509,11 +7541,13 @@ function dualRecomputeChains(side){
   // dedupSharedContinuations() dưới đây đã đủ để tránh vẽ trùng đoạn, không cần xóa hẳn cả chuỗi của 1 cung.
   // CHỈ truyền realAnchorSet cho kết cấu Kị - xem giải thích đầy đủ tại định nghĩa dedupSharedContinuations.
   chains=dedupSharedContinuations(chains, inst.hcMode==='hung' ? realAnchorSet : null);
-  st.quick.forEach((qLetter,idx)=>{
+  // st.quick giờ là Map(idx->Set(letter)) - lặp qua TỪNG chữ trong Set của mỗi idx (xem giải thích đầy đủ ở
+  // recomputePhiHoaChainsRaw bên lá số đơn).
+  st.quick.forEach((qLetters,idx)=>{ qLetters.forEach(qLetter=>{
     const isNienQuick = qLetter==='D' && inst.nienGlowTarget[inst.hcMode] && inst.nienGlowTarget[inst.hcMode].idx===idx;
     const ch = isNienQuick ? dualExtendNienKyQuickChain(c,dualComputeSingleChain(c,idx,qLetter,true),letter) : dualComputeSingleChain(c,idx,qLetter,true);
     if(ch) chains.push(ch);
-  });
+  }); });
   inst.chains[inst.hcMode]=chains;
 }
 
@@ -7867,11 +7901,11 @@ function dualCloneHcState(side){
   const inst=dualInst[side];
   const hcState={};
   ['hung','cat'].forEach(m=>{
-    hcState[m]={the:new Set(inst.hcState[m].the), dung:new Set(inst.hcState[m].dung), quick:new Map(inst.hcState[m].quick)};
+    hcState[m]={the:new Set(inst.hcState[m].the), dung:new Set(inst.hcState[m].dung), quick:cloneQuickMap(inst.hcState[m].quick)};
   });
   return {
     hcState, arrowOverrides:JSON.parse(JSON.stringify(inst.arrowOverrides)),
-    reverseStar:dualReverseFlightStar[side], reverseArrows:dualReverseFlightArrows[side].slice(),
+    reverseSelections:dualReverseFlightSelections[side].map(s=>({...s})), reverseArrows:dualReverseFlightArrows[side].slice(),
     shapes:inst.shapes.slice(),
   };
 }
@@ -7879,12 +7913,12 @@ function dualApplySnapshot(side,snap){
   const inst=dualInst[side];
   const hcState={};
   ['hung','cat'].forEach(m=>{
-    hcState[m]={the:new Set(snap.hcState[m].the), dung:new Set(snap.hcState[m].dung), quick:new Map(snap.hcState[m].quick)};
+    hcState[m]={the:new Set(snap.hcState[m].the), dung:new Set(snap.hcState[m].dung), quick:cloneQuickMap(snap.hcState[m].quick)};
   });
   inst.hcState=hcState;
   inst.arrowOverrides=JSON.parse(JSON.stringify(snap.arrowOverrides));
   inst.shapes=(snap.shapes||[]).slice();
-  dualReverseFlightStar[side]=snap.reverseStar||null;
+  dualReverseFlightSelections[side]=(snap.reverseSelections||[]).map(s=>({...s}));
   dualReverseFlightArrows[side]=(snap.reverseArrows||[]).slice();
   dualRecomputeChains(side);
   dualRenderCgButtons(side);
@@ -7909,6 +7943,9 @@ function dualClearAll(side){
   dualHoaStructureTabIdx[side][mode]=0;
   Object.keys(inst.arrowOverrides).forEach(k=>{ if(k.startsWith(mode+':')) delete inst.arrowOverrides[k]; });
   if(dualSelectedPhiArrow[side] && dualSelectedPhiArrow[side].mode===mode) dualSelectedPhiArrow[side]=null;
+  // Cùng lỗi vừa sửa ở bản đơn: truy ngược (dualReverseFlightSelections/Arrows) độc lập với Hung/Cát, phải
+  // xóa vô điều kiện ở đây thì "XÓA ALL" mới xóa sạch được các mũi tên truy ngược đang hiển thị.
+  dualReverseFlightSelections[side]=[]; dualReverseFlightArrows[side]=[]; dualStarPickerFor[side]=null;
   dualActionLog[side]=[]; dualActionRedoLog[side]=[];
   dualRenderCgButtons(side);
   dualRenderGrid(side);
@@ -8046,14 +8083,15 @@ let dualSelectedPhiArrow={A:null,B:null,C:null,D:null};
 // -- Truy ngược (port của starPickerFor/reverseFlightStar/pickReverseLetter/computeReverseFlights) - bấm 1
 // sao -> hiện bảng chọn ABCD -> chọn 1 chữ để truy ngược cung nào phi chữ đó vào đúng sao này. --
 let dualStarPickerFor={A:null,B:null,C:null,D:null};
-let dualReverseFlightStar={A:null,B:null,C:null,D:null};
+// Mỗi lần bấm 1 chữ ABCD là BẬT/TẮT ĐỘC LẬP đúng lựa chọn đó, không thay thế các lựa chọn đã bật trước đó -
+// xem giải thích đầy đủ ở reverseFlightSelections bên lá số đơn.
+let dualReverseFlightSelections={A:[],B:[],C:[],D:[]};
 let dualReverseFlightArrows={A:[],B:[],C:[],D:[]};
 function dualQuickFlyLetter(side,idx,letter){
   const inst=dualInst[side]; const c=inst.c; if(!c) return;
   const st=inst.hcState[inst.hcMode];
   const before=dualCloneHcState(side);
-  if(st.quick.get(idx)===letter) st.quick.delete(idx);
-  else st.quick.set(idx,letter);
+  quickToggle(st,idx,letter);
   dualRecomputeChains(side);
   dualPushHcAction(side,before);
   dualRenderGrid(side);
@@ -8080,16 +8118,17 @@ function dualComputeReverseFlights(side,targetIdx,starName,letterFilter){
   }
   return out;
 }
+function dualRecomputeReverseFlightArrows(side){
+  dualReverseFlightArrows[side] = dualReverseFlightSelections[side].flatMap(sel=>dualComputeReverseFlights(side,sel.idx,sel.star,sel.letter));
+}
 // Đồng bộ với Thể/Dụng, giống bên lá số đơn: cung truy ngược tìm ra sẽ tự vào tập Dụng, bỏ chọn thì gỡ ra.
 // Truy ngược độc lập với Thể/Dụng - xem giải thích ở pickReverseLetter bên lá số đơn.
 function dualPickReverseLetter(side,idx,starName,letter){
-  const cur=dualReverseFlightStar[side];
-  if(cur && cur.idx===idx && cur.star===starName && cur.letter===letter){
-    dualReverseFlightStar[side]=null; dualReverseFlightArrows[side]=[];
-  }else{
-    dualReverseFlightStar[side]={idx,star:starName,letter};
-    dualReverseFlightArrows[side]=dualComputeReverseFlights(side,idx,starName,letter);
-  }
+  const sels=dualReverseFlightSelections[side];
+  const i=sels.findIndex(s=>s.idx===idx && s.star===starName && s.letter===letter);
+  if(i>=0) sels.splice(i,1); // bấm lại đúng chữ đã bật - chỉ tắt riêng chữ đó, giữ nguyên các chữ khác
+  else sels.push({idx,star:starName,letter});
+  dualRecomputeReverseFlightArrows(side);
   dualStarPickerFor[side]=null;
   dualRenderGrid(side);
   dualRedrawCanvas(side);
@@ -8269,13 +8308,15 @@ function dualRenderGrid(side){
       const phus=stars.filter(s=>s.loai==='phu');
       const nienGlow=inst.nienGlowTarget[inst.hcMode];
       const isNienGlow=(s)=>nienGlow && nienGlow.idx===idx && nienGlow.star===s.ten;
-      const picker=dualStarPickerFor[side], revStar=dualReverseFlightStar[side];
+      const picker=dualStarPickerFor[side], revSels=dualReverseFlightSelections[side];
       const isPicking=(s)=>picker && picker.idx===idx && picker.star===s.ten;
-      const isTraced=(s)=>revStar && revStar.idx===idx && revStar.star===s.ten;
+      const isTraced=(s)=>revSels.some(sel=>sel.idx===idx && sel.star===s.ten);
       const starSpan=(s,cls)=>{
         const nameEsc=s.ten.replace(/'/g,"\\'");
-        const pickerHtml=isPicking(s)?`<span class="star-picker">${['A','B','C','D'].map(L=>
-          `<span class="phb phb-${L}" onclick="event.stopPropagation();dualPickReverseLetter('${side}',${idx},'${nameEsc}','${L}')">${L}</span>`).join('')}</span>`:'';
+        const pickerHtml=isPicking(s)?`<span class="star-picker">${['A','B','C','D'].map(L=>{
+          const active=revSels.some(sel=>sel.idx===idx && sel.star===s.ten && sel.letter===L);
+          return `<span class="phb phb-${L}${active?' phb-active':''}" onclick="event.stopPropagation();dualPickReverseLetter('${side}',${idx},'${nameEsc}','${L}')">${L}</span>`;
+        }).join('')}</span>`:'';
         // Gạch dưới thủ công do vẽ mũi tên tay chạm tới sao này - giữ nguyên tới khi xóa mũi tên đó.
         const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
@@ -8285,7 +8326,7 @@ function dualRenderGrid(side){
       const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
       const phiCls = st.the.has(idx) ? ' phi-source' : (st.dung.has(idx) ? ' phi-dung' : '');
       const quickBadges=['A','B','C','D'].map(L=>
-        `<span class="phb phb-${L}${st.quick.get(idx)===L?' phb-active':''}" onclick="event.stopPropagation();dualQuickFlyLetter('${side}',${idx},'${L}')">${L}</span>`
+        `<span class="phb phb-${L}${quickHas(st,idx,L)?' phb-active':''}" onclick="event.stopPropagation();dualQuickFlyLetter('${side}',${idx},'${L}')">${L}</span>`
       ).join('');
       h+=`<div class="cung${phiCls}" data-idx="${idx}">
         <div class="phi-hover-badges">${quickBadges}</div>
@@ -8517,8 +8558,14 @@ function dualFlyNienHoa(side,letter){
   const st=inst.hcState[inst.hcMode];
   if(st.the.has(idx)||st.dung.has(idx)) return;
   const before=dualCloneHcState(side);
-  if(st.quick.get(idx)==='D'){ st.quick.delete(idx); inst.nienGlowTarget[inst.hcMode]=null; }
-  else { st.quick.set(idx,'D'); inst.nienGlowTarget[inst.hcMode]={idx,star}; }
+  if(quickHas(st,idx,'D')){
+    const s=st.quick.get(idx); s.delete('D'); if(!s.size) st.quick.delete(idx);
+    inst.nienGlowTarget[inst.hcMode]=null;
+  }
+  else {
+    const s=st.quick.get(idx); if(s) s.add('D'); else st.quick.set(idx,new Set(['D']));
+    inst.nienGlowTarget[inst.hcMode]={idx,star};
+  }
   dualRecomputeChains(side);
   dualPushHcAction(side,before);
   dualRenderCgButtons(side);
