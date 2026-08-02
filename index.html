@@ -24,13 +24,13 @@
 :root{
   --bg:#ffffff; --panel:#ffffff; --text:#111111; --muted:#666666;
   --border:#000000; --border-lt:#cfcfcf; --maroon:#7a2331; --red:#c0392b; --red-th:#e0483a;
-  --blue:#1e40af; --green:#15803d; --gold:#8a6d1d; --accent:#2563eb;
+  --blue:#1e40af; --green:#15803d; --gold:#8a6d1d; --accent:#2563eb; --dung-th:#00bcd4;
   --hover:#f4f4f2;
 }
 body.theme-dark{
   --bg:#000000; --panel:#0a0a0a; --text:#f0c040; --muted:#c9a84c99;
   --border:#c9a84c; --border-lt:#c9a84c44; --maroon:#f0c040; --red:#ff6b6b; --red-th:#ff6b6b;
-  --blue:#67e8f9; --green:#52b788; --gold:#f0c040; --accent:#c9a84c;
+  --blue:#67e8f9; --green:#52b788; --gold:#f0c040; --accent:#c9a84c; --dung-th:#00bcd4;
   --hover:#120e00;
 }
 body{font-family:'Segoe UI',Arial,sans-serif;color:var(--text);min-height:100vh;
@@ -346,8 +346,8 @@ body.theme-dark .cung.hl-luunguyet{background:#0f2a12}
 .cung.hl-hoaA{box-shadow:inset 0 0 0 2px var(--green)}
 .cung.hl-hoaD{box-shadow:inset 0 0 0 2px #000}
 body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
-.cung.phi-source{outline:3px solid var(--red-th);outline-offset:-3px;z-index:2}
-.cung.phi-dung{outline:3px solid var(--accent);outline-offset:-3px;z-index:2}
+.cung.phi-source{outline:4.5px solid var(--red-th);outline-offset:-4.5px;z-index:2}
+.cung.phi-dung{outline:4.5px solid var(--dung-th);outline-offset:-4.5px;z-index:2}
 .cung.center{grid-column:2/4;grid-row:2/4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0;padding:14px;cursor:default}
 .cung.center:hover{background:var(--panel)}
 
@@ -482,7 +482,7 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .line-width-row{display:flex;align-items:center;gap:5px;border-top:1px solid var(--border-lt);padding-top:6px}
 .line-width-row .lw-icon{font-size:.85rem;color:var(--text);flex-shrink:0}
 .line-width-row input[type="range"]{flex:1;min-width:0}
-.line-width-row #lineWidthLabel{font-size:.62rem;color:var(--muted);flex-shrink:0;width:16px;text-align:right}
+.line-width-row .lw-val{font-size:.62rem;color:var(--muted);flex-shrink:0;width:16px;text-align:right}
 .tool-divider{height:1px;background:var(--border-lt);margin:1px 0}
 .btn-danger{padding:5px 2px;border:none;border-radius:4px;background:var(--red);color:#fff;font-size:.62rem;font-weight:500}
 .stepper{display:flex;align-items:stretch;gap:2px}
@@ -2126,7 +2126,8 @@ let selectedLuuNguyetMonth=null;
 let drawTool=null;
 let shapes=[];
 let drawColor='#c0392b';
-let drawLineWidth=2;
+let drawLineWidth=4.5; // độ dày khung ô vuông (rect)
+let drawArrowWidth=2.5; // độ dày mũi tên (arrow) - tách riêng khỏi drawLineWidth
 let drawFontSize=14;
 let selectedPhiArrow=null; // {mode,idx} - cung sở hữu mũi tên phi hóa đang được chọn trên lá số (để xóa bằng phím Del)
 // Danh sách {s,pts,isSel,isReverse} sau khi đã qua đủ các bước spreadDivergingOrigins/spreadParallelArrows/
@@ -4773,11 +4774,17 @@ function toggleColorPalette(){
       `<button class="color-swatch-opt${hex===drawColor?' active':''}" data-hex="${hex}" style="background:${hex}" onclick="event.stopPropagation();pickDrawColor('${hex}')"></button>`
     ).join('');
     pop.innerHTML=`<div class="color-swatch-grid">${swatches}</div>
-      <div class="line-width-row" title="Độ dày nét vẽ (mũi tên/ô vuông)">
-        <span class="lw-icon">╱</span>
+      <div class="line-width-row" title="Độ dày khung ô vuông">
+        <span class="lw-icon">▭</span>
         <input type="range" id="lineWidthSlider" min="1" max="8" step="0.5" value="${drawLineWidth}"
           oninput="setDrawLineWidth(this.value)" onclick="event.stopPropagation()">
-        <span id="lineWidthLabel">${drawLineWidth}</span>
+        <span id="lineWidthLabel" class="lw-val">${drawLineWidth}</span>
+      </div>
+      <div class="line-width-row" title="Độ dày mũi tên">
+        <span class="lw-icon">➔</span>
+        <input type="range" id="arrowWidthSlider" min="1" max="8" step="0.5" value="${drawArrowWidth}"
+          oninput="setDrawArrowWidth(this.value)" onclick="event.stopPropagation()">
+        <span id="arrowWidthLabel" class="lw-val">${drawArrowWidth}</span>
       </div>`;
     pop.hidden=false;
   }else pop.hidden=true;
@@ -4790,6 +4797,10 @@ function pickDrawColor(hex){
 function setDrawLineWidth(v){
   drawLineWidth=parseFloat(v);
   const label=document.getElementById('lineWidthLabel'); if(label) label.textContent=drawLineWidth;
+}
+function setDrawArrowWidth(v){
+  drawArrowWidth=parseFloat(v);
+  const label=document.getElementById('arrowWidthLabel'); if(label) label.textContent=drawArrowWidth;
 }
 document.addEventListener('click',(e)=>{
   const pop=document.getElementById('colorPalettePopup');
@@ -5716,7 +5727,7 @@ function onOff(el,mouseType,touchType,handler,opts){
       const r=cv.getBoundingClientRect();
       const {clientX,clientY}=clientPointFrom(e);
       const x=clientX-r.left, y=clientY-r.top;
-      redrawCanvas({type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawLineWidth});
+      redrawCanvas({type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawTool==='arrow'?drawArrowWidth:drawLineWidth});
       if(drawTool==='arrow') updateArrowHoverUnderline(x,y);
     },{passive:false});
     onOff(window,'mouseup','touchend',e=>{
@@ -5725,7 +5736,7 @@ function onOff(el,mouseType,touchType,handler,opts){
       const {clientX,clientY}=clientPointFrom(e);
       const x=clientX-r.left, y=clientY-r.top;
       if(drawTool==='rect'||drawTool==='arrow'){
-        const shape={type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawLineWidth};
+        const shape={type:drawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:drawColor,lineWidth:drawTool==='arrow'?drawArrowWidth:drawLineWidth};
         // Mũi tên vẽ tay chạm tới 1 sao lúc buông chuột - gạch dưới sao đó luôn (giữ tới khi xóa mũi tên này),
         // không phải chỉ gạch tạm lúc đang rê.
         if(drawTool==='arrow' && arrowHoverStarEl){
@@ -6374,7 +6385,11 @@ function computeKetCauStructuresRaw(mode){
       // điểm chạm mà không cần dò lại dữ liệu gốc. Đặt lên ĐẦU danh sách (trước cả "trùng lặp"/"niên...").
       otherTags.unshift(step.star);
       const tagStr = ` (${otherTags.join(', ')})`;
-      const targetHtml = `${label(step.to)}${tagStr}`;
+      // Ghi chính tinh/tag TRƯỚC tên cung chức năng (yêu cầu người dùng: "(Cự Môn) Tật" thay vì "Tật (Cự
+      // Môn)") - CHỈ đổi thứ tự hiển thị ở đây (targetHtml, dùng cho các điểm ĐÍCH), không đụng tagStr (vẫn
+      // giữ nguyên cho nhánh "tự hóa X xuất${tagStr}" phía dưới, nơi tagStr gắn sau 1 cụm động từ chứ không
+      // đứng cạnh tên cung nào cả).
+      const targetHtml = `(${otherTags.join(', ')}) ${label(step.to)}`;
       // Tự hóa xuất TẠI CHỖ ngay GIỮA mạch chính (không phải ở gốc, i>=1) - cung vừa đáp lại đúng CŨNG là cung
       // xuất phát bước này (step.from===step.to, vd Phu Thê tự hóa Kị xuất nên Can của nó bay ra lại đáp
       // ngay về chính nó) - ghi rõ "tự hóa xuất" thay vì lặp lại y hệt tên cung 2 lần liền ("—CK→ Phu Thê"
@@ -6410,7 +6425,7 @@ function computeKetCauStructuresRaw(mode){
     // đúng nơi Can của root chuyển Kị tới (root tự hóa xuất VÀ mang niên đều dùng CHUNG 1 Can duy nhất của
     // chính root, nên niên A cũng tất yếu "chuyển Kị" ra đúng CÙNG 1 điểm đó, dù khác sao khởi phát).
     if(rootSelfLoop && rootNienTag && !rootNienSameStar && steps[1]){
-      lines.push(`<li class="hoa-sub hoa-plus">⤷ niên ${letter==='D'?'D':'A'} (${rootNienStarName}) —CK→ ${label(steps[1].to)} (${steps[1].star}) [+1${lettAbbr}]</li>`);
+      lines.push(`<li class="hoa-sub hoa-plus">⤷ niên ${letter==='D'?'D':'A'} (${rootNienStarName}) —CK→ (${steps[1].star}) ${label(steps[1].to)} [+1${lettAbbr}]</li>`);
     }
     // Kết cấu Lộc bắt buộc đồng tinh diệu giữa các cung liên kết (trừ Kị xuất đối cung, đã xử lý riêng ở
     // mustContinueKy) - kể cả khi M đáp thẳng vào ĐÚNG cung gốc, vẫn phải đúng sao mà gốc tự hóa/hóa Lộc ra,
@@ -6634,7 +6649,9 @@ function computeKetCauStructuresRaw(mode){
             // Luôn kèm tên sao đích trong ngoặc (yêu cầu người dùng) - xem giải thích tương tự ở mạch chính.
             otherDisp.unshift(s.star);
             const tagStr = ` (${otherDisp.join(', ')})`;
-            const targetHtml = label(s.to)+tagStr;
+            // Chính tinh/tag TRƯỚC tên cung (xem giải thích ở targetHtml của mạch chính phía trên) - tagStr
+            // vẫn giữ nguyên cho nhánh "tự hóa xuất${tagStr}".
+            const targetHtml = `(${otherDisp.join(', ')}) ${label(s.to)}`;
             if(s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
             else if(hasKXDC) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
             else flow += (i===0 ? ` —TK→ ` : ` —CK→ `) + targetHtml;
@@ -6716,7 +6733,8 @@ function computeKetCauStructuresRaw(mode){
         subSteps.forEach((s,i)=>{
           const tags=subTags[i];
           const tagStr = tags.length ? ` (${tags.join(', ')})` : '';
-          const targetHtml = label(s.to)+tagStr;
+          // Chính tinh/tag TRƯỚC tên cung (xem giải thích ở targetHtml của mạch chính phía trên).
+          const targetHtml = tags.length ? `(${tags.join(', ')}) ${label(s.to)}` : label(s.to);
           // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
           // thích tương tự ở mạch chính phía trên.
           if(i>0 && s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
