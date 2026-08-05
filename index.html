@@ -227,6 +227,12 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .hoa-structure-list li.hoa-sub{color:var(--muted);font-style:italic}
 .hoa-structure-list li.hoa-branch{padding-left:10px;color:var(--text);font-style:normal}
 .hoa-structure-list li.hoa-plus{padding-left:18px;color:var(--maroon);font-weight:600;font-style:normal}
+/* Truy Lộc/Kị (TL/TK) trực tiếp + niên A/D + KXĐC: đều là 1 nguồn Lộc/Kị ĐỘC LẬP thứ 2 vừa "gặp" đúng 1 điểm
+   đã có sẵn trên mạch chính (không phải chỉ mô tả lại đường đi bình thường) - tô đỏ để nổi bật, tách hẳn khỏi
+   màu maroon dùng chung cho mọi dòng hội tụ khác. Dùng --red-th (không phải --maroon) vì --maroon đổi thành
+   VÀNG ở theme tối (mất hẳn ý nghĩa "đỏ"), còn --red-th luôn là đỏ ở cả 2 theme. */
+.hoa-structure-list li.hoa-red{color:var(--red-th)!important}
+.hoa-structure-list .kk-red{color:var(--red-th);font-weight:700}
 .hoa-structure-title{margin-top:8px}
 .hoa-structure-title:first-child{margin-top:0}
 .hoa-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
@@ -2069,8 +2075,8 @@ const CITIES=[
 
 // Tên sao rút gọn khi HIỂN THỊ (chỉ đổi chữ hiện ra, KHÔNG đụng tới s.ten gốc - mọi tra cứu/tính toán tự hóa,
 // phi hóa, click chọn sao... vẫn dùng tên đầy đủ như cũ) - Văn Xương/Văn Khúc quá dài so với cung, viết tắt
-// bỏ chữ "Văn" cho gọn.
-const STAR_DISPLAY_ABBR={'Văn Xương':'Xương','Văn Khúc':'Khúc'};
+// chữ "Văn" thành "V." cho gọn.
+const STAR_DISPLAY_ABBR={'Văn Xương':'V.Xương','Văn Khúc':'V.Khúc'};
 function displayStarName(ten){ return STAR_DISPLAY_ABBR[ten]||ten; }
 const DC=["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
 const CAN=["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
@@ -5233,29 +5239,31 @@ function drawSkitchArrow(ctx,p1,p2,color,widthScale){
   ctx.lineTo(baseX-px*headHalfWidth, baseY-py*headHalfWidth);
   ctx.closePath(); ctx.fill();
 }
-// Màu chữ trong khoanh tròn nhãn chữ trên thân mũi tên (nền LUÔN đen, xem drawArrowLetterBadge): D dùng
-// trắng (chữ đen sẽ chìm mất trên nền đen, vì hoaArrowColor('D') mặc định là đen/vàng tùy theme) - A/B/C vẫn
-// giữ đúng màu riêng vốn đủ tương phản trên nền đen (A xanh lá, B đỏ, C xanh dương).
+// Màu chữ trong khoanh tròn nhãn chữ trên thân mũi tên (nền đen hoặc tím, xem drawArrowLetterBadge) - LUÔN
+// trắng cho cả 4 chữ ABCD, vì cả 2 nền (đen/tím) đều đủ tối để chữ trắng luôn rõ nét (trước đây B/C giữ màu
+// riêng đỏ/xanh dương theo hoaArrowColor(), nhưng đọc không rõ trên nền đen - đổi hẳn sang trắng cho đồng nhất).
 function arrowLetterBadgeColor(letter){
-  // D và A đều dùng trắng cho rõ nét trên nền đen (hoaArrowColor('A') xanh lá bị mờ/khó đọc ở cỡ chữ nhỏ) -
-  // B/C vẫn giữ đúng màu riêng (đỏ/xanh dương), vốn đã đủ tương phản.
-  return (letter==='D'||letter==='A') ? '#fff' : hoaArrowColor(letter);
+  return '#fff';
 }
-// Nhãn chữ trên thân mũi tên phi hóa: khoanh tròn nền đen, cách đầu mũi tên ~1.3cm - đại diện cho loại
-// hóa (Lộc/Quyền/Khoa/Kị) của mũi tên, kể cả các bước chuyển Kị nối tiếp.
-// isChuyenKy: bước chuyển Kị (nối tiếp, không phải bước hóa GỐC của chính Thể/Dụng) - nền đổi sang tím
-// (#6d28d9, giống màu badge "T" đánh dấu Thân) để phân biệt rõ với bước hóa ban đầu (nền đen).
+// Nhãn chữ trên thân mũi tên phi hóa: khoanh tròn nền đen (hoặc tím nếu là Kị), cách đầu mũi tên ~1.3cm - đại
+// diện cho loại hóa (Lộc/Quyền/Khoa/Kị) của mũi tên, kể cả các bước chuyển Kị nối tiếp.
+// isChuyenKy: bước chuyển Kị (nối tiếp, không phải bước hóa GỐC của chính Thể/Dụng). Nền tím (#6d28d9, giống
+// màu badge "T" đánh dấu Thân) áp dụng cho CẢ isChuyenKy=true LẪN chữ D (Kị) nói chung - kể cả khi D là bước
+// hóa GỐC (vd bấm nhanh ABCD ngay trên 1 cung, không thuộc chuỗi Thể/Dụng nào) - để MỌI mũi tên Kị đều đồng
+// bộ 1 màu tím duy nhất, không riêng gì đoạn chuyển Kị nối tiếp của Thể/Dụng. A/B/C (không phải Kị) vẫn giữ
+// nền đen như cũ.
 // scale: dùng để thu nhỏ đồng bộ cho lá số mini bên tab "2 Lá Số"/"PLUS" (xem dualArrowScale) - mặc định 1
 // (đúng kích cỡ gốc) cho lá số đơn.
 function drawArrowLetterBadge(ctx,text,x,y,isChuyenKy,scale){
   const sc=scale||1;
   const r=7.5*sc; // ~4mm đường kính (ở scale=1)
+  const isKy=isChuyenKy||text==='D';
   ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-  ctx.fillStyle=isChuyenKy ? '#6d28d9' : '#000';
+  ctx.fillStyle=isKy ? '#6d28d9' : '#000';
   ctx.fill();
   ctx.font='bold '+(7*sc)+'px Segoe UI';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle=isChuyenKy ? '#fff' : arrowLetterBadgeColor(text);
+  ctx.fillStyle=arrowLetterBadgeColor(text);
   ctx.fillText(text,x,y+0.5*sc);
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
 }
@@ -6143,7 +6151,7 @@ function computeKetCauStructures(mode){
   return result;
 }
 function computeKetCauStructuresRaw(mode){
-  const c=chart(); const letter=mode==='cat'?'A':'D', letterName=mode==='cat'?'Lộc':'Kị';
+  const c=chart(); const letter=mode==='cat'?'A':'D', letterName=mode==='cat'?'Lộc':'Kị', lettAbbr=letter==='A'?'L':'K';
   if(!c) return [];
   const st=hcState[mode];
   // Cung đang mang niên A/D vừa bấm "N.Lộc"/"N.Kỵ" (nienGlowTarget) - nếu CHƯA thuộc Thể/Dụng thật sự, cũng
@@ -6237,12 +6245,18 @@ function computeKetCauStructuresRaw(mode){
   // Tử Nữ trước đó) - phải kiểm tra computeTuHoaFor(fromIdx), TUYỆT ĐỐI không phải computeTuHoaFor(target).
   function detectBonusTags(target,star,i,fromIdx){
     const tags=[];
-    // Niên A/D: chỉ cần CUNG ĐÍCH có BẤT KỲ sao nào mang niên cùng chữ là đủ +1 - không cần ĐÚNG NGAY sao
-    // vừa đáp tới (star) - áp dụng ĐỒNG NHẤT cho cả Lộc lẫn Kị. Trước đây kết cấu Kị đã nới lỏng kiểu này
-    // ("khác tinh diệu vẫn tính chung Kị - chỉ cần cùng cung có sao mang niên Kị"), nhưng kết cấu Lộc lại bắt
-    // buộc ĐÚNG SAO (c.thMap[star]==='A') mới tính - khiến 1 cung có 2 sao (vd Liêm Trinh đáp tới do phi Lộc,
-    // Phá Quân lại là sao mang niên A) bị bỏ sót +1 Lộc dù rõ ràng CUNG đó đang mang niên A, chỉ khác sao.
-    const cungHasNien = (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter);
+    // Niên D (Kị): chỉ cần CUNG ĐÍCH có BẤT KỲ sao nào mang niên Kị là đủ +1 - không cần ĐÚNG NGAY sao vừa
+    // đáp tới (khác tinh diệu vẫn tính chung Kị, giữ nguyên như cũ).
+    // Niên A (Lộc): PHẢI ĐÚNG SAO vừa đáp tới (c.thMap[star]==='A') mới tính - kết cấu Cát/Lộc chỉ tính khi
+    // CÙNG tinh diệu (yêu cầu người dùng xác nhận lại) - vd Huynh hóa Lộc ra Cự Môn, dù cung đích (Tử Nữ) CŨNG
+    // có sao Thiên Cơ mang niên A, nhưng Thiên Cơ KHÔNG PHẢI sao vừa đáp (Cự Môn mới là sao vừa đáp) - 2 sao
+    // khác nhau, KHÔNG được tính +1 Lộc từ niên A ở đây. Trước đây từng nới lỏng thành "cung có bất kỳ sao
+    // nào mang niên cũng được" áp dụng chung cho cả Lộc lẫn Kị (xem lịch sử) - nhưng đó là hiểu sai, chỉ đúng
+    // cho Kị; Lộc luôn đòi cùng tinh diệu, khớp đúng với quy tắc "rootNienSameStar" đã áp dụng riêng cho
+    // trường hợp root tự hóa xuất (evalRoot) từ trước - giờ áp dụng NHẤT QUÁN quy tắc này cho MỌI trường hợp.
+    const cungHasNien = letter==='D'
+      ? (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter)
+      : c.thMap[star]==='A';
     if(cungHasNien) tags.push(letter==='D' ? 'niên D' : 'niên A');
     if(letter==='A'){
       const selfHoaA=computeTuHoaFor(target);
@@ -6264,7 +6278,13 @@ function computeKetCauStructuresRaw(mode){
     if(det.includes('niên D') && !nienCap.used){ add+=1; tags.push('niên D'); nienCap.used=true; nienHit=true; }
     if(det.includes('niên A') && !nienCap.used){ add+=1; tags.push('niên A'); nienCap.used=true; nienHit=true; }
     if(det.includes('tự hóa Lộc')){ add+=1; tags.push('tự hóa Lộc'); }
-    if(det.includes('KXĐC')){ add+=1; tags.push('KXĐC'); }
+    // KXĐC (Kị xuất đối cung) LUÔN buộc mạch phải tiếp tục chuyển Kị (xem mustContinueKy, áp dụng cho CẢ kết
+    // cấu Lộc lẫn Kị vì "chuyển Kị luôn dùng chữ D") - nhưng bản thân KXĐC là 1 hiện tượng CỦA KỊ, chỉ THẬT SỰ
+    // đáng tính +1 khi đang đếm kết cấu KỊ (letter==='D'). Ở kết cấu LỘC (letter==='A'), KXĐC chỉ là lý do
+    // NGẦM khiến mạch tiếp tục bay (không phải 1 nguồn Lộc độc lập) - vẫn giữ tag để HIỂN THỊ đúng lý do mạch
+    // rẽ tiếp (↓ KXĐC), nhưng KHÔNG cộng điểm. Trước đây cộng vô điều kiện bất kể Lộc/Kị, khiến 1 kết cấu Lộc
+    // bị cộng dư 1 Lộc không có thật mỗi khi mạch đi qua đúng 1 điểm KXĐC.
+    if(det.includes('KXĐC')){ tags.push('KXĐC'); if(letter==='D') add+=1; }
     if(add>0) seen.add(key);
     return {add,tags,nienHit};
   }
@@ -6274,7 +6294,11 @@ function computeKetCauStructuresRaw(mode){
   // Đồng nhất với detectBonusTags: chỉ cần CUNG target có sao mang niên cùng chữ là đủ, không cần đúng
   // ngay sao vừa đáp (tham số "star" giữ lại cho tương thích chữ ký gọi cũ, không dùng nữa).
   function nienTagFor(target,star){
-    const has=(c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter);
+    // Đồng nhất với detectBonusTags: Kị (D) chỉ cần cung có bất kỳ sao nào mang niên; Lộc (A) bắt buộc ĐÚNG
+    // SAO vừa tự hóa (star) - kết cấu Cát chỉ tính khi cùng tinh diệu (xem giải thích đầy đủ ở detectBonusTags).
+    const has = letter==='D'
+      ? (c.data.saoCung[String(target)]||[]).some(s2=>c.thMap[s2.ten]===letter)
+      : c.thMap[star]==='A';
     return has ? (letter==='D'?'niên D':'niên A') : null;
   }
   // Tên THẬT SỰ của ngôi sao đang mang niên A/D tại 1 cung (nếu có) - dùng để so sánh đồng/khác tinh diệu với
@@ -6340,6 +6364,12 @@ function computeKetCauStructuresRaw(mode){
     const spineIndexOf=new Map(); steps.forEach((s,i)=>spineIndexOf.set(s.to,i));
     const seenBonus=new Set();
     const nienCap={used:false};
+    // Đoạn "bơm lực" (bomLucFrom) do 1 thành viên M truy Lộc/Kị bơm thêm - KHÔNG gắn liền vào chữ mạch chính
+    // nữa (trước đây "↓ M TK" chen giữa spine), mà dồn sang ghi NGAY SAU dòng hội tụ CỦA CHÍNH M ở dưới (xem
+    // members.forEach) - vì đây CÙNG LÀ 1 sự kiện với việc M hội tụ vào mạch chính (chỉ là M còn "kéo dài"
+    // thêm được 1 nhịp nhờ chính Can của nó), không phải 2 sự kiện tách rời đáng ghi ở 2 nơi khác nhau (yêu
+    // cầu người dùng: mỗi thành viên bơm lực chỉ ghi 1 lần, gộp chung 1 chỗ).
+    const bombSegments=new Map(); // bomLucFrom idx -> [{html, add}]
     let nienBonusNode=null; // {to,star} - điểm mà niên A/D "tọa" trúng, dùng để vẽ thêm nhánh trong fishbone
     let total=1;
     const rootSelfLoop = steps[0] && steps[0].to===root;
@@ -6367,9 +6397,15 @@ function computeKetCauStructuresRaw(mode){
     // từ bước 1 trở đi luôn là CK (chuyển Kị, dùng Can cung vừa đáp). Riêng KXĐC (Kị xuất đối cung) xuống
     // dòng, chĩa mũi tên xuống (↓ KXĐC) để tách biệt khỏi luồng CK bình thường.
     const isNienRoot = root===nienIdx;
+    // rootNienTag chỉ set khi rootSelfLoop && "gặp niên" - LUÔN kèm total+=1 thật (xem "if(rootSelfLoop &&
+    // rootNienTag)" phía trên) nên tô đỏ + ghi +1 ở đây luôn đúng, không sợ cộng dư.
+    // "Cung Triệu nhân phi X = 1" (total=1 nền, luôn cộng vô điều kiện dù rơi vào nhánh nào bên dưới) - ghi rõ
+    // ngay "+1" tại đây (yêu cầu người dùng: chính bước hóa GỐC đầu tiên của root cũng phải thấy rõ đóng góp
+    // bao nhiêu Kị/Lộc, không chỉ ngầm gộp vào 1 ngoặc tổng ở cuối dòng, dễ hiểu lầm là ngoặc đó thuộc về đoạn
+    // chữ NGAY TRƯỚC nó thay vì là tổng dồn từ đầu dòng).
     const rootTag = rootSelfLoop
-      ? (rootNienTag && rootNienSameStar ? `${rootNienTag} - ${steps[0].star} + tự hóa ${letter} xuất` : `tự hóa ${letterName} xuất - ${steps[0].star}`)
-      : (isNienRoot ? `niên ${mode==='cat'?'A':'D'}` : `hóa ${letterName}`);
+      ? (rootNienTag && rootNienSameStar ? `<span class="kk-red">${rootNienTag} (+1${lettAbbr})</span> - ${steps[0].star} + tự hóa ${letter} xuất (+1${lettAbbr})` : `tự hóa ${letterName} xuất - ${steps[0].star} (+1${lettAbbr})`)
+      : (isNienRoot ? `niên ${mode==='cat'?'A':'D'} (+1${lettAbbr})` : `hóa ${letterName} (+1${lettAbbr})`);
     let spine = `<b>${label(root)}</b> (${rootTag})`;
     // Nhãn "trùng lặp" thuộc về CHÍNH cung vừa đáp (step.to), không phải cung kế tiếp - đây là cung mà Can
     // của nó sắp bị bước SAU tái dùng để chuyển Kị tiếp. Nếu Di, Tật, Điền đều thuộc tập Thể/Dụng đã chọn,
@@ -6411,7 +6447,10 @@ function computeKetCauStructuresRaw(mode){
       const isTrungLapCung = letter==='D' && hasNextStep && step.to!==root && stillConsecutive && realAnchorSet.has(step.to);
       if(step.to!==root && realAnchorSet.has(step.to)) spineRealMembers.add(step.to);
       if(!isSelectedHere) stillConsecutive=false;
-      const otherTags=bonus.tags.filter(t=>t!=='KXĐC');
+      // Niên A/D và "tự hóa Lộc" ở đây LUÔN là 1 lần cộng MỚI, THẬT SỰ (bonus.tags chỉ chứa các nhãn này khi
+      // pointBonus vừa thật sự +1, xem nienCap/seen - không như dispTags ở nhánh thành viên hội tụ phía dưới,
+      // có thể chỉ là nhắc lại suông) - tô đỏ + ghi rõ +1 luôn an toàn, không sợ hiển thị sai thành cộng dư.
+      const otherTags=bonus.tags.filter(t=>t!=='KXĐC').map(t=>(t==='niên D'||t==='niên A'||t==='tự hóa Lộc')?`<span class="kk-red">${t} (+1${lettAbbr})</span>`:t);
       if(isTrungLapCung) otherTags.unshift('trùng lặp');
       // Luôn kèm tên sao đích trong ngoặc (yêu cầu người dùng) - để nhìn ra ngay đồng/khác tinh diệu giữa các
       // điểm chạm mà không cần dò lại dữ liệu gốc. Đặt lên ĐẦU danh sách (trước cả "trùng lặp"/"niên...").
@@ -6433,31 +6472,30 @@ function computeKetCauStructuresRaw(mode){
       // không liên quan gì tới Lộc đang truy.
       const isMidSpineSelfLoop = i>0 && step.from===step.to;
       if(step.bomLucFrom!=null){
-        // Bước này CHỈ tồn tại nhờ 1 cung khác truy Lộc/Kị bơm lực (không phải tự nhiên chuyển Kị tiếp được) -
-        // ghi rõ tên cung đã bơm lực trên dòng riêng, giống cách tách dòng cho KXĐC, để không đánh đồng với
-        // CK bình thường (mạch đã thật sự hết lực tại điểm trước đó).
-        const convTag = letter==='A' ? 'TL' : 'TK';
-        spine += `<br>↓ ${label(step.bomLucFrom)} ${convTag}<br>→ ${targetHtml}`;
+        // Bước này CHỈ tồn tại nhờ 1 cung khác (M=step.bomLucFrom) truy Lộc/Kị bơm lực - KHÔNG ghi vào chữ
+        // mạch chính nữa (xem giải thích ở khai báo bombSegments phía trên), dồn sang đúng dòng hội tụ của M.
+        const list=bombSegments.get(step.bomLucFrom)||[];
+        list.push({html:`<br>—CK→ ${targetHtml}`, add:bonus.add});
+        bombSegments.set(step.bomLucFrom, list);
       }
-      else if(bonus.tags.includes('KXĐC')) spine += `<br>↓ KXĐC<br>→ ${targetHtml}`;
+      else if(bonus.tags.includes('KXĐC')) spine += `<br>↓ <span class="kk-red">KXĐC${letter==='D'?` (+1${lettAbbr})`:''}</span><br>→ ${targetHtml}`;
       else if(isMidSpineSelfLoop) spine += `: tự hóa ${step.letter} xuất${tagStr}`;
       else if(i===0) spine += (isNienRoot ? ` —CK→ ` : ` → `) + targetHtml;
       else spine += ` —CK→ ${targetHtml}`;
     });
-    // Ghi kèm điểm Lộc/Kị TÍCH LŨY của dòng mạch chính ngay tại đây (yêu cầu người dùng: mỗi dòng đều thấy rõ
-    // đóng góp bao nhiêu Lộc/Kị, không chỉ tổng cuối cùng) - "total" tại thời điểm này đã gồm đủ: 1 (nền) +
-    // niên tại root nếu root tự hóa xuất + mọi điểm cộng dọc mạch chính (niên/tự hóa Lộc/KXĐC) vừa tính xong
-    // trong steps.forEach phía trên, TRƯỚC KHI xét tới bất kỳ thành viên hội tụ nào (M) - đúng nghĩa "điểm của
-    // riêng dòng 1".
-    const lettAbbr = letter==='A' ? 'L' : 'K';
-    const lines=[`<li class="hoa-spine">${spine} [${total}${lettAbbr}]</li>`];
+    // KHÔNG còn ghi ngoặc tổng dồn "[X]" ở cuối dòng mạch chính nữa (yêu cầu người dùng: ngoặc tổng dồn đặt
+    // cuối dòng dễ hiểu lầm là thuộc về đúng đoạn chữ NGAY TRƯỚC nó - vd "...—CK→ Thê [2K]" trông như "CK→ Thê"
+    // đáng giá 2 Kị, dù thật ra đó chỉ là 1 đoạn chuyển Kị thuần túy không cộng gì thêm, số "2" là DỒN từ 2
+    // điểm khác nhau ở ĐẦU dòng) - mỗi điểm cộng điểm giờ đã tự ghi rõ "+1" ngay tại chỗ nó xảy ra (bước hóa
+    // GỐC của root, KXĐC, niên...), không cần thêm 1 con số tổng mơ hồ ở cuối nữa.
+    const lines=[`<li class="hoa-spine">${spine}</li>`];
     // Niên A/D rơi vào 1 sao KHÁC hẳn sao đang tự hóa xuất tại root (xem rootNienSameStar phía trên) - ghi rõ
     // thành 1 dòng riêng (đã cộng +1 ở trên rồi, dòng này chỉ để hiển thị, không cộng thêm lần nữa). Ghi theo
     // đúng dòng chảy thật (niên → CK → đích) như mọi dòng hội tụ khác, không giải thích dài dòng - steps[1] là
     // đúng nơi Can của root chuyển Kị tới (root tự hóa xuất VÀ mang niên đều dùng CHUNG 1 Can duy nhất của
     // chính root, nên niên A cũng tất yếu "chuyển Kị" ra đúng CÙNG 1 điểm đó, dù khác sao khởi phát).
     if(rootSelfLoop && rootNienTag && !rootNienSameStar && steps[1]){
-      lines.push(`<li class="hoa-sub hoa-plus">⤷ niên ${letter==='D'?'D':'A'} (${rootNienStarName}) —CK→ (${steps[1].star}) ${label(steps[1].to)} [+1${lettAbbr}]</li>`);
+      lines.push(`<li class="hoa-sub hoa-plus hoa-red">⤷ niên ${letter==='D'?'D':'A'} (${rootNienStarName}) —CK→ (${steps[1].star}) ${label(steps[1].to)} [+1${lettAbbr}]</li>`);
     }
     // Kết cấu Lộc bắt buộc đồng tinh diệu giữa các cung liên kết (trừ Kị xuất đối cung, đã xử lý riêng ở
     // mustContinueKy) - kể cả khi M đáp thẳng vào ĐÚNG cung gốc, vẫn phải đúng sao mà gốc tự hóa/hóa Lộc ra,
@@ -6718,6 +6756,7 @@ function computeKetCauStructuresRaw(mode){
       // (1 lần do "tự hóa Lộc" ở đây, 1 lần nữa do bản thân việc hội tụ +1 ngay bên dưới).
       const memberSelfLoopStart = subSteps[0] && subSteps[0].to===M;
       const subKXDC = subSteps.map(()=>false);
+      const subKXDCNew = subSteps.map(()=>false); // KXĐC ở bước này có phải lần +1 THẬT SỰ hay chỉ nhắc lại suông (xem giải thích ở subKXDC[i]=... bên dưới)
       // "Trùng lặp" cho đường đi riêng của 1 thành viên HỘI TỤ THẬT (không suppressed) - áp dụng CÙNG quy tắc
       // như mạch chính của root (xem isTrungLapCung phía trên): nếu chính M CŨNG đáp qua 1 cung Thể/Dụng thật
       // khác trên đường đi riêng của nó trước khi chạm vào mạch chính, cung đó vẫn phải được đánh dấu "(trùng
@@ -6744,13 +6783,34 @@ function computeKetCauStructuresRaw(mode){
           const hasNextSub = i+1<subSteps.length;
           const isTrungLapSub = letter==='D' && hasNextSub && s.to!==root && mStillConsecutive && realAnchorSet.has(s.to);
           if(!(s.to===root || realAnchorSet.has(s.to))) mStillConsecutive=false;
-          const otherTags=dispTags.filter(t=>t!=='KXĐC');
+          // "tags" (khác dispTags) chỉ chứa niên D/A hay "tự hóa Lộc" khi ĐÂY THẬT SỰ là lần +1 mới (pointBonus
+          // tôn trọng nienCap/seen) - dispTags có thể rơi vào nhánh fallback detectBonusTags THUẦN HIỂN THỊ
+          // (điểm đã "seen"/niên đã dùng ở nơi khác rồi) nên KHÔNG được ghi "+1" trong trường hợp đó, tránh
+          // hiểu nhầm cộng dư.
+          const otherTags=dispTags.filter(t=>t!=='KXĐC').map(t=>{
+            if((t==='niên D'||t==='niên A'||t==='tự hóa Lộc') && tags.includes(t)) return `<span class="kk-red">${t} (+1${lettAbbr})</span>`;
+            return t;
+          });
           if(isTrungLapSub) otherTags.unshift('trùng lặp');
           // Luôn kèm tên sao trong ngoặc (yêu cầu người dùng) - xem giải thích tương tự ở mạch chính.
           otherTags.unshift(s.star);
           subTags[i]=otherTags;
           subKXDC[i]=dispTags.includes('KXĐC');
+          // Cùng lý do như niên ở trên: chỉ ghi "+1" khi đây THẬT SỰ là lần cộng KXĐC mới (tags, không phải
+          // dispTags fallback) VÀ đang ở kết cấu Kị (letter==='D') - KXĐC không cộng điểm ở kết cấu Lộc (xem
+          // giải thích đầy đủ ở pointBonus).
+          subKXDCNew[i]=tags.includes('KXĐC') && letter==='D';
         });
+      }else if(!info.onRoot && isSelfLoopHere && letter==='A'){
+        // "Cung tự hóa A phải cộng thêm 1 Lộc" (yêu cầu người dùng) - ÁP DỤNG NGAY CẢ khi cả chuỗi riêng của M
+        // chỉ vỏn vẹn đúng 1 bước tự hóa xuất rồi dừng hẳn (isSelfLoopHere, "dead-end"), không chỉ trường hợp
+        // tự hóa xuất RỒI còn tiếp tục bay (memberSelfLoopStart, xử lý ở nhánh trên). Nếu chính cung M này
+        // ĐƯỢC CHỌN làm root thay vì làm thành viên, hành vi tự hóa xuất giống hệt sẽ tự động là "cung Triệu
+        // nhân phi X = 1" (base) của root - không có lý do gì để "1" đó biến mất chỉ vì M đang bị xử lý như 1
+        // thành viên trong lượt duyệt gốc khác (2 vai trò hiển thị khác nhau, nhưng CÙNG 1 sự thật: M được
+        // chọn Thể/Dụng thì M tự nó luôn mang 1 Lộc). CHỈ áp dụng cho kết cấu LỘC - kết cấu Kị giữ nguyên hành
+        // vi gốc (không cộng), người dùng chỉ nêu rõ quy tắc này cho riêng "tự hóa A".
+        total+=1;
       }
       let flow='';
       // Thành viên hội tụ CHÍNH LÀ cung niên A/D (nienIdx) - nhãn hiển thị phải ghi rõ "niên A/D" thay vì tên
@@ -6759,9 +6819,16 @@ function computeKetCauStructuresRaw(mode){
       // vẫn tính đủ điểm hội tụ như bình thường (đây là 1 nguồn ĐỘC LẬP, không phải trùng lặp/dư thừa).
       const isNienMember = M===nienIdx;
       if(isSelfLoopHere){
-        const tagStr = subTags[0].length ? ` (${subTags[0].join(', ')})` : '';
-        flow = `: tự hóa ${letter} xuất${tagStr}`;
+        // "+1L" khi genuine (xem nhánh else if(...isSelfLoopHere && letter==='A') phía trên - CHỈ kết cấu Lộc,
+        // và CHỈ khi không phải info.onRoot vì lúc đó đã tính trong nền "1" của root rồi).
+        const creditTag = (!info.onRoot && letter==='A') ? ` (+1${lettAbbr})` : '';
+        flow = `: tự hóa ${letter} xuất (${subSteps[0].star})${creditTag}`;
       }else{
+        // "Hội tụ = +1" (total+=1 ở đầu khối này, vô điều kiện khi !info.onRoot && !isSelfLoopHere) là 1 điểm
+        // THẬT SỰ, riêng biệt với bất kỳ tag niên/KXĐC nào CŨNG rơi đúng vào bước i=0 - ghi rõ "+1" ngay tại
+        // bước hội tụ GỐC (i=0) để không còn phải dồn vào 1 ngoặc tổng mơ hồ ở cuối dòng (yêu cầu người dùng).
+        // info.onRoot thì KHÔNG có "+1" này (đáp thẳng vào gốc, đã tính trong nền "1" của root rồi).
+        const baseCreditTag = !info.onRoot ? ` (+1${lettAbbr})` : '';
         subSteps.forEach((s,i)=>{
           const tags=subTags[i];
           const tagStr = tags.length ? ` (${tags.join(', ')})` : '';
@@ -6770,17 +6837,53 @@ function computeKetCauStructuresRaw(mode){
           // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
           // thích tương tự ở mạch chính phía trên.
           if(i>0 && s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
-          else if(subKXDC[i]) flow += `<br>↓ KXĐC<br>→ ${targetHtml}`;
-          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}` : ` → ${targetHtml}`;
+          else if(subKXDC[i]) flow += `<br>↓ <span class="kk-red">KXĐC${subKXDCNew[i]?` (+1${lettAbbr})`:''}</span><br>→ ${targetHtml}`;
+          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}${baseCreditTag}` : ` → ${targetHtml}${baseCreditTag}`;
           else flow += ` —CK→ ${targetHtml}`;
         });
       }
       const memberLabel = isNienMember ? `niên ${mode==='cat'?'A':'D'}` : label(M);
+      // Đoạn "bơm lực" (nếu M chính là nguồn bomLucFrom của 1/nhiều bước trên mạch chính, xem bombSegments) -
+      // gộp NGAY vào bullet của M ở đây, không còn tách ra ghi rời trên mạch chính nữa (yêu cầu người dùng:
+      // 1 thành viên bơm lực chỉ nên ghi 1 lần, gộp chung 1 chỗ thay vì rải ra 2 nơi khác nhau).
+      const bombExtra=bombSegments.get(M);
       // Không hiển thị dòng "đã tính trong nền" nữa (theo yêu cầu) - vẫn giữ subSteps/memberSubChains để tab
-      // "cô lập kết cấu" vẽ đúng, chỉ bỏ dòng chữ mô tả khi M đáp thẳng vào gốc (info.onRoot).
-      if(!info.onRoot){
-        const memberDelta=total-totalBeforeMember;
-        lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${memberLabel}</b>${flow} [+${memberDelta}${lettAbbr}]</li>`);
+      // "cô lập kết cấu" vẽ đúng, chỉ bỏ dòng chữ mô tả khi M đáp thẳng vào gốc (info.onRoot) - TRỪ KHI M vẫn
+      // còn đoạn bơm lực (bombExtra) cần ghi, lúc đó vẫn phải hiện dòng để không mất dấu đoạn đó.
+      if(!info.onRoot || bombExtra){
+        // Truy Lộc/Kị (TL/TK) hay niên hội tụ THẲNG (đúng 1 bước, subSteps.length===1) là 1 NGUỒN Lộc/Kị ĐỘC
+        // LẬP thứ 2 vừa "gặp" đúng 1 điểm - tô đỏ để nổi bật, đúng tinh thần "truy Kị cũng là 1 kết cấu mới"
+        // (yêu cầu người dùng). Nếu điểm đó đã hiện ĐÚNG SAO này rồi trên mạch chính (spineIndexOf khớp cả
+        // sao, không chỉ khớp cung) thì đường đi (sao) đã được mô tả đủ ở trên rồi - rút gọn dòng này, KHÔNG
+        // lặp lại tên sao/đường đi nữa, chỉ còn tên cung + số Kị/Lộc đóng góp (theo đúng yêu cầu: "không được
+        // lặp lại những đường truy kỵ đã ghi trước đó").
+        let redClass='', flowOut=flow;
+        if(!isSelfLoopHere && subSteps.length===1){
+          redClass=' hoa-red';
+          if(!isNienMember){
+            const spineIdxHere=spineIndexOf.get(subSteps[0].to);
+            // Điểm i=0 khi root tự hóa xuất (rootSelfLoop) KHÔNG hề được xử lý qua pointBonus ở mạch chính (bị
+            // "return" sớm ngay đầu steps.forEach, xem "if(i===0 && rootSelfLoop) return;") - dù ngôi sao
+            // trùng khớp, đây KHÔNG PHẢI "đã mô tả đủ ở trên" như các điểm i>=1 khác, nên KHÔNG được áp dụng
+            // rút gọn ở đây - nếu không, sẽ mất hẳn tag/nguồn +1 riêng của CHÍNH cung root tại điểm đó (vd
+            // cung root tự hóa Lộc TẠI đúng điểm này, hoàn toàn độc lập với việc root tự hóa xuất, đã bị hiểu
+            // lầm là "trùng, khỏi ghi" trong khi thực ra CHƯA từng được tính/ghi ở mạch chính).
+            const spineAlreadyDescribed = spineIdxHere!==undefined && !(spineIdxHere===0 && rootSelfLoop);
+            if(spineAlreadyDescribed && steps[spineIdxHere].star===subSteps[0].star){
+              flowOut = ` —${convTag}→ ${label(subSteps[0].to)}${!info.onRoot?` (+1${lettAbbr})`:''}`;
+            }
+          }
+        }
+        // Cùng tinh thần tô đỏ như trên, áp dụng cho trường hợp M tự hóa Lộc rồi dừng hẳn (isSelfLoopHere) -
+        // giờ cũng mang 1 nguồn Lộc thật (xem nhánh total+=1 phía trên), nên cũng phải tô đỏ.
+        if(isSelfLoopHere && letter==='A' && !info.onRoot) redClass=' hoa-red';
+        // KHÔNG còn ghi ngoặc tổng dồn "[+X]" ở cuối dòng nữa (cùng lý do như mạch chính phía trên) - mỗi
+        // đoạn đóng góp (hội tụ gốc, KXĐC, niên, đoạn bơm lực...) đã tự ghi rõ "+1" riêng ngay tại chỗ.
+        if(bombExtra){
+          redClass=' hoa-red';
+          bombExtra.forEach(seg=>{ flowOut+=seg.html; });
+        }
+        lines.push(`<li class="hoa-sub hoa-plus${redClass}">⤷ <b>${memberLabel}</b>${flowOut}</li>`);
       }
       if(!isSelfLoopHere) memberSubChains.push({idx:M, steps:subSteps});
       const spineIdx=resolveSpineIndex(M, new Set([M]));
@@ -6817,7 +6920,7 @@ function computeKetCauStructuresRaw(mode){
     }
     if(nienOverlapIdx!=null && (root===nienOverlapIdx || members.includes(nienOverlapIdx)) && !nienCap.used && !nienOverlapIsOwnBaseFlight){
       total+=1; nienCap.used=true;
-      lines.push(`<li class="hoa-sub hoa-plus">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
+      lines.push(`<li class="hoa-sub hoa-plus hoa-red">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
     }
     return {root, total, lines, chainSteps:steps, convergences, nienBonusNode, memberSubChains, spineRealMembers:[...spineRealMembers]};
   }
@@ -6876,19 +6979,36 @@ function computeKetCauStructuresRaw(mode){
     });
     // Loại bỏ kết cấu "nhỏ" mà CHÍNH triệu nhân cung của nó đã xuất hiện như 1 thành viên hội tụ TL (truy Lộc)
     // trong 1 kết cấu "lớn" khác - câu chuyện của nó đã được kể trọn vẹn trong kết cấu lớn kia rồi (cùng 1
-    // đường bay, cùng đích), đứng riêng thêm 1 lần nữa chỉ là lặp lại, không phải 1 kết cấu độc lập thật sự.
-    // "Lớn hơn" so bằng chainSteps.length (mạch dài hơn) trước, rồi total, để không bị loại nhầm 2 chiều.
-    // CHỈ áp dụng khi kết cấu "nhỏ" total===1 (tức TOÀN BỘ câu chuyện của nó chỉ là đúng cái "1" nền tảng, tự
-    // nó KHÔNG có thêm bất kỳ hội tụ/điểm cộng nào khác của riêng nó) - nếu nó CÒN có thêm nội dung riêng
-    // (total>1, tự nó cũng có hội tụ khác), thì CHỈ vì gốc của nó tình cờ chạm vào 1 kết cấu khác ở 1 điểm
-    // không có nghĩa TOÀN BỘ câu chuyện của nó đã được kể hết ở đó - không được loại cả kết cấu.
+    // đường bay, cùng đích), đứng riêng thêm 1 lần nữa chỉ là 2 CÁCH VẼ của CÙNG 1 mạng lưới, không phải 2 kết
+    // cấu độc lập thật sự (yêu cầu người dùng: "2 kết cấu này thực ra là 1"). "Lớn hơn" so bằng
+    // chainSteps.length (mạch dài hơn) trước, rồi total, để không bị loại nhầm 2 chiều.
+    // Trước đây CHỈ áp dụng khi kết cấu "nhỏ" total===1 (sợ loại oan 1 kết cấu còn nội dung riêng chưa kể hết
+    // ở kết cấu lớn) - nhưng "nội dung riêng" của kết cấu nhỏ (vd Tử Nữ) thực chất LUÔN đã được evalRoot của
+    // kết cấu lớn (vd Tật Ách) tính lại đầy đủ rồi, vì evalRoot xét TOÀN BỘ effectiveSelected làm members bất
+    // kể root là ai - nên câu chuyện của "nhỏ" chưa bao giờ bị bỏ sót thật, chỉ là bị "kể lại" một cách khác
+    // (từ góc nhìn gốc khác). Bỏ hẳn điều kiện total===1, áp dụng chung cho MỌI trường hợp gốc của 1 kết cấu
+    // cũng là 1 thành viên hội tụ TL thật sự của kết cấu lớn hơn.
+    // So sánh "big" có THẬT SỰ đáng giữ hơn "small" hay không - PHẢI trả về ưu tiên 1 CHIỀU DUY NHẤT, không
+    // bao giờ hòa tuyệt đối (nếu không, khi 2 kết cấu hòa cả chainSteps.length lẫn total, phép so sánh cũ dùng
+    // ">=" sẽ đúng ở CẢ 2 CHIỀU cùng lúc, khiến 2 kết cấu tự loại lẫn nhau, mất trắng cả 2 - lỗi thật đã gặp).
+    // Thứ tự ưu tiên: (1) chainSteps dài hơn, (2) total cao hơn, (3) gốc KHÔNG tự hóa xuất ngay bước đầu
+    // (rootSelfLoop=false) được ưu tiên hơn - đọc tự nhiên hơn hẳn ("Tử hóa Lộc → Tật..." thay vì "Tật tự hóa
+    // Lộc xuất... ⤷ Tử —TL→ Tật", đúng yêu cầu người dùng: "kết cấu nên viết cho hợp lý"), (4) anchorIdx lớn
+    // hơn (chốt hạ cuối cùng, đảm bảo LUÔN có đúng 1 chiều thắng).
+    const structPreference=(a,b)=>{
+      if(a.chainSteps.length!==b.chainSteps.length) return a.chainSteps.length-b.chainSteps.length;
+      if(a.total!==b.total) return a.total-b.total;
+      const aSelfLoop=a.chainSteps[0]&&a.chainSteps[0].to===a.anchorIdx;
+      const bSelfLoop=b.chainSteps[0]&&b.chainSteps[0].to===b.anchorIdx;
+      if(aSelfLoop!==bSelfLoop) return aSelfLoop?-1:1;
+      return a.anchorIdx-b.anchorIdx;
+    };
     const subsumedIdx=new Set();
     structures.forEach((big,bi)=>{
       (big.convergences||[]).forEach(cv=>{
         structures.forEach((small,si)=>{
-          if(si===bi || small.anchorIdx!==cv.otherIdx || small.total!==1) return;
-          const bigLonger = big.chainSteps.length>small.chainSteps.length ||
-            (big.chainSteps.length===small.chainSteps.length && big.total>=small.total);
+          if(si===bi || small.anchorIdx!==cv.otherIdx) return;
+          const bigLonger = structPreference(big,small)>0;
           if(bigLonger) subsumedIdx.add(si);
         });
       });
