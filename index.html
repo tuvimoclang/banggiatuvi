@@ -132,6 +132,58 @@ body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);col
 .atc-result{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--hover);color:var(--text);font-size:.64rem;font-weight:700;white-space:nowrap}
 @media(max-width:1000px){.atc-layout{flex-direction:column}.atc-tools-col{display:none}.atc-chart-col{flex:1 1 auto;max-width:100%}.atc-panel-col{border-left:none;padding-left:0;border-top:1px solid var(--border-lt);padding-top:14px}}
 
+/* -- Tab "BẢNG VẼ": 2 CỘT TÁCH RIÊNG (đúng bố cục bản tham khảo người dùng gửi) - cột trái GỌN (lá số sát
+   ngay bộ công cụ bên dưới, không khoảng trống thừa) : cột phải là khung trắng RIÊNG (#wbBoard/#wbCanvas),
+   nơi vẽ tự do + nơi các ô cung (bấm nút tên cung ở cột trái) hiện ra. Trước đây gộp chung 1 canvas phủ cả lá
+   số lẫn khung trắng khiến khoảng trống rỗng quá lớn giữa lá số (nhỏ, góc trên-trái) và bộ công cụ (mãi phía
+   dưới) - tách hẳn 2 cột để luôn nhìn thấy TRỌN VẸN lá số lẫn công cụ cùng lúc, không cuộn xa. -*/
+.wb-flat{padding:14px;display:flex;flex-direction:column;gap:10px}
+.wb-layout{display:flex;gap:14px;align-items:stretch}
+.wb-left-col{flex:0 0 38%;max-width:38%;display:flex;flex-direction:column;gap:10px}
+/* Khung "sao chép nguyên trạng" #banWrap (lưới 12 cung + ảnh chụp canvas mũi tên phi hóa/tự hóa/nét vẽ tay
+   ĐANG có ở tab "Nhập thông tin") - dựng ở ĐÚNG kích thước gốc rồi CSS transform:scale() thu nhỏ nguyên khối
+   lại cho vừa cột trái, để lưới cung và ảnh mũi tên luôn khớp pixel-với-pixel (không tính lại tọa độ tay).
+   Nằm TRONG LUỒNG bình thường (không position:absolute nữa - trước đây phải absolute để nhường chỗ cho canvas
+   phủ đè lên, giờ không cần vì canvas đã tách sang cột phải riêng) nên không còn khoảng trống rỗng phía dưới. */
+.wb-chart-wrap{overflow:hidden}
+.wb-chart-wrap .placeholder{padding:24px 8px;text-align:center;color:var(--muted);font-size:.78rem}
+.wb-chart-scalebox{position:relative;transform-origin:top left}
+.wb-chart-scalebox .ban-tuvi{pointer-events:none}
+.wb-chart-arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wb-tools-card{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--border-lt);border-radius:12px;background:var(--panel);box-shadow:0 2px 14px rgba(0,0,0,.06)}
+.wb-toolrow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.wb-toolrow .icon-btn{width:26px;height:26px;flex:0 0 auto}
+.wb-toolrow .btn-danger{padding:3px 8px;font-size:.62rem}
+.wb-color-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.wb-swatch-grid{display:grid;grid-template-columns:repeat(9,16px);gap:3px}
+.wb-swatch{width:16px;height:16px;border-radius:4px;border:1px solid var(--border-lt);cursor:pointer;padding:0}
+.wb-swatch.active{outline:2px solid var(--accent);outline-offset:1px}
+.wb-width-row{display:flex;gap:3px}
+.wb-width-btn{width:22px;height:22px;border:1px solid var(--border-lt);border-radius:5px;background:var(--panel);color:var(--text);font-size:.62rem;font-weight:700;cursor:pointer;padding:0}
+.wb-width-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.wb-cung-title{font-size:.66rem;font-weight:700;letter-spacing:.6px;color:var(--muted);margin-top:2px}
+/* To hẳn lên theo yêu cầu người dùng (trước đây quá nhỏ .6rem/padding 4px 2px, khó bấm). Cố định ĐÚNG 7 cột
+   (không dùng auto-fill nữa) - 14 nút luôn xếp gọn thành ĐÚNG 2 hàng bất kể bề rộng cột trái co giãn thế
+   nào, không bao giờ tràn xuống hàng 3. */
+.wb-cung-btns{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+/* Viền LUÔN ĐEN cố định (không đổi theo màu nền/chữ của nút) - đúng kiểu viền đen rõ nét như bản tham khảo
+   người dùng gửi, áp dụng đồng nhất cho MỌI nút kể cả 2 nút màu N.Lộc/N.Kỵ bên dưới. */
+.wb-cung-btn{padding:8px 2px;border:1.5px solid #1a1a1a;border-radius:9px;background:var(--panel);color:var(--text);font-size:.72rem;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:transform .1s,box-shadow .1s;text-transform:uppercase}
+.wb-cung-btn:hover{background:var(--hover);transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.wb-cung-btn:active{transform:translateY(0);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+/* N.Lộc/N.Kỵ tô màu riêng ngay trên nút (không cần bấm mới biết) - xanh lá cho Lộc, ĐỎ cho Kỵ - khớp đúng
+   màu nền của chính ô sẽ được thả ra khi bấm 2 nút này (xem WB_SPECIAL_BOX_COLORS). Viền vẫn đen như mọi nút
+   khác (không đổi theo bg), chỉ khác màu nền + chữ trắng cho dễ đọc trên nền đậm. */
+.wb-cung-btn.wb-cung-loc{background:#16a34a;color:#fff}
+.wb-cung-btn.wb-cung-loc:hover{background:#16a34a;filter:brightness(1.08)}
+.wb-cung-btn.wb-cung-ky{background:#dc2626;color:#fff}
+.wb-cung-btn.wb-cung-ky:hover{background:#dc2626;filter:brightness(1.1)}
+.wb-right-col{flex:1 1 62%;min-width:0}
+.wb-board{position:relative;width:100%;height:100%;min-height:520px;border:1px solid var(--border-lt);border-radius:14px;background:var(--panel);box-shadow:0 2px 14px rgba(0,0,0,.06);overflow:hidden}
+#wbCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;cursor:crosshair}
+.wb-board.wb-mode-select #wbCanvas{cursor:default}
+@media(max-width:900px){.wb-layout{flex-direction:column}.wb-left-col{flex:1 1 auto;max-width:100%}.wb-board{min-height:420px}}
+
 /* ═══ Sub-tab "LẬP LÁ SỐ" / "AN THỦ CÔNG" (trong tab AN THỦ CÔNG) - sát mép trên (ngang viền khung lá số bên
    trái, không còn padding-top:48px thừa kế từ atc-panel-col cũ), 2 nút bằng nhau (flex:1) và canh giữa. ═══ */
 .atc-subtabs{display:flex;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--border-lt);padding-bottom:10px}
@@ -868,6 +920,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       <button class="tab active" data-tab="form" onclick="switchTopTab('form')">NHẬP THÔNG TIN</button>
       <button class="tab" data-tab="dual" onclick="switchTopTab('dual')">2 LÁ SỐ</button>
       <button class="tab" data-tab="plus" onclick="switchTopTab('plus')">PLUS</button>
+      <button class="tab" data-tab="whiteboard" onclick="switchTopTab('whiteboard')">BẢNG VẼ</button>
     </div>
     <div class="topbar-auth" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0">
       <span id="userInfo" style="display:none"></span>
@@ -1355,6 +1408,66 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
     </div>
   </div>
 
+  <!-- Tab "BẢNG VẼ": 2 cột tách riêng - cột trái GỌN (lá số đồng bộ nguyên trạng, kể cả mũi tên/nét vẽ tay,
+       từ tab "NHẬP THÔNG TIN", sát ngay bên dưới là bộ công cụ, không khoảng trống thừa) : cột phải là khung
+       trắng RIÊNG (#wbBoard/#wbCanvas) - nơi vẽ tự do VÀ nơi các ô cung (bấm nút tên cung ở cột trái) hiện ra.
+       Đúng 6 công cụ theo yêu cầu người dùng: tròn/tam giác/vuông/gôm(xóa)/mũi tên thường/chữ - không có nút
+       "Chọn" riêng, bấm lại ĐÚNG công cụ đang bật là tự về chế độ chọn/kéo-thả ô cung - kèm 9 màu, 4 cỡ nét,
+       undo/redo/xóa hết. Hàng nút hành
+       động trên cùng dùng LẠI nguyên xi các hàm đã có của tab "NHẬP THÔNG TIN" (togglePlainBw/
+       toggleInfoVisible/...) - thao tác trên ĐÚNG 1 lá số đang mở (activeChartIdx), không tách state riêng.
+       Ô cung (shape type 'box') kéo-thả được (wbDraggingBox), mũi tên tự bắt dính cạnh ô gần nhất
+       (wbSnapToBoxEdge, không bắt buộc). -->
+  <div class="panel-flat wb-flat" id="panelWhiteboard" hidden>
+    <!-- Hàng nút riêng cũ (Đổi màu/Ẩn Hiện Info/Tứ hóa mệnh/Lưu lá số/Lưu Kho/Kho LS) đã BỎ - #panelForm
+         (ngay phía trên, dùng CHUNG với tab "NHẬP THÔNG TIN", xem switchTopTab) đã có đủ các nút này VÀ
+         thêm cả form nhập ngày/giờ sinh + nút LẬP LÁ SỐ, khỏi cần 1 bản riêng gây trùng lặp/lệch trạng thái
+         active (nút ở đây trước nay không hề có id nên không bao giờ được cập nhật trạng thái bật/tắt). -->
+    <div class="wb-layout">
+    <div class="wb-left-col" id="wbLeftCol">
+    <div class="wb-chart-wrap" id="wbChartUnderlay"><p class="placeholder">Chưa có lá số - vào tab "NHẬP THÔNG TIN" để lập lá số trước.</p></div>
+    <div class="wb-tools-card" id="wbToolsCard">
+    <div class="wb-toolrow">
+      <button class="icon-btn" id="wbToolEllipse" title="Vẽ hình tròn" onclick="wbSetDrawTool('ellipse')">
+        <svg viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="icon-btn" id="wbToolTriangle" title="Vẽ tam giác" onclick="wbSetDrawTool('triangle')">
+        <svg viewBox="0 0 24 24" width="15" height="15"><path d="M12 4l8 16H4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="icon-btn" id="wbToolRect" title="Vẽ hình vuông/chữ nhật" onclick="wbSetDrawTool('rect')">
+        <svg viewBox="0 0 24 24" width="15" height="15"><rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="icon-btn" id="wbToolEraser" title="Gôm (quét qua để xóa nét)" onclick="wbSetDrawTool('eraser')">
+        <svg viewBox="0 0 24 24" width="15" height="15"><rect x="5" y="10" width="14" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-20 12 14)"/></svg>
+      </button>
+      <button class="icon-btn" id="wbToolArrow" title="Vẽ mũi tên (tự bắt dính vào cạnh ô cung)" onclick="wbSetDrawTool('arrow')">
+        <svg viewBox="0 0 24 24" width="15" height="15"><line x1="4" y1="20" x2="19" y2="5" stroke="currentColor" stroke-width="2"/><path d="M19 5l-6 1.5M19 5l-1.5 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn" id="wbToolText" title="Chèn chữ" onclick="wbSetDrawTool('text')">Aa</button>
+      <button class="icon-btn" title="Hoàn tác" onclick="wbUndoDraw()">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M9 14 4 9l5-5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 9h9a6 6 0 1 1 0 12h-3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="icon-btn" title="Làm lại" onclick="wbRedoDraw()">
+        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M15 14l5-5-5-5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 9h-9a6 6 0 1 0 0 12h3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button class="btn-danger" onclick="wbClearDraw()">Xóa hết</button>
+    </div>
+    <div class="wb-color-row">
+      <div class="wb-swatch-grid" id="wbSwatchGrid"></div>
+      <div class="wb-width-row" id="wbWidthRow"></div>
+    </div>
+    <div class="wb-cung-title">THẢ Ô CUNG</div>
+    <div class="wb-cung-btns" id="wbCungBtns"></div>
+    </div>
+    </div>
+    <div class="wb-right-col">
+      <div class="wb-board" id="wbBoard">
+        <canvas id="wbCanvas"></canvas>
+      </div>
+    </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="phihoa_data.js"></script>
@@ -1433,6 +1546,26 @@ function khoSyncToServer() {
     }).catch(e => console.warn('Đồng bộ Kho lên server thất bại (vẫn lưu local, sẽ tự thử lại lần lưu kế tiếp):', e));
   }, 600);
 }
+// GỘP (không GHI ĐÈ) 2 danh sách lá số theo id - mỗi bản ghi (local hoặc server) có mặt ở BÊN NÀO cũng được
+// giữ lại đủ, không bên nào làm mất bên kia. Nếu 1 id có mặt ở cả 2 bên (đã từng đồng bộ ít nhất 1 lần) thì
+// ưu tiên giữ bản ghiChu/category MỚI HƠN theo savedAt - id là Date.now() lúc tạo nên gần như không trùng.
+function khoMergeLists(localList, serverList) {
+  const byId = new Map();
+  localList.forEach(r => byId.set(r.id, r));
+  serverList.forEach(r => {
+    const existing = byId.get(r.id);
+    if (!existing) { byId.set(r.id, r); return; }
+    // Cùng id ở cả 2 bên - giữ bản có savedAt MỚI HƠN (đề phòng 1 bên đã sửa ghi chú/danh mục sau khi lưu).
+    const existingTime = new Date(existing.savedAt || 0).getTime();
+    const serverTime = new Date(r.savedAt || 0).getTime();
+    if (serverTime > existingTime) byId.set(r.id, r);
+  });
+  // Mới nhất lên đầu, giống thứ tự unshift() vốn có của luuKhoLaSo/confirmLuuKho.
+  return Array.from(byId.values()).sort((a, b) => new Date(b.savedAt||0) - new Date(a.savedAt||0));
+}
+function khoMergeCategories(localCats, serverCats) {
+  return Array.from(new Set([...(localCats||[]), ...(serverCats||[])]));
+}
 async function khoSyncFromServer() {
   // Cùng lý do như khoSyncToServer() - chỉ đồng bộ khi đã isActivated, tránh gõ đại email người khác để đọc
   // được Kho của họ khi chưa có mã kích hoạt hợp lệ đúng email đó.
@@ -1442,21 +1575,30 @@ async function khoSyncFromServer() {
     const url = APPS_SCRIPT_URL + '?' + new URLSearchParams({ action:'kho_get', email: currentUser.email }).toString();
     const result = await fetch(url).then(r => r.json());
     if (!result.ok) return;
+    const localList = khoLoadList();
+    const localCats = khoLoadCategories();
     if (result.updatedAt === null) {
-      // Server CHƯA TỪNG có dữ liệu của email này (lần đồng bộ đầu tiên, updatedAt null) - TUYỆT ĐỐI không
-      // được ghi đè local bằng danh sách rỗng của server trong trường hợp này, nếu không sẽ XÓA MẤT dữ liệu
-      // cục bộ đã lưu từ trước khi có tính năng đồng bộ (đây chính xác là lỗi đã từng làm mất Kho thật của
-      // người dùng khi họ deploy bản có đồng bộ lần đầu). Thay vào đó, đẩy NGƯỢC dữ liệu local hiện có (nếu
-      // có) lên server để "khởi tạo" - máy khác lần đầu đồng bộ sau đó sẽ nhận đúng dữ liệu này.
-      const localList = khoLoadList();
-      const localCats = khoLoadCategories();
+      // Server CHƯA TỪNG có dữ liệu của email này (lần đồng bộ đầu tiên, updatedAt null) - đẩy NGƯỢC dữ liệu
+      // local hiện có (nếu có) lên server để "khởi tạo" - máy khác lần đầu đồng bộ sau đó sẽ nhận đúng dữ
+      // liệu này.
       if (localList.length || localCats.length) khoSyncToServer();
       return;
     }
-    // Server đã có dữ liệu thật (từng đồng bộ ít nhất 1 lần trước đó, updatedAt khác null) - lúc này mới coi
-    // server là bản mới nhất, ghi đè cache local để đồng bộ đúng dữ liệu từ máy khác (nếu có).
-    localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(result.list || []));
-    localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(result.categories || []));
+    // TRƯỚC ĐÂY: ghi đè thẳng local bằng dữ liệu server (coi server luôn là bản mới nhất) - ĐÂY LÀ LỖI GÂY
+    // MẤT DỮ LIỆU đã xác nhận thực tế: nếu 1 lần lưu lá số trên máy A chưa kịp đẩy lên server (mạng chậm/
+    // đóng app quá nhanh, xem khoSyncToServer debounce 600ms) thì lần mở Kho kế tiếp - dù trên CHÍNH máy A
+    // hay máy B - sẽ tải về đúng bản server CŨ HƠN (thiếu bản ghi vừa lưu) và ghi đè mất local, xóa vĩnh viễn
+    // lá số chưa kịp đồng bộ dù nó vẫn còn nguyên trên máy vừa lưu. Sửa thành GỘP 2 bên (khoMergeLists) - lá
+    // số có mặt ở BẤT KỲ bên nào (local hoặc server) đều được giữ lại, không bên nào xóa mất bên kia nữa.
+    const mergedList = khoMergeLists(localList, result.list || []);
+    const mergedCats = khoMergeCategories(localCats, result.categories || []);
+    const listChanged = JSON.stringify(mergedList) !== JSON.stringify(localList);
+    const catsChanged = JSON.stringify(mergedCats) !== JSON.stringify(localCats);
+    localStorage.setItem(getKhoLaSoKey(currentUser.email), JSON.stringify(mergedList));
+    localStorage.setItem(getKhoCatKey(currentUser.email), JSON.stringify(mergedCats));
+    // Nếu gộp thêm được bản ghi mà server CHƯA có (từng bị lỡ nhịp sync) - đẩy ngay bản đã gộp đủ lên server,
+    // để lần đồng bộ kế tiếp (trên máy khác) cũng nhận được đầy đủ, không bị "thiếu" lại từ phía server nữa.
+    if (listChanged || catsChanged) khoSyncToServer();
   } catch(e) { console.warn('Không tải được Kho từ server (tạm dùng dữ liệu local):', e); }
 }
 let khoActiveCategory = 'ALL'; // 'ALL' | 'UNASSIGNED' | tên danh mục
@@ -1697,21 +1839,50 @@ function openKhoLaSo(source) {
 function closeKhoLaSo() {
   const m = document.getElementById('khoModal'); if (m) m.style.display = 'none';
 }
+// Bọc thêm lớp cảnh báo RÕ RÀNG cho mọi kiểu thất bại khi "Mở" 1 lá số từ Kho - trước đây MỌI trường hợp lỗi
+// (không tìm thấy id, thiếu ngày/tháng/năm sinh trong bản ghi, gán .value vào <select> nhưng không khớp
+// option nào, hay 1 lỗi JS bất ngờ trong f.submit()) đều xảy ra ÂM THẦM: modal Kho đã đóng
+// (closeKhoLaSo() luôn chạy TRƯỚC submit), không có lá số nào hiện ra, không 1 dòng thông báo - đúng cảm
+// giác "bấm Mở, lá số biến mất". Giờ mọi nhánh lỗi đều alert() rõ ràng lý do, giúp chẩn đoán ngay tại chỗ.
 function moKhoItem(id) {
   const list = khoLoadList();
-  const r = list.find(x => x.id === id); if (!r) return;
+  const r = list.find(x => x.id === id);
+  if (!r) { alert('Không tìm thấy lá số này trong Kho nữa (có thể đã bị xóa hoặc đổi id).'); return; }
   const f = KHO_SOURCES[khoSource];
+  // Thiếu bất kỳ trường ngày/tháng/năm sinh nào ngay TRONG bản ghi đã lưu (dữ liệu gốc bị hỏng/thiếu, không
+  // phải lỗi lúc điền form) - dừng lại NGAY, báo rõ, không mở form ra để rồi lapLaSo() tự âm thầm báo lỗi
+  // "Nhập đúng Ngày/Tháng/Năm sinh" (dễ bị bỏ lỡ vì modal Kho vừa đóng, mắt còn đang nhìn chỗ khác).
+  if (!r.hoTen || !r.ngayDD || !r.ngayMM || !r.ngayYYYY) {
+    alert(`Bản ghi "${r.hoTen||'(không tên)'}" bị thiếu dữ liệu ngày sinh, không thể mở được.\nNgày lưu: ${r.savedAt||'không rõ'}`);
+    return;
+  }
   document.getElementById(f.hoTen).value = r.hoTen;
   document.getElementById(f.dd).value = r.ngayDD;
   document.getElementById(f.mm).value = r.ngayMM;
   document.getElementById(f.yyyy).value = r.ngayYYYY;
   document.getElementById(f.gio).value = r.gioSinh;
   document.getElementById(f.gioiTinh).value = r.gioiTinh;
+  // Gán .value vào <select> nhưng giá trị đó KHÔNG khớp đúng option nào (vd dữ liệu cũ lưu khác định dạng) -
+  // trình duyệt ÂM THẦM bỏ qua (select giữ nguyên giá trị đang chọn trước đó), không báo lỗi gì - kiểm tra
+  // lại ngay sau khi gán để bắt được đúng trường hợp này, cảnh báo thay vì lặng lẽ dùng sai ngày/giờ.
+  const ddEl=document.getElementById(f.dd), mmEl=document.getElementById(f.mm), gioEl=document.getElementById(f.gio);
+  const mismatches=[];
+  if(String(ddEl.value)!==String(r.ngayDD)) mismatches.push('Ngày');
+  if(String(mmEl.value)!==String(r.ngayMM)) mismatches.push('Tháng');
+  if(String(gioEl.value)!==String(r.gioSinh)) mismatches.push('Giờ sinh');
+  if(mismatches.length){
+    alert(`Cảnh báo: ${mismatches.join(', ')} của "${r.hoTen}" không khớp định dạng hiện tại, có thể bị lệch. Vui lòng kiểm tra lại sau khi lá số hiện ra.`);
+  }
   const lichBtn = document.getElementById(f.lich);
   lichBtn.dataset.val = r.lichLoai;
   lichBtn.textContent = f.lichText(r.lichLoai);
   closeKhoLaSo();
-  f.submit();
+  try {
+    f.submit();
+  } catch(e) {
+    console.error('Lỗi khi mở lá số từ Kho:', e);
+    alert(`Có lỗi khi lập lá số "${r.hoTen}": ${e.message}\n(Xem thêm chi tiết trong Console - F12)`);
+  }
 }
 function xoaKhoItem(id) {
   khoSaveList(khoLoadList().filter(x => x.id !== id));
@@ -2187,15 +2358,25 @@ function chart(){ return activeChartIdx>=0 ? charts[activeChartIdx] : null; }
 // ═══════════════════════════════════
 // TOP TABS
 // ═══════════════════════════════════
+// Tab đang active - dùng để ingestResult() biết có nên tự bật #workspace (lưới lá số đơn) lên hay không.
+// Cần theo dõi riêng vì #panelForm giờ HIỂN THỊ CHUNG ở cả tab "form" lẫn "whiteboard" (xem bên dưới) - lập
+// lá số từ form khi đang đứng ở tab "whiteboard" KHÔNG được tự bật #workspace đè lên khung Bảng Vẽ.
+let activeTopTab='form';
 function switchTopTab(name){
+  activeTopTab=name;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
   document.getElementById('panelGio').hidden = name!=='gio';
-  document.getElementById('panelForm').hidden = name!=='form';
+  // #panelForm (họ tên/ngày giờ sinh + LẬP LÁ SỐ + Đổi màu/Ẩn Info/Tứ hóa Mệnh/Lưu lá số/Lưu Kho/Kho LS)
+  // giờ hiện CHUNG ở cả tab "NHẬP THÔNG TIN" lẫn tab "BẢNG VẼ" - theo đúng yêu cầu người dùng: đứng ở Bảng
+  // Vẽ vẫn thao tác lập/sửa lá số được luôn, không cần chuyển tab qua lại. Không tạo bản sao form riêng cho
+  // Bảng Vẽ (tránh 2 nguồn trạng thái lệch nhau) - dùng lại NGUYÊN VẸN 1 form duy nhất, chỉ đổi điều kiện ẩn.
+  document.getElementById('panelForm').hidden = (name!=='form' && name!=='whiteboard');
   // Tab "PLUS" là 1 khung RIÊNG (#panelPlus), y chang giao diện/công cụ tab "2 Lá Số" (#panel2LaSo) nhưng
   // dùng 2 lá số C/D hoàn toàn độc lập với A/B - không đồng bộ, không hiện chung, mở 1 cặp khách khác mà
   // không đụng tới cặp đang xem ở tab kia.
   document.getElementById('panel2LaSo').hidden = name!=='dual';
   document.getElementById('panelPlus').hidden = name!=='plus';
+  document.getElementById('panelWhiteboard').hidden = name!=='whiteboard';
   // Tab "2 Lá Số"/"PLUS" là khung xem riêng, song song - ẩn tạm khung lá số đơn (nếu đang có) để đỡ rối, các
   // tab khác vẫn giữ nguyên hành vi cũ (workspace do lapLaSo/ingestResult tự bật khi có lá số).
   if(name==='dual'||name==='plus'){
@@ -2215,6 +2396,18 @@ function switchTopTab(name){
     // tab này (đề phòng bị đo sai lúc còn ẩn), giống hệt cách sizeCanvas() làm ở nhánh workspace bên dưới.
     initAtcPanelOnce();
     atcSizeCanvas();
+  }else if(name==='whiteboard'){
+    // PHẢI chụp lại #banWrap TRƯỚC khi ẩn workspace - display:none làm getBoundingClientRect() của #banWrap
+    // trả về 0x0 ngay lập tức, khiến wbRefreshChartPreview() dựng khung lá số kích thước 0 (trống trơn, không
+    // lỗi console vì innerHTML vẫn có, chỉ là width/height=0 nên không hiện gì) - lỗi thật đã gặp khi để hàm
+    // này chạy SAU dòng ẩn workspace. Chép lại đúng lá số ĐANG hiển thị (tĩnh, chỉ để xem trong lúc vẽ chú
+    // thích) mỗi lần mở tab này - nếu không refresh, panel trái sẽ kẹt lá số cũ dù người dùng vừa đổi/lập lá
+    // số khác ở tab "NHẬP THÔNG TIN".
+    wbRefreshChartPreview();
+    document.getElementById('workspace').style.display='none';
+    wbRenderCungBtns(); // chỉ dựng 1 lần (tự bỏ qua nếu đã có, xem khai báo hàm) - không phụ thuộc lá số nào
+    wbRenderColorControls(); // tương tự, chỉ dựng 1 lần
+    wbSizeCanvas();
   }else if(activeChartIdx>=0){
     document.getElementById('workspace').style.display='flex';
     // Canvas có thể đã bị đo/gán kích thước SAI (0x0) nếu 1 hành động vẽ lại nào đó lỡ chạy trong lúc
@@ -2222,6 +2415,12 @@ function switchTopTab(name){
     // đúng ngay khi workspace hiện lại, tránh canvas bị "kẹt" ở kích thước sai khiến các thao tác sau đó
     // (mũi tên, vẽ tay...) như không có tác dụng gì (thật ra vẫn chạy, chỉ là vẽ/định vị sai vào vùng 0x0).
     sizeCanvas();
+    // Lập/mở lá số có thể vừa xảy ra lúc #workspace còn ẩn (bấm "LẬP LÁ SỐ"/"Kho LS" từ tab "BẢNG VẼ" - form
+    // giờ dùng chung, xem ingestResult) - layoutPhuWrap/equalizeCungRowHeights lúc đó đo được 0px (ẩn) nên
+    // tính sai (dồn hết phụ tinh vào dạng liệt kê dọc, chiều cao cung không đều) - đo + xếp lại cho đúng
+    // ngay khi lưới thật sự hiện ra ở tab này.
+    layoutPhuWrap('banTuvi');
+    equalizeCungRowHeights('banTuvi');
   }
 }
 // Tab "AN THỦ CÔNG" (top) chia 2 sub-tab bên panel-col PHẢI: "Lập Lá Số" (form ngày/tháng/năm sinh thật, gọi
@@ -2620,6 +2819,478 @@ function atcClearDraw(){
     });
   });
 })();
+
+// -- Tab "BẢNG VẼ": #wbCanvas nằm ở cột phải (#wbBoard, khung trắng riêng, tách khỏi lá số bên cột trái).
+// Đúng 6 công cụ theo yêu cầu người dùng: tròn(ellipse)/tam giác/vuông(rect)/gôm(eraser)/mũi tên
+// thường(arrow, đường thẳng nét đều + đầu mũi tên chữ V, KHÔNG dùng kiểu thon dần của canvas chính)/chữ(text)
+// - không có nút "Chọn" riêng (bấm lại đúng công cụ đang bật là tự về chế độ chọn/kéo-thả ô cung) - kèm 9
+// màu, 4 cỡ nét, undo/redo/xóa hết, chọn 1 nét rồi xóa bằng Delete. Tái dùng các hàm generic đã có:
+// drawShape/drawShapeHighlight (rect/text), startInlineTextInput, distToSegment, onOff, clientPointFrom -
+// không copy lại các hàm đó; mũi tên/ellipse/triangle có hàm vẽ+hit-test riêng ở dưới (mũi tên cố tình KHÔNG
+// dùng drawShape() gốc vì cần kiểu thường, khác kiểu thon dần dùng cho canvas chính).
+// THÊM: shape type 'box' - 1 Ô CUNG kéo-thả được (bấm nút tên cung ở wbCungBtns để "thả" ra 1 ô mới, xem
+// video tham khảo). 'box' vẫn là 1 phần tử BÌNH THƯỜNG trong wbShapes (không phải DOM riêng) - nhờ vậy dùng
+// lại được NGUYÊN VẸN hạ tầng chọn/xóa/undo/redo chung, không cần viết hệ thống riêng.
+let wbDrawTool=null, wbShapes=[], wbDrawColor='#000000', wbDrawWidth=2;
+let wbActionLog=[], wbActionRedoLog=[], wbSelectedShapeIdx=null;
+let wbBoxSpawnCount=0, wbDraggingBox=null;
+// Kéo-giãn KHUNG ô tên cung (type 'box'): tay nắm hình vuông cam ở góc dưới-phải ô đang được chọn - kéo ra
+// để khung to/rộng hơn (đồng thời cỡ chữ cũng tự phóng theo tỉ lệ khung cho vừa vặn), kéo vào để khung nhỏ
+// lại. Góc trên-trái (x1,y1) đứng yên làm mốc, chỉ góc dưới-phải (x2,y2) di chuyển theo con trỏ.
+const WB_BOX_HANDLE_SIZE=9; // nửa cạnh vùng bắt trúng tay nắm (px)
+const WB_BOX_MIN_W=36, WB_BOX_MIN_H=22, WB_BOX_MAX_W=500, WB_BOX_MAX_H=300;
+let wbResizingBox=null; // {idx, x1,y1, w0,h0, font0} - x1/y1: góc neo cố định; w0/h0/font0: kích thước lúc bắt đầu kéo
+function wbBoxHandlePos(sh){
+  return {x:Math.max(sh.x1,sh.x2), y:Math.max(sh.y1,sh.y2)};
+}
+function wbHitTestResizeHandle(x,y){
+  if(wbSelectedShapeIdx===null) return false;
+  const sh=wbShapes[wbSelectedShapeIdx]; if(!sh || sh.type!=='box') return false;
+  const hp=wbBoxHandlePos(sh);
+  return Math.abs(x-hp.x)<=WB_BOX_HANDLE_SIZE && Math.abs(y-hp.y)<=WB_BOX_HANDLE_SIZE;
+}
+const WB_PALETTE=['#000000','#e74c3c','#f39c12','#f1c40f','#27ae60','#00bcd4','#2980b9','#8e44ad','#ffffff'];
+const WB_WIDTHS=[2,4,8,14];
+// Đúng 14 nút = 2 hàng x 7 cột (khớp bố cục bản tham khảo): 12 cung theo thứ tự sidebar (CUNG_SHORT_LABEL) +
+// N.Lộc/N.Kỵ - bấm 1 nút là thả ngay 1 ô cung mới lên khung vẽ, không cần đã lập lá số (chỉ là nhãn chữ tự
+// do, không gắn dữ liệu thật).
+const WB_CUNG_LIST=['Mệnh','Phụ','Phúc','Điền','Sự','Giao','Di','Tật','Tài','Tử','Thê','Huynh','N.Lộc','N.Kỵ'];
+// Đúng 6 công cụ theo yêu cầu người dùng (đã bỏ bút chì/dạ quang/nét lượn/đường thẳng riêng/ống hút màu/nút
+// "Chọn" riêng - bỏ chọn tool nào đang bật (bấm lại đúng nút đó) là tự về chế độ chọn/kéo-thả ô cung, không
+// cần 1 nút "Chọn" riêng). Cả 4 hình rect/arrow/ellipse/triangle đều chỉ cần điểm bắt đầu+kết thúc lúc buông
+// chuột (2-điểm) - text và eraser xử lý riêng (xem initWbCanvasEvents).
+const WB_TWO_POINT_TOOLS=['rect','arrow','ellipse','triangle'];
+const WB_TOOL_BTN_IDS={rect:'wbToolRect', arrow:'wbToolArrow', text:'wbToolText',
+  eraser:'wbToolEraser', ellipse:'wbToolEllipse', triangle:'wbToolTriangle'};
+// Chép lại NGUYÊN TRẠNG khung lá số ở tab "NHẬP THÔNG TIN" (#banWrap: lưới 12 cung + TOÀN BỘ mũi tên phi
+// hóa/tự hóa/nét vẽ tay đang có trên #drawCanvas) làm NỀN góc trên-trái #wbBoard - đúng yêu cầu người dùng
+// "hình lá số có sự liên kết với tab nhập thông tin, giữ nguyên các mũi tên hay nét vẽ trên tab đó". Vì
+// #drawCanvas là 1 <canvas> riêng (không nằm trong innerHTML của #banTuvi), phải chụp lại bằng
+// canvas.toDataURL() thành 1 ảnh rồi chồng lên ĐÚNG vị trí cũ (inset:0, y hệt CSS #drawCanvas) - không thể
+// chỉ clone innerHTML lưới suông là đủ. Dựng lại ở ĐÚNG kích thước gốc (rect.width/height đo từ #banWrap
+// thật) rồi mới scale() thu nhỏ nguyên khối lại (~40% bề rộng board), để lưới cung và ảnh mũi tên luôn khớp
+// pixel-với-pixel (không phải tính lại tọa độ tay theo tỉ lệ mới, dễ sai số/lệch hàng).
+function wbRefreshChartPreview(){
+  const outer=document.getElementById('wbChartUnderlay'); if(!outer) return;
+  const srcWrap=document.getElementById('banWrap');
+  const srcGrid=document.getElementById('banTuvi');
+  if(activeChartIdx<0 || !srcWrap || !srcGrid || !srcGrid.innerHTML.trim()){
+    outer.innerHTML='<p class="placeholder">Chưa có lá số - vào tab "NHẬP THÔNG TIN" để lập lá số trước.</p>';
+    outer.style.width=''; outer.style.height='';
+    return;
+  }
+  // #banWrap có thể ĐANG ẨN lúc hàm này chạy - không chỉ vì workspace.style.display:none, mà cả ANCESTOR
+  // #panelForm có thuộc tính "hidden" (luôn đúng khi đang đứng ở tab Bảng Vẽ, panelForm.hidden=true) - hidden
+  // trên tổ tiên làm getBoundingClientRect() của MỌI hậu duệ trả về 0x0 dù workspace tự nó display:flex.
+  // Phải hiện tạm CẢ HAI rồi đo/chụp ngay trong cùng 1 tick JS (trước khi trình duyệt kịp paint frame kế
+  // tiếp), sau đó trả lại đúng nguyên trạng - người dùng không thấy nhấp nháy gì cả.
+  const panelForm=document.getElementById('panelForm');
+  const workspace=document.getElementById('workspace');
+  const prevPanelHidden=panelForm.hidden;
+  const prevWsDisplay=workspace.style.display;
+  if(prevPanelHidden) panelForm.hidden=false;
+  if(getComputedStyle(workspace).display==='none') workspace.style.display='flex';
+  // sizeCanvas() có thể đã bị BỎ QUA (đo được 0x0, tự return sớm) ở LẦN GẦN NHẤT nó được gọi trong lúc
+  // #panelForm/#workspace còn ẩn (vd bấm "Đổi màu" ngay từ tab Bảng Vẽ - togglePlainBw gọi sizeCanvas() trước
+  // khi tới đây) - khiến #drawCanvas vẫn còn giữ pixel CŨ (màu/kích thước trước khi đổi), chụp lại lúc đó sẽ
+  // ra ảnh SAI màu. Gọi lại NGAY BÂY GIỜ (đang hiện tạm, đo được đúng kích thước) để #drawCanvas chắc chắn vẽ
+  // đúng trạng thái mới nhất trước khi toDataURL().
+  sizeCanvas();
+  const rect=srcWrap.getBoundingClientRect();
+  const srcCanvas=document.getElementById('drawCanvas');
+  let arrowUrl='';
+  try{ if(srcCanvas && srcCanvas.width>0) arrowUrl=srcCanvas.toDataURL('image/png'); }catch(e){ arrowUrl=''; }
+  if(prevPanelHidden) panelForm.hidden=true;
+  workspace.style.display=prevWsDisplay;
+  const leftCol=document.getElementById('wbLeftCol');
+  const targetW=Math.max(220,leftCol?leftCol.clientWidth:360);
+  const scale=rect.width>0 ? Math.min(1, targetW/rect.width) : 1;
+  outer.innerHTML=`<div class="ban-wrap wb-chart-scalebox" style="width:${rect.width}px;height:${rect.height}px;transform:scale(${scale})">
+      <div class="ban-tuvi">${srcGrid.innerHTML}</div>
+      ${arrowUrl?`<img class="wb-chart-arrows" src="${arrowUrl}" alt="">`:''}
+    </div>`;
+  outer.style.width=(rect.width*scale)+'px';
+  outer.style.height=(rect.height*scale)+'px';
+}
+// Gọi lại wbRefreshChartPreview() mỗi khi state lá số đổi (lập mới/mở từ Kho LS/đổi màu/ẩn info/tứ hóa mệnh)
+// NHƯNG chỉ khi đang thật sự đứng ở tab Bảng Vẽ - tránh tính toán/snapshot vô ích lúc tab khác đang mở.
+function wbRefreshIfVisible(){
+  const p=document.getElementById('panelWhiteboard');
+  if(p && !p.hidden) wbRefreshChartPreview();
+}
+function wbRenderCungBtns(){
+  const box=document.getElementById('wbCungBtns'); if(!box || box.childElementCount) return;
+  box.innerHTML=WB_CUNG_LIST.map(n=>{
+    const extra = n==='N.Lộc' ? ' wb-cung-loc' : (n==='N.Kỵ' ? ' wb-cung-ky' : '');
+    return `<button class="wb-cung-btn${extra}" onclick="wbAddBox('${n}')">${n}</button>`;
+  }).join('');
+}
+function wbRenderColorControls(){
+  const cBox=document.getElementById('wbSwatchGrid');
+  if(cBox && !cBox.childElementCount){
+    cBox.innerHTML=WB_PALETTE.map(hex=>`<button class="wb-swatch${hex===wbDrawColor?' active':''}" data-hex="${hex}" style="background:${hex}" onclick="wbPickColor('${hex}')" title="${hex}"></button>`).join('');
+  }
+  const wBox=document.getElementById('wbWidthRow');
+  if(wBox && !wBox.childElementCount){
+    wBox.innerHTML=WB_WIDTHS.map(w=>`<button class="wb-width-btn${w===wbDrawWidth?' active':''}" data-w="${w}" onclick="wbSetWidth(${w})">${w}</button>`).join('');
+  }
+}
+// Thả 1 ô cung mới (shape type 'box') - xếp theo hàng, tự xuống dòng, để nhiều ô liên tiếp không đè khít lên
+// nhau (người dùng vẫn kéo được ra vị trí tùy ý ngay sau đó).
+// Màu nền riêng cho 2 ô đặc biệt N.Lộc/N.Kỵ - thả ra là có màu sẵn luôn (xanh lá/đỏ), khỏi cần tự bấm màu
+// thủ công, đồng bộ với đúng màu 2 nút tương ứng trên toolbar (xem CSS .wb-cung-loc/.wb-cung-ky).
+const WB_SPECIAL_BOX_COLORS={'N.Lộc':{bg:'#16a34a',color:'#ffffff'}, 'N.Kỵ':{bg:'#dc2626',color:'#ffffff'}};
+function wbAddBox(label){
+  const perRow=6, w=100, h=42, gapX=20, gapY=18, marginX=20, marginY=16;
+  const col=wbBoxSpawnCount%perRow, row=Math.floor(wbBoxSpawnCount/perRow);
+  const x=marginX+col*(w+gapX), y=marginY+row*(h+gapY);
+  wbBoxSpawnCount++;
+  wbSelectedShapeIdx=null;
+  const special=WB_SPECIAL_BOX_COLORS[label];
+  // Chữ trong ô LUÔN viết hoa (kể cả tiếng Việt có dấu) - canvas fillText không tự áp text-transform như
+  // CSS, phải viết hoa sẵn ngay trong dữ liệu label thì vẽ ra mới hoa đúng.
+  const upperLabel=label.toLocaleUpperCase('vi-VN');
+  wbPushShapeAction({type:'box', x1:x, y1:y, x2:x+w, y2:y+h, label:upperLabel,
+    bg:special?special.bg:'#ffffff', color:special?special.color:'#1a1a1a', fontSize:14});
+  wbRedrawCanvas();
+}
+// t===null: chế độ chọn/kéo-thả ô cung (không có nút riêng) - bấm lại ĐÚNG công cụ đang bật thì tắt về chế độ
+// này, bấm 1 công cụ khác hẳn thì chuyển thẳng sang công cụ đó.
+function wbSetDrawTool(t){
+  wbDrawTool = (t!==null && wbDrawTool===t) ? null : t;
+  Object.entries(WB_TOOL_BTN_IDS).forEach(([key,id])=>{
+    const btn=document.getElementById(id); if(btn) btn.classList.toggle('active', wbDrawTool===key);
+  });
+  document.getElementById('wbBoard').classList.toggle('wb-mode-select', wbDrawTool===null);
+  wbSelectedShapeIdx=null;
+  wbRedrawCanvas();
+}
+// Đang chọn sẵn 1 Ô CUNG (type 'box') thì bấm màu = đổi MÀU NỀN của đúng ô đó (giống video tham khảo: chọn ô
+// "ĐIỀN" rồi bấm đỏ -> ô tô đỏ) - không có ô nào đang chọn thì bấm màu chỉ đổi màu mực cho lần vẽ kế tiếp.
+function wbPickColor(hex){
+  const sel=(wbSelectedShapeIdx!==null && wbShapes[wbSelectedShapeIdx] && wbShapes[wbSelectedShapeIdx].type==='box') ? wbShapes[wbSelectedShapeIdx] : null;
+  if(sel){ sel.bg=hex; wbRedrawCanvas(); }
+  else wbDrawColor=hex;
+  document.querySelectorAll('#wbSwatchGrid .wb-swatch').forEach(b=>b.classList.toggle('active', b.dataset.hex===hex));
+}
+function wbSetWidth(w){
+  wbDrawWidth=w;
+  document.querySelectorAll('#wbWidthRow .wb-width-btn').forEach(b=>b.classList.toggle('active', parseFloat(b.dataset.w)===w));
+}
+function wbPushShapeAction(shape){
+  wbShapes.push(shape);
+  wbActionLog.push({type:'shape', shape});
+  wbActionRedoLog=[];
+}
+function wbUndoDraw(){
+  if(!wbActionLog.length) return;
+  const action=wbActionLog.pop();
+  wbActionRedoLog.push(action);
+  wbSelectedShapeIdx=null;
+  if(action.type==='shape'){ const i=wbShapes.indexOf(action.shape); if(i>=0) wbShapes.splice(i,1); }
+  else if(action.type==='shape-remove'){ wbShapes.push(action.shape); }
+  else if(action.type==='shape-resize'){ action.shape.fontSize=action.before; }
+  else if(action.type==='shape-resize-box'){ Object.assign(action.shape, action.before); }
+  wbRedrawCanvas();
+}
+function wbRedoDraw(){
+  if(!wbActionRedoLog.length) return;
+  const action=wbActionRedoLog.pop();
+  wbActionLog.push(action);
+  wbSelectedShapeIdx=null;
+  if(action.type==='shape'){ wbShapes.push(action.shape); }
+  else if(action.type==='shape-remove'){ const i=wbShapes.indexOf(action.shape); if(i>=0) wbShapes.splice(i,1); }
+  else if(action.type==='shape-resize'){ action.shape.fontSize=action.after; }
+  else if(action.type==='shape-resize-box'){ Object.assign(action.shape, action.after); }
+  wbRedrawCanvas();
+}
+function wbClearDraw(){
+  wbShapes=[]; wbActionLog=[]; wbActionRedoLog=[]; wbSelectedShapeIdx=null; wbBoxSpawnCount=0;
+  wbRedrawCanvas();
+}
+function wbDeleteSelectedShape(){
+  if(wbSelectedShapeIdx===null) return;
+  const shape=wbShapes[wbSelectedShapeIdx]; if(!shape) return;
+  wbShapes.splice(wbSelectedShapeIdx,1);
+  wbActionLog.push({type:'shape-remove', shape});
+  wbActionRedoLog=[];
+  wbSelectedShapeIdx=null;
+  wbRedrawCanvas();
+}
+// Tẩy: xóa NGAY (không qua chọn trước) đúng 1 nét chạm phải tại (x,y), vẫn ghi vào wbActionLog để Hoàn tác
+// dùng lại được - gọi liên tục lúc kéo chuột (initWbCanvasEvents) để "quét" xóa nhiều nét cùng lượt kéo.
+function wbEraseAt(x,y){
+  const hit=wbHitTestDrawnShape(x,y); if(hit===null) return;
+  const shape=wbShapes[hit];
+  wbShapes.splice(hit,1);
+  wbActionLog.push({type:'shape-remove', shape});
+  wbActionRedoLog=[];
+  if(wbSelectedShapeIdx===hit) wbSelectedShapeIdx=null;
+  else if(wbSelectedShapeIdx!==null && wbSelectedShapeIdx>hit) wbSelectedShapeIdx--;
+  wbRedrawCanvas();
+}
+function wbHitTestDrawnShape(x,y){
+  const threshold=8;
+  for(let i=wbShapes.length-1;i>=0;i--){
+    const sh=wbShapes[i];
+    if(sh.type==='box'){
+      // Cả phần THÂN ô (không chỉ viền) đều bắt trúng được - để bấm/kéo ở bất kỳ đâu trong ô cũng chọn/di
+      // chuyển được nó, khác rect thường (rect không kéo-thả được, chỉ cần bắt trúng viền).
+      const x1=Math.min(sh.x1,sh.x2)-4, x2=Math.max(sh.x1,sh.x2)+4, y1=Math.min(sh.y1,sh.y2)-4, y2=Math.max(sh.y1,sh.y2)+4;
+      if(x>=x1 && x<=x2 && y>=y1 && y<=y2) return i;
+    }else if(sh.type==='arrow'){
+      if(distToSegment(x,y,sh.x1,sh.y1,sh.x2,sh.y2)<=threshold) return i;
+    }else if(sh.type==='rect'){
+      const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2);
+      const inX=x>=x1-threshold && x<=x2+threshold, inY=y>=y1-threshold && y<=y2+threshold;
+      const onLeft=inY && Math.abs(x-x1)<=threshold, onRight=inY && Math.abs(x-x2)<=threshold;
+      const onTop=inX && Math.abs(y-y1)<=threshold, onBottom=inX && Math.abs(y-y2)<=threshold;
+      if(onLeft||onRight||onTop||onBottom) return i;
+    }else if(sh.type==='ellipse'){
+      const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2||1, ry=Math.abs(sh.y2-sh.y1)/2||1;
+      const nd=Math.sqrt(Math.pow((x-cx)/rx,2)+Math.pow((y-cy)/ry,2));
+      if(Math.abs(nd-1)*Math.min(rx,ry)<=threshold) return i;
+    }else if(sh.type==='triangle'){
+      const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2), midX=(x1+x2)/2;
+      if(distToSegment(x,y,midX,y1,x2,y2)<=threshold || distToSegment(x,y,x2,y2,x1,y2)<=threshold || distToSegment(x,y,x1,y2,midX,y1)<=threshold) return i;
+    }else if(sh.type==='text'){
+      const r=(sh.fontSize||14)/14;
+      const w=(sh.text||'').length*8*r+6;
+      if(x>=sh.x1-2 && x<=sh.x1+w && y>=sh.y1-16*r && y<=sh.y1+4*r) return i;
+    }
+  }
+  return null;
+}
+// Điểm (x,y) vừa bấm/thả để vẽ mũi tên rơi vào BÊN TRONG (hoặc sát cạnh, margin 14px) 1 ô cung -> tự "bắt
+// dính" vào ĐÚNG điểm gần nhất trên VIỀN của ô đó, thay vì cắm giữa thân chữ (không bắt buộc - chỉ áp dụng
+// cho công cụ mũi tên, các công cụ khác vẽ tự do bình thường). Không có ô nào gần đó thì trả nguyên điểm gốc.
+function wbSnapToBoxEdge(x,y){
+  const margin=14;
+  for(let i=wbShapes.length-1;i>=0;i--){
+    const sh=wbShapes[i]; if(sh.type!=='box') continue;
+    const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2);
+    if(x<x1-margin || x>x2+margin || y<y1-margin || y>y2+margin) continue;
+    const cx=Math.min(Math.max(x,x1),x2), cy=Math.min(Math.max(y,y1),y2);
+    const dl=cx-x1, dr=x2-cx, dt=cy-y1, db=y2-cy, m=Math.min(dl,dr,dt,db);
+    if(m===dl) return {x:x1,y:cy};
+    if(m===dr) return {x:x2,y:cy};
+    if(m===dt) return {x:cx,y:y1};
+    return {x:cx,y:y2};
+  }
+  return {x,y};
+}
+function wbDrawBoxShape(ctx,sh){
+  const x=Math.min(sh.x1,sh.x2), y=Math.min(sh.y1,sh.y2), w=Math.abs(sh.x2-sh.x1), h=Math.abs(sh.y2-sh.y1);
+  ctx.fillStyle=sh.bg||'#ffffff';
+  ctx.fillRect(x,y,w,h);
+  // Viền LUÔN ĐEN cố định - không dùng sh.color (màu chữ) nữa, vì N.Lộc/N.Kỵ có chữ trắng trên nền màu đậm,
+  // viền theo màu chữ sẽ gần như biến mất (trắng trên xanh/đỏ khó thấy). Đồng bộ với viền đen của nút toolbar.
+  ctx.strokeStyle='#1a1a1a';
+  ctx.lineWidth=2;
+  ctx.strokeRect(x,y,w,h);
+  ctx.fillStyle=sh.color||'#1a1a1a';
+  ctx.font='700 '+(sh.fontSize||14)+'px Segoe UI';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(sh.label||'', x+w/2, y+h/2);
+  ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+}
+// Mũi tên THƯỜNG (đường thẳng nét đều + đầu mũi tên hình chữ V đơn giản) - KHÔNG dùng drawSkitchArrow gốc
+// (thân thon dần kiểu canvas chính) theo đúng yêu cầu người dùng (ảnh mẫu: 1 đường thẳng mảnh + mũi tên nhọn
+// gọn, không thon).
+function wbDrawArrowShape(ctx,sh){
+  const {x1,y1,x2,y2}=sh;
+  ctx.save();
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  const angle=Math.atan2(y2-y1,x2-x1);
+  const headLen=8+(sh.lineWidth||2)*1.5;
+  ctx.beginPath();
+  ctx.moveTo(x2-headLen*Math.cos(angle-Math.PI/6), y2-headLen*Math.sin(angle-Math.PI/6));
+  ctx.lineTo(x2,y2);
+  ctx.lineTo(x2-headLen*Math.cos(angle+Math.PI/6), y2-headLen*Math.sin(angle+Math.PI/6));
+  ctx.stroke();
+  ctx.restore();
+}
+function wbDrawEllipseShape(ctx,sh){
+  const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2, ry=Math.abs(sh.y2-sh.y1)/2;
+  ctx.save();
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2;
+  ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+}
+function wbDrawTriangleShape(ctx,sh){
+  const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2), midX=(x1+x2)/2;
+  ctx.save();
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(midX,y1); ctx.lineTo(x2,y2); ctx.lineTo(x1,y2); ctx.closePath(); ctx.stroke();
+  ctx.restore();
+}
+function wbDrawAnyShape(ctx,sh){
+  if(sh.type==='box') wbDrawBoxShape(ctx,sh);
+  else if(sh.type==='arrow') wbDrawArrowShape(ctx,sh);
+  else if(sh.type==='ellipse') wbDrawEllipseShape(ctx,sh);
+  else if(sh.type==='triangle') wbDrawTriangleShape(ctx,sh);
+  else drawShape(ctx,sh); // rect/text - hàm gốc dùng chung
+}
+function wbHighlightShape(ctx,sh){
+  if(sh.type==='box'){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,152,0,.9)'; ctx.lineWidth=2.5; ctx.setLineDash([5,3]);
+    const x=Math.min(sh.x1,sh.x2)-4, y=Math.min(sh.y1,sh.y2)-4, w=Math.abs(sh.x2-sh.x1)+8, h=Math.abs(sh.y2-sh.y1)+8;
+    ctx.strokeRect(x,y,w,h);
+    ctx.restore();
+    // Tay nắm kéo-giãn cỡ chữ - hình vuông cam đặc, đậu đúng góc dưới-phải ô, luôn vẽ (không nét đứt) để
+    // dễ nhận biết và bấm trúng hơn viền ô.
+    const hp=wbBoxHandlePos(sh);
+    ctx.save();
+    ctx.fillStyle='#ff9800';
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.fillRect(hp.x-WB_BOX_HANDLE_SIZE, hp.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+    ctx.strokeRect(hp.x-WB_BOX_HANDLE_SIZE, hp.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+    ctx.restore();
+    return;
+  }
+  if(sh.type==='rect'||sh.type==='arrow'||sh.type==='text'){ drawShapeHighlight(ctx,sh); return; }
+  // ellipse/triangle: vẽ lại đúng hình dạng gốc, viền cam mờ dày hơn đè lên - đơn giản hơn hẳn so với tính
+  // riêng 1 kiểu highlight (khung chữ nhật bao quanh) cho từng loại hình học khác nhau.
+  ctx.save();
+  ctx.strokeStyle='rgba(255,152,0,.6)'; ctx.lineCap='round'; ctx.lineJoin='round';
+  if(sh.type==='ellipse'){
+    const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2+4, ry=Math.abs(sh.y2-sh.y1)/2+4;
+    ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
+  }else if(sh.type==='triangle'){
+    const x1=Math.min(sh.x1,sh.x2)-4, x2=Math.max(sh.x1,sh.x2)+4, y1=Math.min(sh.y1,sh.y2)-4, y2=Math.max(sh.y1,sh.y2)+4, midX=(x1+x2)/2;
+    ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(midX,y1); ctx.lineTo(x2,y2); ctx.lineTo(x1,y2); ctx.closePath(); ctx.stroke();
+  }
+  ctx.restore();
+}
+function wbRedrawCanvas(preview){
+  const cv=document.getElementById('wbCanvas'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  if(wbSelectedShapeIdx!==null && wbShapes[wbSelectedShapeIdx]) wbHighlightShape(ctx,wbShapes[wbSelectedShapeIdx]);
+  [...wbShapes, ...(preview?[preview]:[])].forEach(sh=>wbDrawAnyShape(ctx,sh));
+}
+function wbSizeCanvas(){
+  const cv=document.getElementById('wbCanvas'); if(!cv) return;
+  const r=cv.getBoundingClientRect();
+  if(r.width<=0 || r.height<=0) return;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr; cv.height=r.height*dpr;
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  wbRedrawCanvas();
+}
+window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhiteboard').hidden) wbSizeCanvas(); });
+(function initWbCanvasEvents(){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const cv=document.getElementById('wbCanvas'); if(!cv) return;
+    const board=document.getElementById('wbBoard');
+    let dragging=false, start=null; // dragging: false|'shape'|'erase'
+    onOff(cv,'mousedown','touchstart',e=>{
+      e.preventDefault(); // xem giải thích tương tự initCanvasEvents - tránh browser blur() input chèn chữ vừa focus()
+      const r=cv.getBoundingClientRect();
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
+      if(!wbDrawTool){
+        // Đã có sẵn 1 ô đang được chọn + bấm ĐÚNG vào tay nắm cam ở góc dưới-phải -> bắt đầu kéo-giãn cỡ
+        // chữ, KHÔNG chọn lại/kéo-thả ô như bình thường (phải kiểm tra TRƯỚC wbHitTestDrawnShape, vì tay
+        // nắm nằm ngay trên/sát viền ô, nếu không sẽ luôn bị hiểu nhầm thành "bấm vào ô để kéo-thả").
+        if(wbHitTestResizeHandle(x,y)){
+          const sh=wbShapes[wbSelectedShapeIdx];
+          const x1=Math.min(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2);
+          wbResizingBox={idx:wbSelectedShapeIdx, x1, y1,
+            w0:Math.abs(sh.x2-sh.x1), h0:Math.abs(sh.y2-sh.y1), font0:sh.fontSize||14,
+            before:{x2:sh.x2,y2:sh.y2,fontSize:sh.fontSize}};
+          return;
+        }
+        const hit=wbHitTestDrawnShape(x,y);
+        wbSelectedShapeIdx=hit;
+        // Bấm trúng 1 Ô CUNG (công cụ "Chọn") -> bắt đầu KÉO cả ô đi theo chuột, neo đúng điểm bấm bên trong
+        // ô (offX/offY) để ô không bị "giật" nhảy góc trên-trái về đúng con trỏ.
+        if(hit!==null && wbShapes[hit].type==='box'){
+          const sh=wbShapes[hit];
+          const bx=Math.min(sh.x1,sh.x2), by=Math.min(sh.y1,sh.y2);
+          wbDraggingBox={idx:hit, offX:x-bx, offY:y-by, w:Math.abs(sh.x2-sh.x1), h:Math.abs(sh.y2-sh.y1)};
+        }
+        wbRedrawCanvas();
+        return;
+      }
+      if(wbDrawTool==='text'){
+        const fontSize=Math.max(12, wbDrawWidth*2+8);
+        startInlineTextInput(board,x,y,wbDrawColor,txt=>{
+          wbPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:wbDrawColor,fontSize}); wbRedrawCanvas();
+        },fontSize);
+        return;
+      }
+      if(wbDrawTool==='eraser'){ dragging='erase'; wbEraseAt(x,y); return; }
+      // Mũi tên bắt đầu ĐÚNG từ cạnh 1 ô cung (nếu bấm gần/trong ô đó) - để nối 2 ô luôn chạm sát mép; các
+      // công cụ 2-điểm khác vẽ tự do, không bắt dính.
+      const p0 = wbDrawTool==='arrow' ? wbSnapToBoxEdge(x,y) : {x,y};
+      dragging='shape'; start=p0;
+    },{passive:false});
+    onOff(cv,'mousemove','touchmove',e=>{
+      const r=cv.getBoundingClientRect();
+      const {clientX,clientY}=clientPointFrom(e);
+      const x=clientX-r.left, y=clientY-r.top;
+      if(wbResizingBox){
+        e.preventDefault();
+        const d=wbResizingBox, sh=wbShapes[d.idx]; if(!sh){ wbResizingBox=null; return; }
+        const newW=Math.max(WB_BOX_MIN_W, Math.min(WB_BOX_MAX_W, x-d.x1));
+        const newH=Math.max(WB_BOX_MIN_H, Math.min(WB_BOX_MAX_H, y-d.y1));
+        sh.x1=d.x1; sh.y1=d.y1; sh.x2=d.x1+newW; sh.y2=d.y1+newH;
+        // Cỡ chữ tự phóng theo tỉ lệ trung bình của cả 2 chiều (rộng+cao) so với lúc bắt đầu kéo, để chữ
+        // luôn vừa vặn với khung mới, không bị tràn ra ngoài hay lọt thỏm quá nhỏ so với khung to.
+        const scale=((newW/d.w0)+(newH/d.h0))/2;
+        sh.fontSize=Math.max(8,Math.min(72, d.font0*scale));
+        wbRedrawCanvas();
+        return;
+      }
+      if(wbDraggingBox){
+        e.preventDefault();
+        const d=wbDraggingBox, sh=wbShapes[d.idx];
+        const nx=x-d.offX, ny=y-d.offY;
+        sh.x1=nx; sh.y1=ny; sh.x2=nx+d.w; sh.y2=ny+d.h;
+        wbRedrawCanvas();
+        return;
+      }
+      if(dragging==='erase'){ e.preventDefault(); wbEraseAt(x,y); return; }
+      if(dragging!=='shape') return;
+      e.preventDefault();
+      wbRedrawCanvas({type:wbDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:wbDrawColor,lineWidth:wbDrawWidth});
+    },{passive:false});
+    onOff(window,'mouseup','touchend',e=>{
+      if(wbResizingBox){
+        const d=wbResizingBox, sh=wbShapes[d.idx];
+        wbResizingBox=null;
+        if(sh && (sh.x2!==d.before.x2 || sh.y2!==d.before.y2)){
+          wbActionLog.push({type:'shape-resize-box', shape:sh, before:d.before, after:{x2:sh.x2,y2:sh.y2,fontSize:sh.fontSize}});
+          wbActionRedoLog=[];
+        }
+        return;
+      }
+      if(wbDraggingBox){ wbDraggingBox=null; return; }
+      if(dragging==='erase'){ dragging=false; return; }
+      if(dragging!=='shape') return; dragging=false;
+      const r=cv.getBoundingClientRect();
+      const {clientX,clientY}=clientPointFrom(e);
+      let x=clientX-r.left, y=clientY-r.top;
+      if(wbDrawTool==='arrow'){ const p=wbSnapToBoxEdge(x,y); x=p.x; y=p.y; }
+      if(WB_TWO_POINT_TOOLS.includes(wbDrawTool)){
+        wbPushShapeAction({type:wbDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:wbDrawColor,lineWidth:wbDrawWidth});
+      }
+      wbRedrawCanvas();
+    });
+    document.addEventListener('keydown',e=>{
+      if(document.getElementById('panelWhiteboard').hidden) return;
+      if(e.key!=='Delete' && e.key!=='Backspace') return;
+      const tag=(document.activeElement&&document.activeElement.tagName)||'';
+      if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+      if(wbSelectedShapeIdx!==null){ e.preventDefault(); wbDeleteSelectedShape(); }
+    });
+  });
+})();
+
 async function atcExportToLapLaSo(){
   const err=document.getElementById('atcError'); err.textContent='';
   if(!atcSel.can||!atcSel.tuVi||!atcSel.thang||!atcSel.gioSinh||(atcSel.menh===null||atcSel.menh===undefined)){
@@ -3208,13 +3879,30 @@ function ingestResult(d, birthYear){
   else { c.label=charts[activeChartIdx].label; c.ghiChu=charts[activeChartIdx].ghiChu; charts[activeChartIdx]=c; }
 
   selectedCungIdx=null; selectedDaiVanIdx=null; selectedLuuNienYear=null; tuHoaArrows=[]; resetHcState(); closeAllNav();
-  document.getElementById('workspace').style.display='flex';
+  // renderAll() (qua renderGrid) gọi layoutPhuWrap()/equalizeCungRowHeights() - 2 hàm này ĐO KÍCH THƯỚC THẬT
+  // của #banWrap/.cung bằng getBoundingClientRect(), nên BẮT BUỘC #workspace phải đang display:flex (không
+  // phải display:none) lúc renderAll() chạy, nếu không mọi phép đo ra 0 → equalizeCungRowHeights ép
+  // minHeight:0 lên MỌI cung (dẹt lép), layoutPhuWrap ép MỌI phụ tinh xuống dạng liệt kê dọc (dồn cục 1 cột) -
+  // và vì đây là inject TRỰC TIẾP vào innerHTML của #banTuvi (không phải suy ra lại mỗi lần vẽ), các inline
+  // style/class SAI này bị "đóng băng" luôn trong DOM. Tai hại nhất: #banTuvi chính là nguồn mà
+  // wbRefreshChartPreview() SAO CHÉP NGUYÊN VẸN sang khung xem trước bên tab "BẢNG VẼ" - nên hễ lập lá số
+  // ngay từ tab Bảng Vẽ (nay có thể làm được vì form dùng chung, xem switchTopTab) trong lúc #workspace đang
+  // ẩn, khung xem trước sẽ vĩnh viễn bị dẹt/nhỏ dù sau đó có đo lại kích thước container thế nào đi nữa.
+  // Cách sửa: LUÔN tạm bật #workspace='flex' trước khi renderAll() (bất kể đang ở tab nào), đo/dựng đúng kích
+  // thước thật xong xuôi rồi mới ẩn lại nếu không phải đang đứng ở tab "NHẬP THÔNG TIN" - giống hệt "mánh"
+  // tạm hiện rồi ẩn lại mà wbRefreshChartPreview() đã dùng cho chính #banWrap.
+  const workspaceEl=document.getElementById('workspace');
+  workspaceEl.style.display='flex';
   renderAll();
+  if(activeTopTab!=='form') workspaceEl.style.display='none';
   selectCungByIdx(vM);
   // Mỗi lần lập lá số mới: tự động ẩn info ở ô trung tâm - chỉ hiện lại khi người dùng bấm nút Ẩn/Hiện Info.
   centerInfoHidden=true;
   applyCenterInfoVisibility();
   document.getElementById('btnInfo').classList.toggle('active',centerInfoHidden);
+  // Lập lá số mới HOẶC mở từ Kho LS có thể xảy ra ngay TRONG tab Bảng Vẽ (nút "Kho LS"/"Lưu lá số" dùng lại
+  // nguyên hàm này, xem panelWhiteboard) - refresh lại khung lá số nền ngay nếu đang đứng ở tab đó.
+  wbRefreshIfVisible();
 }
 
 // Chụp lại toàn bộ trạng thái đang xem (đại vận/lưu niên/lưu nguyệt đang chọn, mũi tên phi hóa đã kéo chỉnh,
@@ -4648,11 +5336,13 @@ function togglePlainBw(){
   if(!document.getElementById('panelPlus').hidden) ['C','D'].forEach(side=>{
     if(dualInst[side] && dualInst[side].c){ dualSizeCanvas(side); dualRedrawCanvas(side); }
   });
+  wbRefreshIfVisible(); // đổi đen/trắng cũng đổi màu mũi tên trên khung nền Bảng Vẽ - chụp lại ngay nếu đang mở tab đó
 }
 function toggleInfoVisible(){
   centerInfoHidden=!centerInfoHidden;
   applyCenterInfoVisibility();
   document.getElementById('btnInfo').classList.toggle('active',centerInfoHidden);
+  wbRefreshIfVisible();
 }
 function applyCenterInfoVisibility(){
   const el=document.getElementById('centerInfo');
@@ -4661,6 +5351,7 @@ function applyCenterInfoVisibility(){
 function toggleTuHoaVisible(){
   document.body.classList.toggle('show-menh-hoa');
   document.getElementById('btnTuHoa').classList.toggle('active');
+  wbRefreshIfVisible();
 }
 
 // ═══════════════════════════════════
@@ -4846,6 +5537,10 @@ document.addEventListener('click',(e)=>{
   if(pop && !pop.hidden && !pop.contains(e.target) && e.target.id!=='colorSwatchBtn') pop.hidden=true;
   const fsPop=document.getElementById('fontSizePopup');
   if(fsPop && !fsPop.hidden && !fsPop.contains(e.target) && e.target.id!=='toolText') fsPop.hidden=true;
+  const wbPop=document.getElementById('wbColorPalettePopup');
+  if(wbPop && !wbPop.hidden && !wbPop.contains(e.target) && e.target.id!=='wbColorSwatchBtn') wbPop.hidden=true;
+  const wbFsPop=document.getElementById('wbFontSizePopup');
+  if(wbFsPop && !wbFsPop.hidden && !wbFsPop.contains(e.target) && e.target.id!=='wbToolText') wbFsPop.hidden=true;
   const topicPop=document.getElementById('topicPopup');
   // Dùng composedPath() thay vì topicPop.contains(e.target): bấm 1 chủ đề sẽ gọi renderTopicPopup() làm mới
   // innerHTML NGAY trong lúc bubble, khiến e.target (nút cũ) bị gỡ khỏi DOM trước khi tới listener này ở
@@ -6545,7 +7240,19 @@ function computeKetCauStructuresRaw(mode){
           // trừ như quy tắc "không tính cung thứ 2" (quy tắc đó chỉ áp dụng cho truy Lộc CHỜ, không áp dụng
           // khi chính M cũng có 1 lượt hóa Lộc GỐC của riêng mình trùng khớp y hệt điểm gốc của root).
           else if(steps[0] && p0.to===steps[0].to && p0.star===steps[0].star) found={p:p0, via:null};
-          else if(steps.slice(1).some(s=>s.star===p0.star)) found={p:p0, via:null};
+          // ĐÃ BỎ (lỗi): trước đây còn 1 nhánh "else if(steps.slice(1).some(s=>s.star===p0.star))" - so khớp
+          // p0.star với BẤT KỲ sao nào xuất hiện ở CÁC BƯỚC SAU (steps.slice(1)) của mạch chính root. Các bước
+          // sau bước đầu LUÔN là bước CHUYỂN KỊ (chữ D, xem computeSingleChain: step2 trở đi luôn flyFrom(...,
+          // 'D')), tức ngôi sao ở đó là sao đang MANG KỊ tại cung vừa đáp, KHÔNG liên quan gì tới "hóa Lộc" -
+          // trùng tên sao ở đây chỉ là ngẫu nhiên (cùng cung có nhiều sao, 1 sao mang Lộc gốc, 1 sao khác mang
+          // Kị lúc chuyển tiếp). Coi đó là "cùng tinh diệu" rồi cộng +1 Lộc/gộp kết cấu là SAI - vd Mệnh hóa Lộc
+          // (Vũ Khúc) → Sự Nghiệp, Sự Nghiệp tự hóa Kị xuất tại chỗ bằng Tham Lang (steps[1].star='Tham Lang',
+          // KHÔNG phải Vũ Khúc); Huynh Đệ hóa Lộc RIÊNG ra đúng Tham Lang (cũng rơi vào Sự Nghiệp, vì 2 sao ở
+          // chung 1 cung) - nhánh cũ so p0.star ('Tham Lang') với steps[1].star ('Tham Lang') ra khớp, gộp nhầm
+          // Huynh Đệ vào kết cấu Lộc của Mệnh dù 2 bên hóa Lộc ra 2 TINH DIỆU KHÁC NHAU (Vũ Khúc ≠ Tham Lang) -
+          // đúng ra phải tách thành 2 kết cấu Lộc độc lập (kết cấu Cát chỉ tính "truy Lộc" khi CÙNG tinh diệu
+          // với chính sao root vừa hóa Lộc ra - steps[0].star/rootOwnStar - đã đủ bởi 2 nhánh so sánh phía
+          // trên, không cần và không được so thêm với các bước chuyển Kị phía sau).
           // M tự hóa Lộc XUẤT ngay tại chỗ (đáp thẳng về chính mình, p0.to===M) - Can của M CHƯA hề "rời" M ở
           // bước 0 (chỉ tự xoay tại chỗ, chưa bay đi đâu), nên bước chuyển Kị KẾ TIẾP (i=1) vẫn dùng ĐÚNG Can
           // của M chứ không phải Can "mượn" của 1 cung khác - khác hẳn 1 chuỗi bình thường đã thật sự bay qua
