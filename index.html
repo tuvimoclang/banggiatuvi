@@ -145,11 +145,24 @@ body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);col
    lại cho vừa cột trái, để lưới cung và ảnh mũi tên luôn khớp pixel-với-pixel (không tính lại tọa độ tay).
    Nằm TRONG LUỒNG bình thường (không position:absolute nữa - trước đây phải absolute để nhường chỗ cho canvas
    phủ đè lên, giờ không cần vì canvas đã tách sang cột phải riêng) nên không còn khoảng trống rỗng phía dưới. */
-.wb-chart-wrap{overflow:hidden}
+.wb-chart-wrap{overflow:visible}
+/* SỬA LỖI (2026-08-07): trước đây overflow:hidden - khung preview lá số bên tab BẢNG VẼ (wbChartUnderlay)
+   CẮT MẤT mọi thứ tràn ra ngoài viền của chính nó. wbRefreshChartPreview() resize outer theo đúng
+   rect.width*scale/rect.height*scale NGAY SAU KHI gán innerHTML, nhưng trình duyệt cần 1 nhịp reflow mới đo
+   đúng kích thước thật của .wb-chart-scalebox vừa scale() xong - trong khoảng đó (và ở vài trường hợp lệch
+   làm tròn số thập phân của scale), khung .ban-tuvi (lưới 12 cung, không nằm trong padding-box) vẫn có thể
+   tràn nhẹ ra ngoài outer, bị overflow:hidden CẮT MẤT đúng các cung nằm SÁT RÌA/GÓC lưới (Mệnh, Điền Trạch,
+   Thiên Di, Phúc Đức...) - đúng lỗi người dùng báo "mũi tên không đi vào được các cung này, bị xén mất".
+   Đổi overflow:visible: không còn cắt gì cả, khung ngoài (.wb-left-col) vẫn giới hạn chiều rộng bình thường
+   qua chính CSS layout (flex/grid) của nó, không cần overflow:hidden ở đây để "bảo vệ" bố cục. */
 .wb-chart-wrap .placeholder{padding:24px 8px;text-align:center;color:var(--muted);font-size:.78rem}
-.wb-chart-scalebox{position:relative;transform-origin:top left}
+.wb-chart-scalebox{position:relative;overflow:visible;transform-origin:top left}
 .wb-chart-scalebox .ban-tuvi{pointer-events:none}
-.wb-chart-arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* z-index:5 PHẢI khớp đúng #drawCanvas gốc (index.html dòng ~386) - các cung đang là Thể/Dụng
+   (.cung.phi-source/.phi-dung) có z-index:2 riêng (để nổi viền đậm), không có z-index này ảnh mũi tên sẽ bị
+   CHÍNH các cung Thể/Dụng đó đè lên trên (z-index:2 > auto/0), chỉ còn thấy mũi tên ở khe/viền giữa các ô -
+   đúng lỗi người dùng báo "mũi tên không đi vào được cung Thể/Dụng, chỉ chạm viền". */
+.wb-chart-arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 .wb-tools-card{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--border-lt);border-radius:12px;background:var(--panel);box-shadow:0 2px 14px rgba(0,0,0,.06)}
 .wb-toolrow{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .wb-toolrow .icon-btn{width:26px;height:26px;flex:0 0 auto}
@@ -1196,6 +1209,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
       <div class="sb-tabs">
         <button class="sb-tab active" data-sbtab="thedung" onclick="switchSbTab('thedung')">THỂ/DỤNG</button>
         <button class="sb-tab" data-sbtab="phihoa" onclick="switchSbTab('phihoa')">TƯỢNG PHI HÓA</button>
+        <button class="sb-tab sb-tab-ai" id="btnLuanGiaiAI" type="button" title="Copy kết cấu hiện tại cho GPT Luna, không lưu file" onclick="copyKetCauForLuna(event)">LUẬN GIẢI AI</button>
       </div>
 
       <div class="sb-content" id="sbThedung">
@@ -2710,7 +2724,9 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
       });
     }
     if(hasB){
-      drawArrowHeadAt(ctx, B, dx, dy, lineColor);
+      const tipB={x:B.x+ux*12,y:B.y+uy*12};
+      drawLine(ctx,B,tipB,lineColor);
+      drawArrowHeadAt(ctx, tipB, dx, dy, lineColor);
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
         const along=(i-(g.toB.length-1)/2)*11;
@@ -2834,9 +2850,12 @@ function atcClearDraw(){
 let wbDrawTool=null, wbShapes=[], wbDrawColor='#000000', wbDrawWidth=2;
 let wbActionLog=[], wbActionRedoLog=[], wbSelectedShapeIdx=null;
 let wbBoxSpawnCount=0, wbDraggingBox=null;
-// Kéo-giãn KHUNG ô tên cung (type 'box'): tay nắm hình vuông cam ở góc dưới-phải ô đang được chọn - kéo ra
-// để khung to/rộng hơn (đồng thời cỡ chữ cũng tự phóng theo tỉ lệ khung cho vừa vặn), kéo vào để khung nhỏ
-// lại. Góc trên-trái (x1,y1) đứng yên làm mốc, chỉ góc dưới-phải (x2,y2) di chuyển theo con trỏ.
+// Kéo-giãn KHUNG: tay nắm hình vuông cam ở góc dưới-phải ô đang được chọn - kéo ra để khung to/rộng hơn (nếu
+// là ô tên cung 'box', cỡ chữ cũng tự phóng theo tỉ lệ khung cho vừa vặn), kéo vào để khung nhỏ lại. Áp dụng
+// cho MỌI hình có diện tích khép kín (box/rect/ellipse/triangle) - KHÔNG áp dụng cho arrow/text (arrow là 1
+// đường thẳng không có "khung trong/ngoài" để giãn theo cách này; text tự co theo cỡ chữ riêng, không có
+// khái niệm khung). Góc trên-trái (x1,y1) đứng yên làm mốc, chỉ góc dưới-phải (x2,y2) theo con trỏ.
+const WB_RESIZABLE_TYPES=['box','rect','ellipse','triangle'];
 const WB_BOX_HANDLE_SIZE=9; // nửa cạnh vùng bắt trúng tay nắm (px)
 const WB_BOX_MIN_W=36, WB_BOX_MIN_H=22, WB_BOX_MAX_W=500, WB_BOX_MAX_H=300;
 let wbResizingBox=null; // {idx, x1,y1, w0,h0, font0} - x1/y1: góc neo cố định; w0/h0/font0: kích thước lúc bắt đầu kéo
@@ -2845,10 +2864,30 @@ function wbBoxHandlePos(sh){
 }
 function wbHitTestResizeHandle(x,y){
   if(wbSelectedShapeIdx===null) return false;
-  const sh=wbShapes[wbSelectedShapeIdx]; if(!sh || sh.type!=='box') return false;
+  const sh=wbShapes[wbSelectedShapeIdx]; if(!sh || !WB_RESIZABLE_TYPES.includes(sh.type)) return false;
   const hp=wbBoxHandlePos(sh);
   return Math.abs(x-hp.x)<=WB_BOX_HANDLE_SIZE && Math.abs(y-hp.y)<=WB_BOX_HANDLE_SIZE;
 }
+// Núm kéo-giãn 4 GÓC cho rect/ellipse/triangle (khác 'box' - box chỉ có 1 núm góc dưới-phải vì còn phải tự
+// phóng cỡ chữ theo tỉ lệ, xem wbBoxHandlePos/wbHitTestResizeHandle). Người dùng yêu cầu "các núm xung quanh"
+// để kéo kích cỡ tự do theo cả 4 hướng, không chỉ 1 góc cố định neo top-left như box.
+const WB_CORNER_RESIZABLE_TYPES=['rect','ellipse','triangle'];
+function wbCornerPositions(sh){
+  const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2);
+  return {tl:{x:x1,y:y1}, tr:{x:x2,y:y1}, bl:{x:x1,y:y2}, br:{x:x2,y:y2}};
+}
+// Trả về key góc ('tl'/'tr'/'bl'/'br') nếu (x,y) bấm trúng đúng 1 núm của hình đang chọn, null nếu không.
+function wbHitTestCornerHandle(x,y){
+  if(wbSelectedShapeIdx===null) return null;
+  const sh=wbShapes[wbSelectedShapeIdx]; if(!sh || !WB_CORNER_RESIZABLE_TYPES.includes(sh.type)) return null;
+  const positions=wbCornerPositions(sh);
+  for(const key of ['tl','tr','bl','br']){
+    const p=positions[key];
+    if(Math.abs(x-p.x)<=WB_BOX_HANDLE_SIZE && Math.abs(y-p.y)<=WB_BOX_HANDLE_SIZE) return key;
+  }
+  return null;
+}
+let wbResizingCorner=null; // {idx, corner, before:{x1,y1,x2,y2}}
 const WB_PALETTE=['#000000','#e74c3c','#f39c12','#f1c40f','#27ae60','#00bcd4','#2980b9','#8e44ad','#ffffff'];
 const WB_WIDTHS=[2,4,8,14];
 // Đúng 14 nút = 2 hàng x 7 cột (khớp bố cục bản tham khảo): 12 cung theo thứ tự sidebar (CUNG_SHORT_LABEL) +
@@ -2907,7 +2946,7 @@ function wbRefreshChartPreview(){
   const scale=rect.width>0 ? Math.min(1, targetW/rect.width) : 1;
   outer.innerHTML=`<div class="ban-wrap wb-chart-scalebox" style="width:${rect.width}px;height:${rect.height}px;transform:scale(${scale})">
       <div class="ban-tuvi">${srcGrid.innerHTML}</div>
-      ${arrowUrl?`<img class="wb-chart-arrows" src="${arrowUrl}" alt="">`:''}
+      ${arrowUrl?`<img class="wb-chart-arrows" src="${arrowUrl}" alt="" style="position:absolute;left:0;top:0;display:block;width:${rect.width}px;height:${rect.height}px">`:''}
     </div>`;
   outer.style.width=(rect.width*scale)+'px';
   outer.style.height=(rect.height*scale)+'px';
@@ -2965,10 +3004,12 @@ function wbSetDrawTool(t){
   wbSelectedShapeIdx=null;
   wbRedrawCanvas();
 }
-// Đang chọn sẵn 1 Ô CUNG (type 'box') thì bấm màu = đổi MÀU NỀN của đúng ô đó (giống video tham khảo: chọn ô
-// "ĐIỀN" rồi bấm đỏ -> ô tô đỏ) - không có ô nào đang chọn thì bấm màu chỉ đổi màu mực cho lần vẽ kế tiếp.
+// Đang chọn sẵn 1 hình khép kín (box/rect/ellipse/triangle) thì bấm màu = đổi MÀU NỀN bên trong của đúng
+// hình đó (giống video tham khảo: chọn ô "ĐIỀN" rồi bấm đỏ -> ô tô đỏ) - áp dụng luôn cho hình tròn/chữ
+// nhật/tam giác vừa vẽ, không riêng gì ô tên cung. Không có hình nào đang chọn thì bấm màu chỉ đổi màu mực
+// (viền/nét vẽ) cho lần vẽ kế tiếp.
 function wbPickColor(hex){
-  const sel=(wbSelectedShapeIdx!==null && wbShapes[wbSelectedShapeIdx] && wbShapes[wbSelectedShapeIdx].type==='box') ? wbShapes[wbSelectedShapeIdx] : null;
+  const sel=(wbSelectedShapeIdx!==null && wbShapes[wbSelectedShapeIdx] && WB_RESIZABLE_TYPES.includes(wbShapes[wbSelectedShapeIdx].type)) ? wbShapes[wbSelectedShapeIdx] : null;
   if(sel){ sel.bg=hex; wbRedrawCanvas(); }
   else wbDrawColor=hex;
   document.querySelectorAll('#wbSwatchGrid .wb-swatch').forEach(b=>b.classList.toggle('active', b.dataset.hex===hex));
@@ -2991,6 +3032,7 @@ function wbUndoDraw(){
   else if(action.type==='shape-remove'){ wbShapes.push(action.shape); }
   else if(action.type==='shape-resize'){ action.shape.fontSize=action.before; }
   else if(action.type==='shape-resize-box'){ Object.assign(action.shape, action.before); }
+  else if(action.type==='shape-resize-corner'){ Object.assign(action.shape, action.before); }
   wbRedrawCanvas();
 }
 function wbRedoDraw(){
@@ -3002,6 +3044,7 @@ function wbRedoDraw(){
   else if(action.type==='shape-remove'){ const i=wbShapes.indexOf(action.shape); if(i>=0) wbShapes.splice(i,1); }
   else if(action.type==='shape-resize'){ action.shape.fontSize=action.after; }
   else if(action.type==='shape-resize-box'){ Object.assign(action.shape, action.after); }
+  else if(action.type==='shape-resize-corner'){ Object.assign(action.shape, action.after); }
   wbRedrawCanvas();
 }
 function wbClearDraw(){
@@ -3042,6 +3085,9 @@ function wbHitTestDrawnShape(x,y){
       if(distToSegment(x,y,sh.x1,sh.y1,sh.x2,sh.y2)<=threshold) return i;
     }else if(sh.type==='rect'){
       const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2);
+      // Đã có tô màu nền (sh.bg) thì cả phần THÂN cũng bắt trúng được, không chỉ viền - giống ô tên cung
+      // (type 'box'), để bấm lại vào giữa hình đã tô màu vẫn chọn được nó (đỡ phải nhắm đúng viền mảnh).
+      if(sh.bg){ if(x>=x1-4 && x<=x2+4 && y>=y1-4 && y<=y2+4) return i; }
       const inX=x>=x1-threshold && x<=x2+threshold, inY=y>=y1-threshold && y<=y2+threshold;
       const onLeft=inY && Math.abs(x-x1)<=threshold, onRight=inY && Math.abs(x-x2)<=threshold;
       const onTop=inX && Math.abs(y-y1)<=threshold, onBottom=inX && Math.abs(y-y2)<=threshold;
@@ -3049,9 +3095,18 @@ function wbHitTestDrawnShape(x,y){
     }else if(sh.type==='ellipse'){
       const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2||1, ry=Math.abs(sh.y2-sh.y1)/2||1;
       const nd=Math.sqrt(Math.pow((x-cx)/rx,2)+Math.pow((y-cy)/ry,2));
+      // Có tô nền thì cả phần TRONG hình (nd<=1) cũng bắt trúng, không chỉ đúng viền - xem giải thích ở rect.
+      if(sh.bg && nd<=1) return i;
       if(Math.abs(nd-1)*Math.min(rx,ry)<=threshold) return i;
     }else if(sh.type==='triangle'){
       const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2), midX=(x1+x2)/2;
+      // Có tô nền thì cả phần TRONG tam giác cũng bắt trúng - dò bằng dấu (sign) của 3 tích chéo cạnh.
+      if(sh.bg){
+        const sign=(ax,ay,bx,by,cx,cy)=>(ax-cx)*(by-cy)-(bx-cx)*(ay-cy);
+        const d1=sign(x,y,midX,y1,x2,y2), d2=sign(x,y,x2,y2,x1,y2), d3=sign(x,y,x1,y2,midX,y1);
+        const hasNeg=(d1<0)||(d2<0)||(d3<0), hasPos=(d1>0)||(d2>0)||(d3>0);
+        if(!(hasNeg&&hasPos)) return i;
+      }
       if(distToSegment(x,y,midX,y1,x2,y2)<=threshold || distToSegment(x,y,x2,y2,x1,y2)<=threshold || distToSegment(x,y,x1,y2,midX,y1)<=threshold) return i;
     }else if(sh.type==='text'){
       const r=(sh.fontSize||14)/14;
@@ -3114,23 +3169,38 @@ function wbDrawArrowShape(ctx,sh){
 function wbDrawEllipseShape(ctx,sh){
   const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2, ry=Math.abs(sh.y2-sh.y1)/2;
   ctx.save();
-  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2;
-  ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+  // Tô nền bên trong nếu có (bấm màu lúc đang chọn hình - xem wbPickColor) - fill TRƯỚC stroke để viền luôn
+  // nổi rõ trên nền, không bị viền đè lấp bởi nước sơn tô sau.
+  if(sh.bg){ ctx.fillStyle=sh.bg; ctx.fill(); }
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2; ctx.stroke();
   ctx.restore();
 }
 function wbDrawTriangleShape(ctx,sh){
   const x1=Math.min(sh.x1,sh.x2), x2=Math.max(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2), y2=Math.max(sh.y1,sh.y2), midX=(x1+x2)/2;
   ctx.save();
-  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2; ctx.lineJoin='round';
-  ctx.beginPath(); ctx.moveTo(midX,y1); ctx.lineTo(x2,y2); ctx.lineTo(x1,y2); ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(midX,y1); ctx.lineTo(x2,y2); ctx.lineTo(x1,y2); ctx.closePath();
+  if(sh.bg){ ctx.fillStyle=sh.bg; ctx.fill(); }
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2; ctx.lineJoin='round'; ctx.stroke();
+  ctx.restore();
+}
+// Hình chữ nhật RIÊNG cho Bảng Vẽ (khác drawShape() gốc dùng cho canvas chính) - có hỗ trợ tô màu nền bên
+// trong khi được chọn + bấm màu (xem wbPickColor), điều mà drawShape() gốc không có (chỉ vẽ viền suông).
+function wbDrawRectShape(ctx,sh){
+  const x=Math.min(sh.x1,sh.x2), y=Math.min(sh.y1,sh.y2), w=Math.abs(sh.x2-sh.x1), h=Math.abs(sh.y2-sh.y1);
+  ctx.save();
+  if(sh.bg){ ctx.fillStyle=sh.bg; ctx.fillRect(x,y,w,h); }
+  ctx.strokeStyle=sh.color; ctx.lineWidth=sh.lineWidth||2;
+  ctx.strokeRect(x,y,w,h);
   ctx.restore();
 }
 function wbDrawAnyShape(ctx,sh){
   if(sh.type==='box') wbDrawBoxShape(ctx,sh);
+  else if(sh.type==='rect') wbDrawRectShape(ctx,sh);
   else if(sh.type==='arrow') wbDrawArrowShape(ctx,sh);
   else if(sh.type==='ellipse') wbDrawEllipseShape(ctx,sh);
   else if(sh.type==='triangle') wbDrawTriangleShape(ctx,sh);
-  else drawShape(ctx,sh); // rect/text - hàm gốc dùng chung
+  else drawShape(ctx,sh); // text - hàm gốc dùng chung
 }
 function wbHighlightShape(ctx,sh){
   if(sh.type==='box'){
@@ -3150,12 +3220,15 @@ function wbHighlightShape(ctx,sh){
     ctx.restore();
     return;
   }
-  if(sh.type==='rect'||sh.type==='arrow'||sh.type==='text'){ drawShapeHighlight(ctx,sh); return; }
-  // ellipse/triangle: vẽ lại đúng hình dạng gốc, viền cam mờ dày hơn đè lên - đơn giản hơn hẳn so với tính
-  // riêng 1 kiểu highlight (khung chữ nhật bao quanh) cho từng loại hình học khác nhau.
+  if(sh.type==='arrow'||sh.type==='text'){ drawShapeHighlight(ctx,sh); return; }
+  // rect/ellipse/triangle: vẽ lại đúng hình dạng gốc, viền cam mờ dày hơn đè lên, kèm 4 NÚM GÓC (giống ô tên
+  // cung nhưng đủ 4 góc thay vì chỉ 1) để kéo chỉnh kích cỡ tự do theo mọi hướng.
   ctx.save();
   ctx.strokeStyle='rgba(255,152,0,.6)'; ctx.lineCap='round'; ctx.lineJoin='round';
-  if(sh.type==='ellipse'){
+  if(sh.type==='rect'){
+    const x=Math.min(sh.x1,sh.x2)-4, y=Math.min(sh.y1,sh.y2)-4, w=Math.abs(sh.x2-sh.x1)+8, h=Math.abs(sh.y2-sh.y1)+8;
+    ctx.lineWidth=3; ctx.strokeRect(x,y,w,h);
+  }else if(sh.type==='ellipse'){
     const cx=(sh.x1+sh.x2)/2, cy=(sh.y1+sh.y2)/2, rx=Math.abs(sh.x2-sh.x1)/2+4, ry=Math.abs(sh.y2-sh.y1)/2+4;
     ctx.lineWidth=3; ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2); ctx.stroke();
   }else if(sh.type==='triangle'){
@@ -3163,6 +3236,17 @@ function wbHighlightShape(ctx,sh){
     ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(midX,y1); ctx.lineTo(x2,y2); ctx.lineTo(x1,y2); ctx.closePath(); ctx.stroke();
   }
   ctx.restore();
+  if(WB_CORNER_RESIZABLE_TYPES.includes(sh.type)){
+    const positions=wbCornerPositions(sh);
+    ctx.save();
+    ctx.fillStyle='#ff9800';
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    Object.values(positions).forEach(p=>{
+      ctx.fillRect(p.x-WB_BOX_HANDLE_SIZE, p.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+      ctx.strokeRect(p.x-WB_BOX_HANDLE_SIZE, p.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+    });
+    ctx.restore();
+  }
 }
 function wbRedrawCanvas(preview){
   const cv=document.getElementById('wbCanvas'); if(!cv) return;
@@ -3202,6 +3286,19 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
           wbResizingBox={idx:wbSelectedShapeIdx, x1, y1,
             w0:Math.abs(sh.x2-sh.x1), h0:Math.abs(sh.y2-sh.y1), font0:sh.fontSize||14,
             before:{x2:sh.x2,y2:sh.y2,fontSize:sh.fontSize}};
+          return;
+        }
+        // Bấm trúng 1 trong 4 núm góc của rect/ellipse/triangle đang chọn -> bắt đầu kéo-giãn kích cỡ theo
+        // đúng góc đó, neo góc ĐỐI DIỆN cố định (kiểm tra TRƯỚC hitTestDrawnShape, cùng lý do như tay nắm box).
+        const corner=wbHitTestCornerHandle(x,y);
+        if(corner){
+          const sh=wbShapes[wbSelectedShapeIdx];
+          // Chuẩn hóa lại x1/y1/x2/y2 về đúng thứ tự min/max TRƯỚC khi kéo - để logic "góc nào kéo, góc đối
+          // diện đứng yên" luôn nhất quán, không phụ thuộc chiều vẽ ban đầu (kéo từ phải-dưới lên trái-trên
+          // hay ngược lại đều ra cùng 1 hình chữ nhật, chỉ khác thứ tự lưu x1/x2).
+          const nx1=Math.min(sh.x1,sh.x2), nx2=Math.max(sh.x1,sh.x2), ny1=Math.min(sh.y1,sh.y2), ny2=Math.max(sh.y1,sh.y2);
+          sh.x1=nx1; sh.y1=ny1; sh.x2=nx2; sh.y2=ny2;
+          wbResizingCorner={idx:wbSelectedShapeIdx, corner, before:{x1:nx1,y1:ny1,x2:nx2,y2:ny2}};
           return;
         }
         const hit=wbHitTestDrawnShape(x,y);
@@ -3246,6 +3343,21 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         wbRedrawCanvas();
         return;
       }
+      if(wbResizingCorner){
+        e.preventDefault();
+        const d=wbResizingCorner, sh=wbShapes[d.idx]; if(!sh){ wbResizingCorner=null; return; }
+        const b=d.before;
+        // Mỗi góc chỉ di chuyển ĐÚNG 2 cạnh liền kề của chính nó, giữ nguyên 2 cạnh còn lại (đối diện) -
+        // kẹp kích thước tối thiểu (WB_BOX_MIN_W/H) để không kéo lộn ngược hình lại thành âm.
+        let {x1,y1,x2,y2}=b;
+        if(d.corner==='tl'){ x1=Math.min(x,x2-WB_BOX_MIN_W); y1=Math.min(y,y2-WB_BOX_MIN_H); }
+        else if(d.corner==='tr'){ x2=Math.max(x,x1+WB_BOX_MIN_W); y1=Math.min(y,y2-WB_BOX_MIN_H); }
+        else if(d.corner==='bl'){ x1=Math.min(x,x2-WB_BOX_MIN_W); y2=Math.max(y,y1+WB_BOX_MIN_H); }
+        else if(d.corner==='br'){ x2=Math.max(x,x1+WB_BOX_MIN_W); y2=Math.max(y,y1+WB_BOX_MIN_H); }
+        sh.x1=x1; sh.y1=y1; sh.x2=x2; sh.y2=y2;
+        wbRedrawCanvas();
+        return;
+      }
       if(wbDraggingBox){
         e.preventDefault();
         const d=wbDraggingBox, sh=wbShapes[d.idx];
@@ -3266,6 +3378,18 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         if(sh && (sh.x2!==d.before.x2 || sh.y2!==d.before.y2)){
           wbActionLog.push({type:'shape-resize-box', shape:sh, before:d.before, after:{x2:sh.x2,y2:sh.y2,fontSize:sh.fontSize}});
           wbActionRedoLog=[];
+        }
+        return;
+      }
+      if(wbResizingCorner){
+        const d=wbResizingCorner, sh=wbShapes[d.idx];
+        wbResizingCorner=null;
+        if(sh){
+          const after={x1:sh.x1,y1:sh.y1,x2:sh.x2,y2:sh.y2};
+          if(JSON.stringify(after)!==JSON.stringify(d.before)){
+            wbActionLog.push({type:'shape-resize-corner', shape:sh, before:d.before, after});
+            wbActionRedoLog=[];
+          }
         }
         return;
       }
@@ -4159,6 +4283,76 @@ function reapplyNavHighlights(c){
     renderLuuNguyetChuc(idx);
   }
   updateStepperUI();
+}
+
+// ═══════════════════════════════════
+// COPY KẾT CẤU CHO GPT LUNA (không lưu file, chỉ dùng clipboard)
+// Chỉ đọc kết cấu đã tính; không thay đổi total/merge/filter hay renderer.
+// ═══════════════════════════════════
+function copyKetCauForLuna(ev){
+  try{
+    ev?.stopPropagation?.();
+    const c=chart();
+    const mode=hcMode||'hung';
+    const structures=computeKetCauStructures(mode)||[];
+    const isoIdx=isolatedKetCauIdx?.[mode];
+    const picked=isoIdx==null?structures:(structures[isoIdx]?[structures[isoIdx]]:structures);
+    const lines=[];
+    const st=hcState[mode]||{the:new Set(),dung:new Set()};
+    const cungName=idx=>c&&idx!=null?cungChucOf(idx,c.vM):'';
+    const setNames=set=>[...(set||[])].map(cungName).filter(Boolean);
+    const topicDef=activeTopicKey?TOPIC_THE_DUNG[activeTopicKey]:null;
+    const topicLabel=TOPIC_LIST.find(t=>t.key===activeTopicKey)?.label||'Chưa chọn';
+    lines.push('[TỬ VI TOOL — KẾT CẤU CẦN LUẬN GIẢI]');
+    lines.push(`Chủ đề: ${topicLabel}`);
+    lines.push(`Chủ đề Thể gợi ý: ${topicDef?.the?.join(', ')||'—'}`);
+    lines.push(`Chủ đề Dụng gợi ý: ${topicDef?.dung?.join(', ')||'—'}`);
+    lines.push(`Thể đang chọn trong tool: ${setNames(st.the).join(', ')||'—'}`);
+    lines.push(`Dụng đang chọn trong tool: ${setNames(st.dung).join(', ')||'—'}`);
+    if(c){
+      const chartInfo=[c.name,c.date,c.gender,c.hour].filter(v=>String(v||'').trim()).join(' | ');
+      if(chartInfo) lines.push(`Lá số: ${chartInfo}`);
+    }
+    const countLabel=mode==='cat'?'Tổng Lộc/cát hóa':'Tổng Kỵ/hung hóa';
+    lines.push(`Chế độ: ${mode==='cat'?'CÁT':'HUNG'} | Số kết cấu: ${picked.length}`);
+    lines.push(`${countLabel}: ${picked.map(s=>hoaCountLabelText(s.total,mode==='cat'?'A':'D')).join(' | ')||'0'}`);
+    lines.push('');
+    picked.forEach((s,i)=>{
+      lines.push(`=== KẾT CẤU ${i+1} ===`);
+      lines.push(`Mỏ neo: ${cungName(s.anchorIdx)||'—'}`);
+      lines.push(`Tổng Kỵ theo tool: ${s.total??'—'}`);
+      if(s.lines?.length){
+        const note=s.lines.map(x=>String(x).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()).filter(Boolean).join(' | ');
+        lines.push(`Kết cấu tool ghi: ${note}`);
+        lines.push('Sao cần luận trong kết cấu: hãy đọc từng sao được ghi trong dòng trên (không bỏ qua tính chất sao); phân tích vai trò của sao trong HK/CK và cung nó nhập.');
+      }
+      lines.push('Các dòng trên là dữ liệu kết cấu đã tính; không tự suy ra thêm cạnh từ vị trí node.');
+      lines.push('');
+    });
+    lines.push('Yêu cầu cho GPT Luna: Bám đúng Chủ đề và Thể/Dụng đang chọn để luận các kết cấu trên.');
+    lines.push('Phân biệt rõ: quy tắc sách, ví dụ tương tự, suy luận và điểm chưa đủ dữ liệu.');
+    lines.push('Không tự thêm HK/CK/TỌA/LĐKK, không sửa số Kỵ và không biến ví dụ thành luật tổng quát.');
+    const text=lines.join('\n');
+    const done=()=>{
+      const b=document.getElementById('btnLuanGiaiAI');
+      if(!b) return;
+      const old=b.textContent; b.textContent='ĐÃ COPY ✓';
+      setTimeout(()=>{b.textContent=old;},1800);
+    };
+    if(navigator.clipboard?.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(()=>copyTextFallback(text,done));
+    }else copyTextFallback(text,done);
+  }catch(e){
+    console.error('copyKetCauForLuna lỗi:',e);
+    const b=document.getElementById('btnLuanGiaiAI');
+    if(b) b.textContent='LỖI COPY';
+  }
+}
+function copyTextFallback(text,done){
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done?.(); }catch(e){ alert('Clipboard bị chặn. Anh hãy copy thủ công nội dung kết cấu.'); }
+  ta.remove();
 }
 
 // ═══════════════════════════════════
@@ -5821,6 +6015,11 @@ function drawTuHoaArrows(ctx){
     }
     if(cursor<1) drawLine(ctx, pt(cursor), pt(1), lineColor);
 
+    // FIX 2026-08-08: TRƯỚC ĐÂY "neo tại viền làm arrowhead bị cắt/che khi đi vào các cung sát mép" nên kéo
+    // đầu nhọn vào SÂU THÊM 12px bên trong cung đích (tipA/tipB lệch khỏi A/B) - gây đúng lỗi người dùng báo:
+    // mũi tên hướng tâm lấn vào bên trong viền cung thay vì dừng ngay tại viền. Giờ đầu mũi tên dừng ĐÚNG tại
+    // A/B (đã là điểm viền cung, xem cellEdgeAnchor 'inner') - tam giác đầu mũi tên vẽ lùi VỀ PHÍA NGOÀI viền
+    // (drawArrowHeadAt vẽ ngược hướng dirX/dirY từ tip), nên đỉnh nhọn vẫn chạm đúng viền, không lấn vào trong.
     if(hasA){
       drawArrowHeadAt(ctx, A, -dx, -dy, lineColor);
       const c=pt(0.13);
@@ -5858,10 +6057,22 @@ function starAnchor(idx,starName){
   if(!cvEl||!cell) return null;
   let target=null;
   cell.querySelectorAll('.sao').forEach(sp=>{ if(!target && sp.textContent.trim().startsWith(starName)) target=sp; });
-  if(!target){ const r=cellRect(idx); return r?{x:r.cx,y:r.cy}:null; }
+  const r=cellRect(idx);
+  if(!target) return r?{x:r.cx,y:r.cy}:null;
   const wr=cvEl.getBoundingClientRect(), sr=target.getBoundingClientRect();
   // Dừng lại ở khoảng trống ngay phía dưới tên sao (không phi đè lên chữ, không chọn phía trên).
-  return {x:sr.left-wr.left+sr.width/2, y:sr.top-wr.top+sr.height+5};
+  let x=sr.left-wr.left+sr.width/2, y=sr.top-wr.top+sr.height+5;
+  // KẸP lại trong đúng ranh giới ô cung đích (trừ hao viền ~4px) - tên sao có thể nằm sát mép dưới/phải ô
+  // (cung nhiều sao, hoặc sao cuối danh sách), khiến điểm neo "ngay dưới chữ" tính ra RỚT RA NGOÀI ô cung -
+  // đúng lỗi người dùng báo: "mũi tên không đi vào không gian của cung chức", đầu mũi tên dừng ở rìa/góc ô
+  // thay vì nằm hẳn bên trong. Luôn ưu tiên giữ đúng vị trí ngay dưới chữ khi nó CÒN nằm trong ô (không đổi
+  // hành vi cũ ở trường hợp bình thường), chỉ kẹp khi thật sự tràn ra ngoài.
+  if(r){
+    const pad=4;
+    x=Math.min(Math.max(x,r.left+pad),r.right-pad);
+    y=Math.min(Math.max(y,r.top+pad),r.bottom-pad);
+  }
+  return {x,y};
 }
 // Rê mũi tên (tool vẽ tay) tới gần dưới/trái/phải 1 sao thì tự gạch dưới sao đó để báo hiệu đang "nhắm" -
 // rê ra khỏi thì mất gạch dưới. Không tính vùng phía trên chữ (đầu mũi tên luôn tới từ dưới/trái/phải theo
@@ -7113,6 +7324,15 @@ function computeKetCauStructuresRaw(mode){
     // chọn)→Thiên Di(có chọn): Giao Hữu chen ngay từ bước đầu nên CẢ kết cấu này KHÔNG có trùng lặp phi hóa,
     // dù Phúc Đức→Thiên Di sau đó có liên tục Thể/Dụng với NHAU thì cũng không tính, vì không khởi từ gốc).
     let stillConsecutive=true;
+    // FIX 2026-08-08 "Cung Mấu chốt": quy tắc bổ sung riêng cho kết cấu HUNG (Kị) - CHỈ khi bước hóa Kị GỐC
+    // (i=0) của root đáp THẲNG vào 1 cung Thể/Dụng khác gây "trùng lặp phi hóa" (isTrungLapCung tại i=0) thì
+    // cung đích đó (step.to) trở thành "Cung Mấu chốt" của kết cấu - ghi nhận vào mauChotIdx, KHÔNG áp dụng
+    // cho các điểm trùng lặp xảy ra ở các bước CK sau đó (Ngọc xác nhận trực tiếp 2026-08-08: chỉ tính bước
+    // đầu). Sau đó nếu BẤT KỲ bước CK nào SAU i=0 quay lại đúng Cung Mấu chốt này, HOẶC đáp vào cung ĐỐI DIỆN
+    // của nó (idx+6)%12, thì đây là 1 nguồn Kị MỚI độc lập (không còn là trùng lặp) → +1 Kị (xem đoạn cộng
+    // total bên dưới forEach). Ví dụ: Mệnh HK Phúc (trùng lặp, Phúc=Mấu chốt) → Phúc CK→ Tật → Tật CK→ Tài
+    // (đối cung của Phúc Đức) → +1 Kị, tổng 3 Kị thay vì 2.
+    let mauChotIdx=null;
     // Cung THẬT SỰ thuộc Thể/Dụng (realAnchorSet) nằm ngay TRÊN mạch chính của root (kể cả khi bị đánh dấu
     // "trùng lặp"/suppressed, tức bị 1 bước chuyển Kị "tiêu thụ" làm nguồn Can tái dùng) - vẫn phải được coi
     // là 1 thành viên THẬT SỰ của kết cấu này (xem realMembersOfKetCau), vì nó chính là 1 phần nội dung của
@@ -7140,6 +7360,8 @@ function computeKetCauStructuresRaw(mode){
       // nên không được ghi nhãn "(trùng lặp)" (dễ hiểu lầm là 1 cung Thể/Dụng thật sự).
       const isSelectedHere = step.to===root || realAnchorSet.has(step.to);
       const isTrungLapCung = letter==='D' && hasNextStep && step.to!==root && stillConsecutive && realAnchorSet.has(step.to);
+      // "Cung Mấu chốt" (xem giải thích ở khai báo mauChotIdx) - CHỈ ghi nhận đúng tại i===0.
+      if(i===0 && isTrungLapCung) mauChotIdx=step.to;
       if(step.to!==root && realAnchorSet.has(step.to)) spineRealMembers.add(step.to);
       if(!isSelectedHere) stillConsecutive=false;
       // Niên A/D và "tự hóa Lộc" ở đây LUÔN là 1 lần cộng MỚI, THẬT SỰ (bonus.tags chỉ chứa các nhãn này khi
@@ -7178,12 +7400,26 @@ function computeKetCauStructuresRaw(mode){
       else if(i===0) spine += (isNienRoot ? ` —CK→ ` : ` → `) + targetHtml;
       else spine += ` —CK→ ${targetHtml}`;
     });
+    // FIX 2026-08-08 "Cung Mấu chốt" (tiếp): sau khi đã đi hết mạch chính, kiểm tra xem có bước CK nào SAU
+    // i=0 quay lại đúng Cung Mấu chốt hoặc cung ĐốI DIỆN của nó không - nếu có, +1 Kị (nguồn Kị mới độc lập,
+    // không phải trùng lặp) và ghi rõ 1 dòng riêng để hiển thị. Chỉ tính 1 lần dù có nhiều bước cùng chạm lại.
+    let mauChotBonusLine=null;
+    if(mauChotIdx!=null){
+      const doiMauChot=(mauChotIdx+6)%12;
+      const hitStep=steps.find((s,i)=>i>0 && (s.to===mauChotIdx || s.to===doiMauChot));
+      if(hitStep){
+        total+=1;
+        const isDoi=hitStep.to===doiMauChot;
+        mauChotBonusLine=`<li class="hoa-sub hoa-plus hoa-red">⤷ quay về ${isDoi?'đối cung của ':''}Cung Mấu chốt (${label(mauChotIdx)}) tại ${label(hitStep.to)} [+1${lettAbbr}]</li>`;
+      }
+    }
     // KHÔNG còn ghi ngoặc tổng dồn "[X]" ở cuối dòng mạch chính nữa (yêu cầu người dùng: ngoặc tổng dồn đặt
     // cuối dòng dễ hiểu lầm là thuộc về đúng đoạn chữ NGAY TRƯỚC nó - vd "...—CK→ Thê [2K]" trông như "CK→ Thê"
     // đáng giá 2 Kị, dù thật ra đó chỉ là 1 đoạn chuyển Kị thuần túy không cộng gì thêm, số "2" là DỒN từ 2
     // điểm khác nhau ở ĐẦU dòng) - mỗi điểm cộng điểm giờ đã tự ghi rõ "+1" ngay tại chỗ nó xảy ra (bước hóa
     // GỐC của root, KXĐC, niên...), không cần thêm 1 con số tổng mơ hồ ở cuối nữa.
     const lines=[`<li class="hoa-spine">${spine}</li>`];
+    if(mauChotBonusLine) lines.push(mauChotBonusLine);
     // Niên A/D rơi vào 1 sao KHÁC hẳn sao đang tự hóa xuất tại root (xem rootNienSameStar phía trên) - ghi rõ
     // thành 1 dòng riêng (đã cộng +1 ở trên rồi, dòng này chỉ để hiển thị, không cộng thêm lần nữa). Ghi theo
     // đúng dòng chảy thật (niên → CK → đích) như mọi dòng hội tụ khác, không giải thích dài dòng - steps[1] là
@@ -7240,6 +7476,13 @@ function computeKetCauStructuresRaw(mode){
           // trừ như quy tắc "không tính cung thứ 2" (quy tắc đó chỉ áp dụng cho truy Lộc CHỜ, không áp dụng
           // khi chính M cũng có 1 lượt hóa Lộc GỐC của riêng mình trùng khớp y hệt điểm gốc của root).
           else if(steps[0] && p0.to===steps[0].to && p0.star===steps[0].star) found={p:p0, via:null};
+          // FIX 2026-08-08: khôi phục truy Lộc vào các bước CK SAU steps[0] (steps[1], steps[2]...) - nhưng
+          // khác bản cũ đã bị bỏ (xem comment "ĐÃ BỎ (lỗi)" ngay dưới), lần này bắt buộc so khớp CẢ cung đến
+          // (.to) LẪN tên sao (.star), không chỉ so tên sao suông - tránh đúng cái bug cũ (trùng tên sao khác
+          // cung/khác sự kiện) mà vẫn tính đúng case hợp lệ: M tự hóa Lộc ra ĐÚNG sao + ĐÚNG cung mà mạch
+          // chính root cũng đi qua ở 1 bước CK sau đó (vd Phúc Đức tự hóa Lộc ra Tham Lang đáp đúng Điền
+          // Trạch, trùng khớp cả cung lẫn sao với bước CK cuối của root Mệnh → Tật → Điền/Tham Lang).
+          else if(steps.slice(1).some(s=>s.to===p0.to && s.star===p0.star)) found={p:p0, via:null};
           // ĐÃ BỎ (lỗi): trước đây còn 1 nhánh "else if(steps.slice(1).some(s=>s.star===p0.star))" - so khớp
           // p0.star với BẤT KỲ sao nào xuất hiện ở CÁC BƯỚC SAU (steps.slice(1)) của mạch chính root. Các bước
           // sau bước đầu LUÔN là bước CHUYỂN KỊ (chữ D, xem computeSingleChain: step2 trở đi luôn flyFrom(...,
@@ -7835,13 +8078,19 @@ function computeKetCauStructuresRaw(mode){
     const map=new Map();
     const add=(idx,reason)=>{ if(!map.has(idx)) map.set(idx,[]); map.get(idx).push(reason); };
     (s.memberIdxs||[s.anchorIdx]).forEach(m=>{
-      // Cung Thể tự thân LUÔN được coi là "tọa Kị" (Thể là chủ thể khởi Kỵ của cả kết cấu, không cần đợi
-      // có chuỗi nào "đáp" tới nó mới tính là tọa Kị) - CHỈ áp dụng cho Thể, KHÔNG áp dụng cho Dụng (Dụng chỉ
-      // thực sự tọa Kị khi có 1 chuỗi thật sự đáp thẳng vào nó, xem điều kiện step.from!==step.to bên dưới).
-      // VD: Điền là Thể, Mệnh là Dụng, Mệnh hóa Kị đến Tử Nữ (đối cung của Điền, dù Tử tự hóa Kị xuất tại
-      // đó không truy tiếp nữa) - kết cấu này vẫn có 1 Kị nhờ LĐKK giữa Tử Nữ và chính Điền (Thể), dù Điền
-      // không hề có chuỗi riêng nào đáp ngược lại đúng vị trí của chính nó.
-      if(st.the.has(m)) add(m,{kind:'the'});
+      // SỬA LẦN 4, CHỐT (theo phản hồi người dùng - domain expert): Thể LÀ mỏ neo LĐKK hợp lệ CHỈ KHI bản
+      // thân Thể đó KHÔNG hóa Kị đi đâu cả (đứng yên, thuần túy là 1 điểm quy chiếu tĩnh) - lúc đó 1 Dụng
+      // khác hóa/chuyển Kị đáp đúng vào ĐỐI CUNG của Thể sẽ coi là "Dụng xung phá Thể" (LĐKK), gộp thành 1
+      // kết cấu chung. NGƯỢC LẠI, nếu Thể ĐANG hóa Kị đi (bắn ra BẤT KỲ cung nào, không riêng gì đối cung -
+      // như Điền hóa Kị → Giao Hữu) thì Thể KHÔNG còn "rảnh" làm mỏ neo được nữa - đây là 2 câu chuyện khác
+      // hẳn nhau: (1) "Thể hóa Kị → X CK → Y" là 1 kết cấu RIÊNG của chính Thể (Thể là triệu nhân cung chủ
+      // động), (2) "Dụng khác hóa Kị đáp đúng đối cung Thể" là 1 kết cấu KHÁC dựa trên vị trí TĨNH của Thể -
+      // 2 vai trò này LOẠI TRỪ NHAU, Thể không thể vừa chủ động hóa Kị đi vừa thụ động làm mỏ neo cùng lúc.
+      if(st.the.has(m)){
+        const chM=chainFor(m);
+        const theHoaKyDi = !!(chM && chM.steps && chM.steps.length>0);
+        if(!theHoaKyDi) add(m,{kind:'the'});
+      }
       const ch=chainFor(m); if(ch) ch.steps.forEach(step=>{ if(step.from!==step.to) add(step.to,{kind:'step',from:step.from,to:step.to}); });
     });
     return map;
@@ -7937,10 +8186,45 @@ function computeKetCauStructuresRaw(mode){
     });
   }
 
-  // Thể là bắt buộc phải có trong 1 kết cấu chuẩn, Dụng chỉ là phụ trợ (có thể có hoặc không) - 1 kết cấu mà
-  // TOÀN BỘ thành viên (gốc + hội tụ + gộp Lưỡng đầu kiến Kị) đều chỉ là Dụng, không dính dáng gì tới Thể,
-  // thì không được coi là 1 kết cấu hợp lệ - loại hẳn, không ghi vào danh sách.
-  const hasThe=s=>{ const members=realMembersOfKetCau(s); return [...members].some(idx=>st.the.has(idx)); };
+  // SỬA (theo phản hồi người dùng): ghi chú THUẦN TÚY MÔ TẢ (KHÔNG cộng điểm, KHÔNG gộp/merge 2 kết cấu)
+  // khi 1 kết cấu TOÀN DỤNG (chưa có Thể nào thật sự tham gia) lại có 1 cung tọa Kị nằm ĐÚNG ĐỐI CUNG của 1
+  // Thể nào đó - dù Thể đó KHÔNG đủ điều kiện làm mỏ neo để GỘP 2 kết cấu thành 1 (vì đang hóa Kị đi nơi
+  // khác, xem điều kiện "theHoaKyDi" ở landingReasonsOf phía trên), vẫn đáng ghi chú lại quan hệ vị trí này
+  // để biết kết cấu có "chạm" Thể-Dụng, không hoàn toàn cô lập vô can - đúng ý người dùng: "Tử - LĐKK - Điền
+  // (Thể), thì lúc này mới là kết cấu hoàn toàn có sự tham gia của Thể-Dụng". Chỉ thêm 1 dòng <li> mô tả,
+  // KHÔNG đụng total/steps/merged gì cả.
+  if(letter==='D'){
+    structures.forEach(s=>{
+      const members=realMembersOfKetCau(s);
+      const alreadyHasThe=[...members].some(idx=>st.the.has(idx));
+      if(alreadyHasThe) return; // đã có Thể thật sự trong kết cấu rồi - không cần ghi chú thêm
+      const reasons=landingReasonsOf(s);
+      const noted=new Set();
+      for(const a of reasons.keys()){
+        const b=(a+6)%12;
+        if(st.the.has(b) && !noted.has(b)){
+          noted.add(b);
+          s.lines.push(`<li class="hoa-sub hoa-ldkk">⤷ <b>${label(a)}</b> ╌ LĐKK ╌ <b>${label(b)}</b> (Thể)</li>`);
+        }
+      }
+    });
+  }
+
+  // SỬA LẠI (Kim hiểu nhầm ở bản trước - đã bị người dùng sửa lỗi): rule "Thể là bắt buộc phải có trong 1
+  // kết cấu chuẩn" VẪN ĐÚNG, KHÔNG bỏ. Chỉ mở rộng thêm 1 cách để thỏa điều kiện "có Thể tham gia": ngoài
+  // cách cũ (Thể là spine/hội tụ THẬT SỰ trong kết cấu), giờ tính CẢ trường hợp kết cấu có 1 cung tọa Kị nằm
+  // đúng ĐỐI CUNG của 1 Thể nào đó (dù Thể đó không đủ điều kiện làm mỏ neo để GỘP 2 kết cấu vì đang hóa Kị
+  // đi nơi khác) - đây chính là quan hệ LĐKK thuần mô tả vừa ghi chú ở khối phía trên (VD: Tử-LĐKK-Điền) -
+  // Thể vẫn coi là "có tham gia" qua quan hệ vị trí này, dù không merge/cộng điểm.
+  const hasThe=s=>{
+    const members=realMembersOfKetCau(s);
+    if([...members].some(idx=>st.the.has(idx))) return true;
+    if(letter==='D'){
+      const reasons=landingReasonsOf(s);
+      for(const a of reasons.keys()){ if(st.the.has((a+6)%12)) return true; }
+    }
+    return false;
+  };
 
   // Cô lập mà vẫn không được "lưỡng đầu kiến Kị" nào cứu -> loại hẳn, như hành vi gốc.
   // Ưu tiên kết cấu DÀI và NHIỀU Lộc/Kị nhất đứng trước (Kết cấu 1, 2...) - so bằng tổng điểm (total) trước
@@ -7960,9 +8244,16 @@ function luongDauKienKyCungSet(mode,includeManualArrows=true){
   if(mode!=='hung') return set;
   const reasons=new Map();
   const add=(idx,reason)=>{ if(!reasons.has(idx)) reasons.set(idx,[]); reasons.get(idx).push(reason); };
-  // Cung Thể tự thân LUÔN được coi là "tọa Kị" (Thể là chủ thể khởi Kỵ của cả kết cấu, không cần đợi có
-  // chuỗi nào "đáp" tới nó mới tính) - xem giải thích đầy đủ ở landingReasonsOf trong computeKetCauStructures.
-  (hcState[mode].the||new Set()).forEach(idx=>add(idx,{kind:'the'}));
+  // SỬA LẦN 4, CHỐT (theo phản hồi người dùng): Thể chỉ là mỏ neo LĐKK hợp lệ khi bản thân nó KHÔNG hóa Kị
+  // đi đâu cả (đứng yên, thuần túy điểm quy chiếu) - nếu Thể ĐANG hóa Kị đi (bắn ra bất kỳ cung nào) thì
+  // không còn "rảnh" làm mỏ neo được nữa (2 vai trò loại trừ nhau). Xem giải thích đầy đủ ở landingReasonsOf
+  // trong computeKetCauStructuresRaw (cùng logic, đồng bộ 2 nơi - nơi này dùng hcState[mode].chains đã tính
+  // sẵn thay vì gọi lại chainFor()).
+  (hcState[mode].the||new Set()).forEach(idx=>{
+    const chIdx=(hcState[mode].chains||[]).find(ch=>ch.from===idx);
+    const theHoaKyDi = !!(chIdx && chIdx.steps && chIdx.steps.length>0);
+    if(!theHoaKyDi) add(idx,{kind:'the'});
+  });
   // Bỏ qua bước "tự hóa Kị xuất/ly tâm" tại chỗ (s.from===s.to) - lực Kị loại này rất yếu, không tính là
   // "tọa Kị" để ghép lưỡng đầu kiến Kị, trừ khi có 1 cung KHÁC thật sự chuyển Kị tới. Giữ lại {from,to} của
   // từng bước (không chỉ mỗi "to") để isGenuineLdkkPair phân biệt được LĐKK thật với KXĐC (1 bước chuyển Kị
@@ -8604,6 +8895,8 @@ function dualDrawTuHoaArrows(side,ctx,c){
     }
     if(cursor<1) drawLine(ctx, pt(cursor), pt(1), lineColor);
 
+    // FIX 2026-08-08: đồng bộ với bản lá số đơn (drawTuHoaArrows) - bỏ đẩy đầu mũi tên lấn 12px vào trong
+    // cung đích, dừng đúng tại A/B (điểm viền cung).
     if(hasA){
       drawArrowHeadAt(ctx, A, -dx, -dy, lineColor);
       const c=pt(0.13);
