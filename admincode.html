@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>🔑 Tử Vi Mộc Lang — Quản Lý Mã</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
@@ -280,16 +281,22 @@ tbody td{padding:9px 10px;color:var(--ink);vertical-align:middle}
 </head>
 <body>
 
-<!-- ── Lock screen ── -->
+<!-- ── Lock screen (Google Sign-In) ──
+     FIX BẢO MẬT 2026-08-13: trước đây là màn hình mật khẩu (chỉ lưu ở localStorage, ai đọc được code
+     cũng qua được) + gửi 1 "adminKey" cố định (SECRET_KEY) lên server cho MỌI thao tác quản trị - ai
+     đọc được file này là coi như có toàn quyền admin. Giờ đổi hẳn: phải đăng nhập ĐÚNG tài khoản Google
+     nằm trong ADMIN_EMAILS (xem trong <script> bên dưới) - mọi request quản trị gửi kèm ID token thật
+     của phiên đăng nhập đó, Code.gs tự xác minh token với chính Google (không tin email do client tự
+     khai), nên dù ai có file admincode.html trong tay cũng KHÔNG vào được nếu không đăng nhập đúng Gmail
+     admin. Bắt buộc phải cập nhật Code.gs tương ứng - xem SECURITY-ADMINCODE.md. -->
 <div id="lockScreen">
   <div class="lock-box">
     <div class="lock-icon">☯</div>
     <h2>Tử Vi Mộc Lang</h2>
-    <p>Trang quản trị — Nhập mật khẩu để tiếp tục</p>
-    <input class="lock-input" type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlock()">
+    <p>Trang quản trị — Đăng nhập bằng Google để tiếp tục</p>
+    <div id="gsiAdminBtn" style="display:flex;justify-content:center;margin:14px 0"></div>
     <div class="lock-err" id="lockErr"></div>
-    <button class="btn btn-gold" style="width:100%" onclick="unlock()">Mở khóa</button>
-    <div class="lock-hint">Lần đầu dùng: mật khẩu mặc định là <b>admin123</b><br>Đổi ngay sau khi đăng nhập</div>
+    <div class="lock-hint">Chỉ đúng (các) Gmail được cấp quyền admin mới đăng nhập được</div>
   </div>
 </div>
 
@@ -302,8 +309,8 @@ tbody td{padding:9px 10px;color:var(--ink);vertical-align:middle}
     <p>Tạo & quản lý mã kích hoạt Premium</p>
   </div>
   <div class="hdr-actions">
-    <button class="btn btn-outline btn-sm" onclick="showChangePass()">🔐 Đổi mật khẩu</button>
-    <button class="btn btn-red btn-sm" onclick="location.reload()">Đăng xuất</button>
+    <span id="adminEmailBadge" style="font-size:.78rem;color:var(--ink-soft)"></span>
+    <button class="btn btn-red btn-sm" onclick="adminLogout()">Đăng xuất</button>
   </div>
 </header>
 
@@ -417,31 +424,6 @@ tbody td{padding:9px 10px;color:var(--ink);vertical-align:middle}
 </div>
 </div>
 
-<!-- Modal đổi mật khẩu -->
-<div id="changePassModal" onclick="if(event.target===this)this.style.display='none'"
-  style="display:none;position:fixed;inset:0;background:rgba(17,17,17,.35);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:32px 36px;width:380px;max-width:92vw;box-shadow:0 12px 40px rgba(17,17,17,.15);position:relative">
-    <button onclick="document.getElementById('changePassModal').style.display='none'"
-      style="position:absolute;top:12px;right:14px;background:var(--bg-soft);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;color:var(--ink-soft);font-weight:700">✕</button>
-    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--jade);margin-bottom:20px">🔐 Đổi Mật Khẩu Admin</div>
-    <div style="margin-bottom:13px">
-      <label style="display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Mật khẩu mới</label>
-      <input type="password" id="newPass1" placeholder="Tối thiểu 6 ký tự" onkeydown="if(event.key==='Enter')document.getElementById('newPass2').focus()"
-        style="width:100%;padding:10px 13px;background:var(--bg-soft);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:.95rem;outline:none;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:16px">
-      <label style="display:block;font-size:.78rem;color:var(--ink-soft);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px">Xác nhận mật khẩu</label>
-      <input type="password" id="newPass2" placeholder="Nhập lại mật khẩu mới" onkeydown="if(event.key==='Enter')changePass()"
-        style="width:100%;padding:10px 13px;background:var(--bg-soft);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-size:.95rem;outline:none;box-sizing:border-box">
-    </div>
-    <div id="passMsg" style="min-height:20px;font-size:.85rem;margin-bottom:10px"></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn btn-gold" onclick="changePass()" style="flex:1;padding:11px">💾 Lưu</button>
-      <button class="btn btn-outline" onclick="document.getElementById('changePassModal').style.display='none'" style="padding:11px 20px">Huỷ</button>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -449,15 +431,25 @@ tbody td{padding:9px 10px;color:var(--ink);vertical-align:middle}
 // ============================================================
 // CONFIG — CHỈ CẦN THAY APPS_SCRIPT_URL
 // ============================================================
-const PASS_KEY     = 'tuvi_admin_pass';
-const DEFAULT_PASS = 'admin123';
-
 // ⚠️ SAU KHI DEPLOY Apps Script, dán URL vào đây:
 // script.google.com → Deploy → New deployment → Web App
 // Execute as: Me | Who has access: Anyone → Copy URL
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRaBKh2Vw2WrGeU1SPPXocGlKEJmdRqhnxPVVKMsjc8WPl5quPyX-vbl2nNrXnIu4M8Q/exec';
 
-const SECRET_KEY = 'TUVIMOCLANG2025'; // Phải giống Code.gs và tool.html
+// FIX BẢO MẬT 2026-08-13: KHÔNG còn dùng SECRET_KEY tĩnh nữa (khóa cũ 'TUVIMOCLANG2025' đã bị lộ dán
+// vào chat AI - đây chính là lý do phải đổi cơ chế, không chỉ đổi chuỗi). Giờ quyền admin dựa trên
+// ĐĂNG NHẬP GOOGLE THẬT: chỉ (các) Gmail liệt kê dưới đây mới vào được, và Code.gs (server) sẽ TỰ XÁC
+// MINH ID token với chính Google trước khi cho làm bất kỳ thao tác quản trị nào (create/revoke/list) -
+// dù ai đọc được TOÀN BỘ code file này (kể cả GOOGLE_CLIENT_ID, vốn luôn công khai theo thiết kế OAuth)
+// cũng không giả mạo được, vì không tự ký được 1 ID token hợp lệ thay cho tài khoản Google thật của anh.
+// Dùng CHUNG đúng GOOGLE_CLIENT_ID với index.html (không phải bí mật, xem giải thích OAuth Client ID).
+const GOOGLE_CLIENT_ID = '401075526815-f6nq8nsnchinirp7qlkeonk40tob07g6.apps.googleusercontent.com';
+// (Các) Gmail được cấp quyền admin - PHẢI khớp đúng danh sách ADMIN_EMAILS đặt trong Code.gs (server),
+// đây chỉ là bản client dùng để hiện lỗi sớm cho gọn UI, KHÔNG phải nơi kiểm tra quyền THẬT (server mới
+// là nơi quyết định thật sự, không tin dữ liệu client tự khai).
+const ADMIN_EMAILS = ['dongoc21189@gmail.com'];
+
+let adminIdToken = null; // ID token Google của phiên admin đang đăng nhập - gửi kèm mọi API quản trị.
 
 const PLAN_LABEL = {
   'trial1d':'🧪 Dùng thử 1 Ngày','trial3d':'🧪 Dùng thử 3 Ngày','trial7d':'🧪 Dùng thử 7 Ngày',
@@ -466,45 +458,45 @@ const PLAN_LABEL = {
 };
 
 // ============================================================
-// LOCK SCREEN
+// LOCK SCREEN (Google Sign-In)
 // ============================================================
-function unlock() {
-  const pass   = document.getElementById('adminPass').value;
-  const stored = localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
-  if (pass === stored) {
-    document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadAndRender();
-  } else {
-    const err = document.getElementById('lockErr');
-    err.textContent = '❌ Mật khẩu không đúng';
-    setTimeout(() => err.textContent = '', 2000);
+function parseJwt(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    return JSON.parse(decodeURIComponent(atob(b64).split('').map(c =>
+      '%' + ('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+  } catch(e) { return {}; }
+}
+function handleAdminCredential(resp) {
+  const payload = parseJwt(resp.credential);
+  const email = (payload.email || '').toLowerCase();
+  const err = document.getElementById('lockErr');
+  if (!email || !ADMIN_EMAILS.includes(email)) {
+    err.textContent = `❌ Gmail "${email||'?'}" không có quyền admin`;
+    return;
   }
+  err.textContent = '';
+  adminIdToken = resp.credential;
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const badge = document.getElementById('adminEmailBadge');
+  if (badge) badge.textContent = '👤 ' + email;
+  loadAndRender();
 }
-document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
-
-function showChangePass() {
-  document.getElementById('newPass1').value = '';
-  document.getElementById('newPass2').value = '';
-  document.getElementById('passMsg').textContent = '';
-  document.getElementById('changePassModal').style.display = 'flex';
-  setTimeout(() => document.getElementById('newPass1').focus(), 50);
+function initAdminGoogleSignIn() {
+  if (typeof google === 'undefined' || !google.accounts) { setTimeout(initAdminGoogleSignIn, 200); return; }
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleAdminCredential });
+  google.accounts.id.renderButton(document.getElementById('gsiAdminBtn'), { theme:'outline', size:'large', text:'signin_with' });
 }
-function changePass() {
-  const p1  = document.getElementById('newPass1').value;
-  const p2  = document.getElementById('newPass2').value;
-  const msg = document.getElementById('passMsg');
-  if (!p1 || p1.length < 6) { msg.style.color='#dc2626'; msg.textContent='Tối thiểu 6 ký tự'; return; }
-  if (p1 !== p2) { msg.style.color='#dc2626'; msg.textContent='Mật khẩu không khớp'; return; }
-  localStorage.setItem(PASS_KEY, p1);
-  msg.style.color='#15803d'; msg.textContent='✅ Đã lưu mật khẩu mới!';
-  document.getElementById('newPass1').value = '';
-  document.getElementById('newPass2').value = '';
-  setTimeout(() => { document.getElementById('changePassModal').style.display='none'; }, 1500);
+window.addEventListener('DOMContentLoaded', initAdminGoogleSignIn);
+function adminLogout() {
+  adminIdToken = null;
+  try { google.accounts.id.disableAutoSelect(); } catch(e) {}
+  location.reload();
 }
 
 // ============================================================
-// API HELPER — gọi Google Apps Script
+// API HELPER — gọi Google Apps Script (mọi action quản trị tự gửi kèm idToken)
 // ============================================================
 async function callAPI(params) {
   if (APPS_SCRIPT_URL.includes('ĐẶT_URL')) {
@@ -513,11 +505,18 @@ async function callAPI(params) {
   }
   const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
   const res  = await fetch(url);
-  return res.json();
+  const result = await res.json();
+  // ID token Google hết hạn sau ~1 giờ - nếu server báo Unauthorized, bắt đăng nhập lại cho chắc thay vì
+  // để lỗi mơ hồ khó hiểu.
+  if (result && result.ok===false && result.msg==='Unauthorized') {
+    showToast('⚠️ Phiên đăng nhập admin đã hết hạn, đang mở lại màn hình đăng nhập...');
+    setTimeout(()=>location.reload(), 1200);
+  }
+  return result;
 }
 
 // ============================================================
-// HASH — để tạo mã format TUVI-...
+// HASH — để tạo mã format TUVI-... (chỉ để tạo chuỗi mã trông ngẫu nhiên, KHÔNG còn ý nghĩa bảo mật)
 // ============================================================
 function simpleHash(str) {
   let h = 0;
@@ -528,7 +527,9 @@ function simpleHash(str) {
 function generateCodeStr(plan) {
   const ts       = Date.now().toString(36).toUpperCase();
   const planShort = {'trial1d':'T1','trial3d':'T3','trial7d':'T7','1month':'1M','3month':'3M','6month':'6M','1year':'1Y','lifetime':'LF'}[plan];
-  const checksum  = simpleHash(SECRET_KEY + '|' + plan + '|' + ts);
+  // Không còn dùng SECRET_KEY để tạo checksum (khóa đó giờ không tồn tại nữa) - chỉ cần 1 chuỗi ngẫu
+  // nhiên cho mã trông không đoán được, KHÔNG phải giá trị bảo mật thật (server không verify checksum này).
+  const checksum  = simpleHash(Math.random().toString(36) + '|' + plan + '|' + ts);
   return `TUVI-${planShort}-${ts}-${checksum}`;
 }
 
@@ -553,7 +554,7 @@ async function generateCodes() {
     const code   = generateCodeStr(plan);
     const result = await callAPI({
       action:   'create',
-      adminKey: SECRET_KEY,
+      idToken: adminIdToken,
       code,
       plan,
       email,
@@ -565,7 +566,7 @@ async function generateCodes() {
       if (result.existingCode) {
         if (!confirm(`⚠️ ${result.msg}\n\nVẫn tạo mã mới cho email này?`)) return;
         // Tạo lại với force (gọi lại, Apps Script sẽ cho qua)
-        const result2 = await callAPI({ action:'create', adminKey:SECRET_KEY, code: generateCodeStr(plan), plan, email, note });
+        const result2 = await callAPI({ action:'create', idToken:adminIdToken, code: generateCodeStr(plan), plan, email, note });
         if (!result2.ok) { showToast('❌ ' + result2.msg); return; }
         showCreated(result2);
       } else {
@@ -646,7 +647,7 @@ async function loadAndRender() {
     '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Đang tải dữ liệu...</td></tr>';
 
   try {
-    const result = await callAPI({ action:'list', adminKey: SECRET_KEY });
+    const result = await callAPI({ action:'list', idToken: adminIdToken });
     if (!result.ok) { showToast('❌ ' + result.msg); return; }
     _cachedCodes = result.codes || [];
     renderStats();
@@ -720,7 +721,7 @@ function renderTable() {
 async function softDeleteCode(code) {
   if (!confirm(`Xóa mã ${code}?\nKhách sẽ không thể dùng mã này nữa. Có thể khôi phục lại sau nếu lỡ tay.`)) return;
   try {
-    const result = await callAPI({ action:'revoke', adminKey:SECRET_KEY, code });
+    const result = await callAPI({ action:'revoke', idToken:adminIdToken, code });
     if (result.ok) { showToast('✅ Đã xóa mã'); loadAndRender(); }
     else showToast('❌ ' + result.msg);
   } catch(e) { showToast('❌ Lỗi: ' + e.message); }
@@ -731,7 +732,7 @@ async function softDeleteCode(code) {
 // ============================================================
 async function restoreCode(code) {
   try {
-    const result = await callAPI({ action:'restore', adminKey:SECRET_KEY, code });
+    const result = await callAPI({ action:'restore', idToken:adminIdToken, code });
     if (result.ok) { showToast('✅ Đã khôi phục mã'); loadAndRender(); }
     else showToast('❌ ' + result.msg);
   } catch(e) { showToast('❌ Lỗi: ' + e.message); }
@@ -743,7 +744,7 @@ async function restoreCode(code) {
 async function hardDeleteCode(code) {
   if (!confirm(`Xóa vĩnh viễn mã ${code}?\nHành động này không thể hoàn tác.`)) return;
   try {
-    const result = await callAPI({ action:'delete', adminKey:SECRET_KEY, code });
+    const result = await callAPI({ action:'delete', idToken:adminIdToken, code });
     if (result.ok) {
       showToast('✅ Đã xóa mã');
       _cachedCodes = _cachedCodes.filter(c => c.code !== code);
@@ -771,7 +772,7 @@ async function deleteAllExpired() {
 
   try {
     for (const c of targets) {
-      const result = await callAPI({ action:'delete', adminKey:SECRET_KEY, code: c.code });
+      const result = await callAPI({ action:'delete', idToken:adminIdToken, code: c.code });
       if (result.ok) _cachedCodes = _cachedCodes.filter(x => x.code !== c.code);
     }
     showToast(`✅ Đã xóa ${targets.length} mã hết hạn`);
