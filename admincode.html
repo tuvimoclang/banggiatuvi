@@ -508,9 +508,9 @@ async function callAPI(params) {
   const result = await res.json();
   // ID token Google hết hạn sau ~1 giờ - nếu server báo Unauthorized, bắt đăng nhập lại cho chắc thay vì
   // để lỗi mơ hồ khó hiểu.
-  if (result && result.ok===false && result.msg==='Unauthorized') {
-    showToast('⚠️ Phiên đăng nhập admin đã hết hạn, đang mở lại màn hình đăng nhập...');
-    setTimeout(()=>location.reload(), 1200);
+  if (result && result.ok===false && (result.msg==='Unauthorized' || result.msg.indexOf('Unauthorized')===0)) {
+    showToast('⚠️ ' + result.msg);
+    setTimeout(()=>location.reload(), 2500);
   }
   return result;
 }
