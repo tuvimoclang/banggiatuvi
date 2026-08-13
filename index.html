@@ -89,6 +89,10 @@ body.theme-dark #lichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a
 body.theme-dark #tlsLichBtn[data-val="duong"]{background:linear-gradient(135deg,#8a6d1d,#f0c040);border-color:#f0c040;color:#000}
 .pill-btn:hover{background:var(--hover)}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;flex-basis:100%;justify-content:space-between;margin-top:8px}
+/* "Lập lá số/Lưu Kho/Kho LS/Xuất" bên "Lập Lá Số" (An Thủ Công) - gộp chung 1 dòng, cùng kích cỡ nhỏ, không
+   để riêng "Lập lá số" full-width to hẳn 1 hàng như trước. */
+.tls-action-row{display:flex;gap:6px;margin-top:8px}
+.tls-action-row>button{flex:1;padding:5px 4px;font-size:.66rem;white-space:nowrap;text-align:center}
 .btn-row button{width:118px;height:30px;padding:2px 6px;text-align:center;font-size:.68rem;box-sizing:border-box;display:flex;align-items:center;justify-content:center;line-height:1.15}
 .btn-row button.locked-text{font-size:.56rem;line-height:1.05}
 .loc-row{display:flex;gap:8px 10px;flex-wrap:wrap;flex-basis:100%;justify-content:flex-start;align-items:flex-end;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border-lt)}
@@ -374,6 +378,7 @@ body.theme-dark .error-box{background:#0f0000;color:#f87171}
 .ban-wrap{position:relative;max-width:848px;width:100%;padding:48px;background:var(--panel);border:1px solid var(--border-lt);border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.06)}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .inline-text-input{position:absolute;z-index:20;border:1px dashed var(--accent);background:transparent;font:14px Segoe UI;padding:0 2px;outline:none;min-width:40px}
+.inline-text-resize-handle{position:absolute;z-index:21;width:9px;height:9px;background:#ff9800;border:1.5px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:ew-resize}
 #atcCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 .ban-wrap.drawing #drawCanvas{pointer-events:auto;cursor:crosshair}
 .ban-wrap.drawing #atcCanvas{pointer-events:auto;cursor:crosshair}
@@ -566,11 +571,13 @@ body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 #navBVan.active{background:var(--red);color:#fff;border-color:var(--red)}
 #navLNien.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 #navLNguyet.active{background:var(--green);color:#fff;border-color:var(--green)}
-/* Đ.VẬN/L.NIÊN bên "Lập Lá Số" (An Thủ Công) - đúng màu như tab lá số đơn (đỏ/xanh dương). */
+/* Đ.VẬN/L.NIÊN/L.NGUYỆT bên "Lập Lá Số" (An Thủ Công) - đúng màu như tab lá số đơn (đỏ/xanh dương/xanh lá). */
 #tlsNavDv{color:var(--red)}
 #tlsNavLn{color:var(--blue)}
+#tlsNavLg{color:var(--green)}
 #tlsNavDv.active{background:var(--red);color:#fff;border-color:var(--red)}
 #tlsNavLn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+#tlsNavLg.active{background:var(--green);color:#fff;border-color:var(--green)}
 .ln-year-info{text-align:center;font-size:.62rem;font-weight:700;color:var(--text);line-height:1.4}
 .hoa-pair{display:flex;gap:4px}
 .hoa-pair .tool-btn{flex:1}
@@ -1045,10 +1052,11 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
                 </select>
               </div>
             </div>
-            <button class="btn-dark" style="width:100%" onclick="tlsLapLaSo()">Lập lá số</button>
-            <div class="btn-row" style="margin-top:8px">
+            <div class="tls-action-row">
+              <button class="btn-dark" onclick="tlsLapLaSo()">Lập lá số</button>
               <button class="btn-purple" onclick="luuKhoLaSo('tls')">Lưu Kho</button>
               <button class="btn-brown" onclick="openKhoLaSo('tls')">Kho LS</button>
+              <button class="btn-outline" onclick="tlsExportToSingle()" title="Chuyển lá số này sang tab Nhập Thông Tin">Xuất</button>
             </div>
           </div>
           <div id="tlsError" class="atc-error"></div>
@@ -1091,8 +1099,12 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
             <button class="step-label" id="tlsNavLn" onclick="tlsToggleLuuNienActive()">L.NIÊN</button>
             <button class="step-arrow" onclick="tlsStepLuuNien(1)">&rsaquo;</button>
           </div>
+          <div class="stepper">
+            <button class="step-arrow" onclick="tlsStepLuuNguyet(-1)">&lsaquo;</button>
+            <button class="step-label" id="tlsNavLg" onclick="tlsToggleLuuNguyetActive()">L.NGUYỆT</button>
+            <button class="step-arrow" onclick="tlsStepLuuNguyet(1)">&rsaquo;</button>
+          </div>
           <button class="btn-outline" onclick="tlsShowAllCung()">Hiện đủ</button>
-          <button class="btn-outline" onclick="tlsExportToSingle()" title="Chuyển lá số này sang tab Nhập Thông Tin">Xuất</button>
         </div>
 
         <div class="tls-hide-panel">
@@ -1492,7 +1504,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
 // với tool.html/admincode.html, để mã kích hoạt đã phát hành vẫn hoạt động bình thường.
 // ============================================================
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRaBKh2Vw2WrGeU1SPPXocGlKEJmdRqhnxPVVKMsjc8WPl5quPyX-vbl2nNrXnIu4M8Q/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGYyxTb8EyA-WAMznSJOGxswFFFE7y7_YZ-Gkwt240CytOUHJckBnpB1GybD6WzgVZcw/exec';
 
 const STORE_KEY = 'tuvi_premium'; // cache local: {email, code, plan, expireAt}
 
@@ -2599,7 +2611,7 @@ function atcRenderPreview(){
     rawApiData:null,
   } : null;
   atcChartBySub.thucong=atcCurChart;
-  tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null;
+  tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsSelectedLuuNguyetMonth=null;
   tlsRenderAll();
   atcRedrawCanvas();
 }
@@ -2724,9 +2736,11 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
       });
     }
     if(hasB){
-      const tipB={x:B.x+ux*12,y:B.y+uy*12};
-      drawLine(ctx,B,tipB,lineColor);
-      drawArrowHeadAt(ctx, tipB, dx, dy, lineColor);
+      // FIX 2026-08-12 (đồng bộ fix 2026-08-08 của hàm cross ở canvas chính): TRƯỚC ĐÂY kéo đầu nhọn vào
+      // SÂU THÊM 12px bên trong cung đích (tipB lệch khỏi B) -> mũi tên lấn vào bên trong viền cung thay vì
+      // dừng ngay tại viền. Giờ đầu mũi tên dừng ĐÚNG tại B (đã là điểm viền cung, atcCellEdgeAnchor 'inner')
+      // - tam giác đầu mũi tên vẽ lùi VỀ PHÍA NGOÀI viền (drawArrowHeadAt vẽ ngược hướng dirX/dirY từ tip).
+      drawArrowHeadAt(ctx, B, dx, dy, lineColor);
       const c=pt(0.87);
       g.toB.forEach((L,i)=>{
         const along=(i-(g.toB.length-1)/2)*11;
@@ -2811,8 +2825,8 @@ function atcClearDraw(){
       const r=cv.getBoundingClientRect();
       const x=e.clientX-r.left, y=e.clientY-r.top;
       if(atcDrawTool==='text'){
-        startInlineTextInput(document.getElementById('atcBanWrap'),x,y,atcDrawColor,txt=>{
-          atcPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:atcDrawColor}); atcRedrawCanvas();
+        startInlineTextInput(document.getElementById('atcBanWrap'),x,y,atcDrawColor,(txt,fs)=>{
+          atcPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:atcDrawColor,fontSize:fs}); atcRedrawCanvas();
         });
         return;
       }
@@ -2847,9 +2861,9 @@ function atcClearDraw(){
 // THÊM: shape type 'box' - 1 Ô CUNG kéo-thả được (bấm nút tên cung ở wbCungBtns để "thả" ra 1 ô mới, xem
 // video tham khảo). 'box' vẫn là 1 phần tử BÌNH THƯỜNG trong wbShapes (không phải DOM riêng) - nhờ vậy dùng
 // lại được NGUYÊN VẸN hạ tầng chọn/xóa/undo/redo chung, không cần viết hệ thống riêng.
-let wbDrawTool=null, wbShapes=[], wbDrawColor='#000000', wbDrawWidth=2;
+let wbDrawTool=null, wbShapes=[], wbDrawColor='#000000', wbDrawWidth=8;
 let wbActionLog=[], wbActionRedoLog=[], wbSelectedShapeIdx=null;
-let wbBoxSpawnCount=0, wbDraggingBox=null;
+let wbBoxSpawnCount=0, wbDraggingBox=null, wbDraggingText=null;
 // Kéo-giãn KHUNG: tay nắm hình vuông cam ở góc dưới-phải ô đang được chọn - kéo ra để khung to/rộng hơn (nếu
 // là ô tên cung 'box', cỡ chữ cũng tự phóng theo tỉ lệ khung cho vừa vặn), kéo vào để khung nhỏ lại. Áp dụng
 // cho MỌI hình có diện tích khép kín (box/rect/ellipse/triangle) - KHÔNG áp dụng cho arrow/text (arrow là 1
@@ -2868,6 +2882,20 @@ function wbHitTestResizeHandle(x,y){
   const hp=wbBoxHandlePos(sh);
   return Math.abs(x-hp.x)<=WB_BOX_HANDLE_SIZE && Math.abs(y-hp.y)<=WB_BOX_HANDLE_SIZE;
 }
+// Tay nắm kéo-giãn cỡ chữ riêng cho hình CHỮ (text) - không có x2/y2 như box nên tính vị trí góc dưới-phải
+// từ đúng công thức bounding box của chính hàm vẽ khung chọn (drawShapeHighlight) để tay nắm luôn khớp viền.
+function wbTextHandlePos(sh){
+  const r=(sh.fontSize||14)/14;
+  const w=(sh.text||'').length*8*r+6;
+  return {x:sh.x1-3+w, y:sh.y1+4*r};
+}
+function wbHitTestTextResizeHandle(x,y){
+  if(wbSelectedShapeIdx===null) return false;
+  const sh=wbShapes[wbSelectedShapeIdx]; if(!sh || sh.type!=='text') return false;
+  const hp=wbTextHandlePos(sh);
+  return Math.abs(x-hp.x)<=WB_BOX_HANDLE_SIZE && Math.abs(y-hp.y)<=WB_BOX_HANDLE_SIZE;
+}
+let wbResizingText=null; // {idx, x1,y1, d0, font0, before}
 // Núm kéo-giãn 4 GÓC cho rect/ellipse/triangle (khác 'box' - box chỉ có 1 núm góc dưới-phải vì còn phải tự
 // phóng cỡ chữ theo tỉ lệ, xem wbBoxHandlePos/wbHitTestResizeHandle). Người dùng yêu cầu "các núm xung quanh"
 // để kéo kích cỡ tự do theo cả 4 hướng, không chỉ 1 góc cố định neo top-left như box.
@@ -2980,7 +3008,7 @@ function wbRenderColorControls(){
 // thủ công, đồng bộ với đúng màu 2 nút tương ứng trên toolbar (xem CSS .wb-cung-loc/.wb-cung-ky).
 const WB_SPECIAL_BOX_COLORS={'N.Lộc':{bg:'#16a34a',color:'#ffffff'}, 'N.Kỵ':{bg:'#dc2626',color:'#ffffff'}};
 function wbAddBox(label){
-  const perRow=6, w=100, h=42, gapX=20, gapY=18, marginX=20, marginY=16;
+  const perRow=6, w=64, h=30, gapX=20, gapY=18, marginX=20, marginY=16;
   const col=wbBoxSpawnCount%perRow, row=Math.floor(wbBoxSpawnCount/perRow);
   const x=marginX+col*(w+gapX), y=marginY+row*(h+gapY);
   wbBoxSpawnCount++;
@@ -2990,7 +3018,7 @@ function wbAddBox(label){
   // CSS, phải viết hoa sẵn ngay trong dữ liệu label thì vẽ ra mới hoa đúng.
   const upperLabel=label.toLocaleUpperCase('vi-VN');
   wbPushShapeAction({type:'box', x1:x, y1:y, x2:x+w, y2:y+h, label:upperLabel,
-    bg:special?special.bg:'#ffffff', color:special?special.color:'#1a1a1a', fontSize:14});
+    bg:special?special.bg:'#ffffff', color:special?special.color:'#1a1a1a', fontSize:11});
   wbRedrawCanvas();
 }
 // t===null: chế độ chọn/kéo-thả ô cung (không có nút riêng) - bấm lại ĐÚNG công cụ đang bật thì tắt về chế độ
@@ -3136,15 +3164,28 @@ function wbSnapToBoxEdge(x,y){
 }
 function wbDrawBoxShape(ctx,sh){
   const x=Math.min(sh.x1,sh.x2), y=Math.min(sh.y1,sh.y2), w=Math.abs(sh.x2-sh.x1), h=Math.abs(sh.y2-sh.y1);
+  // Ngoại hình đồng bộ với nút "THẢ Ô CUNG" bên trái (.wb-cung-btn): bo góc 9px, viền đen 1.5px, chữ đậm hoa.
+  const r=Math.min(9, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
   ctx.fillStyle=sh.bg||'#ffffff';
-  ctx.fillRect(x,y,w,h);
+  ctx.fill();
   // Viền LUÔN ĐEN cố định - không dùng sh.color (màu chữ) nữa, vì N.Lộc/N.Kỵ có chữ trắng trên nền màu đậm,
   // viền theo màu chữ sẽ gần như biến mất (trắng trên xanh/đỏ khó thấy). Đồng bộ với viền đen của nút toolbar.
   ctx.strokeStyle='#1a1a1a';
-  ctx.lineWidth=2;
-  ctx.strokeRect(x,y,w,h);
+  ctx.lineWidth=1.5;
+  ctx.stroke();
   ctx.fillStyle=sh.color||'#1a1a1a';
-  ctx.font='700 '+(sh.fontSize||14)+'px Segoe UI';
+  ctx.font='700 '+(sh.fontSize||11)+'px Segoe UI';
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText(sh.label||'', x+w/2, y+h/2);
   ctx.textAlign='left'; ctx.textBaseline='alphabetic';
@@ -3220,7 +3261,19 @@ function wbHighlightShape(ctx,sh){
     ctx.restore();
     return;
   }
-  if(sh.type==='arrow'||sh.type==='text'){ drawShapeHighlight(ctx,sh); return; }
+  if(sh.type==='text'){
+    drawShapeHighlight(ctx,sh);
+    // Tay nắm kéo-giãn cỡ chữ - hình vuông cam đặc ở góc dưới-phải khung chữ, giống ô cung.
+    const hp=wbTextHandlePos(sh);
+    ctx.save();
+    ctx.fillStyle='#ff9800';
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5;
+    ctx.fillRect(hp.x-WB_BOX_HANDLE_SIZE, hp.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+    ctx.strokeRect(hp.x-WB_BOX_HANDLE_SIZE, hp.y-WB_BOX_HANDLE_SIZE, WB_BOX_HANDLE_SIZE*2, WB_BOX_HANDLE_SIZE*2);
+    ctx.restore();
+    return;
+  }
+  if(sh.type==='arrow'){ drawShapeHighlight(ctx,sh); return; }
   // rect/ellipse/triangle: vẽ lại đúng hình dạng gốc, viền cam mờ dày hơn đè lên, kèm 4 NÚM GÓC (giống ô tên
   // cung nhưng đủ 4 góc thay vì chỉ 1) để kéo chỉnh kích cỡ tự do theo mọi hướng.
   ctx.save();
@@ -3280,6 +3333,14 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         // Đã có sẵn 1 ô đang được chọn + bấm ĐÚNG vào tay nắm cam ở góc dưới-phải -> bắt đầu kéo-giãn cỡ
         // chữ, KHÔNG chọn lại/kéo-thả ô như bình thường (phải kiểm tra TRƯỚC wbHitTestDrawnShape, vì tay
         // nắm nằm ngay trên/sát viền ô, nếu không sẽ luôn bị hiểu nhầm thành "bấm vào ô để kéo-thả").
+        // Ô CHỮ (text) đang chọn + bấm trúng tay nắm cam riêng của nó -> kéo-giãn cỡ chữ theo khoảng cách
+        // tới điểm neo (x1,y1), KHÔNG dùng chung logic w0/h0 của box vì text không có x2/y2.
+        if(wbHitTestTextResizeHandle(x,y)){
+          const sh=wbShapes[wbSelectedShapeIdx];
+          const d0=Math.max(1, Math.hypot(x-sh.x1, y-sh.y1));
+          wbResizingText={idx:wbSelectedShapeIdx, x1:sh.x1, y1:sh.y1, d0, font0:sh.fontSize||14, before:sh.fontSize};
+          return;
+        }
         if(wbHitTestResizeHandle(x,y)){
           const sh=wbShapes[wbSelectedShapeIdx];
           const x1=Math.min(sh.x1,sh.x2), y1=Math.min(sh.y1,sh.y2);
@@ -3310,13 +3371,18 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
           const bx=Math.min(sh.x1,sh.x2), by=Math.min(sh.y1,sh.y2);
           wbDraggingBox={idx:hit, offX:x-bx, offY:y-by, w:Math.abs(sh.x2-sh.x1), h:Math.abs(sh.y2-sh.y1)};
         }
+        // Bấm trúng 1 ô CHỮ (text) -> cũng kéo-thả được y hệt Ô CUNG, neo đúng điểm bấm bên trong khung chữ.
+        if(hit!==null && wbShapes[hit].type==='text'){
+          const sh=wbShapes[hit];
+          wbDraggingText={idx:hit, offX:x-sh.x1, offY:y-sh.y1};
+        }
         wbRedrawCanvas();
         return;
       }
       if(wbDrawTool==='text'){
         const fontSize=Math.max(12, wbDrawWidth*2+8);
-        startInlineTextInput(board,x,y,wbDrawColor,txt=>{
-          wbPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:wbDrawColor,fontSize}); wbRedrawCanvas();
+        startInlineTextInput(board,x,y,wbDrawColor,(txt,fs)=>{
+          wbPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:wbDrawColor,fontSize:fs}); wbRedrawCanvas();
         },fontSize);
         return;
       }
@@ -3343,6 +3409,14 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         wbRedrawCanvas();
         return;
       }
+      if(wbResizingText){
+        e.preventDefault();
+        const d=wbResizingText, sh=wbShapes[d.idx]; if(!sh){ wbResizingText=null; return; }
+        const dist=Math.max(1, Math.hypot(x-d.x1, y-d.y1));
+        sh.fontSize=Math.max(8,Math.min(96, d.font0*(dist/d.d0)));
+        wbRedrawCanvas();
+        return;
+      }
       if(wbResizingCorner){
         e.preventDefault();
         const d=wbResizingCorner, sh=wbShapes[d.idx]; if(!sh){ wbResizingCorner=null; return; }
@@ -3363,6 +3437,13 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         const d=wbDraggingBox, sh=wbShapes[d.idx];
         const nx=x-d.offX, ny=y-d.offY;
         sh.x1=nx; sh.y1=ny; sh.x2=nx+d.w; sh.y2=ny+d.h;
+        wbRedrawCanvas();
+        return;
+      }
+      if(wbDraggingText){
+        e.preventDefault();
+        const d=wbDraggingText, sh=wbShapes[d.idx];
+        sh.x1=x-d.offX; sh.y1=y-d.offY;
         wbRedrawCanvas();
         return;
       }
@@ -3393,7 +3474,17 @@ window.addEventListener('resize',()=>{ if(!document.getElementById('panelWhitebo
         }
         return;
       }
+      if(wbResizingText){
+        const d=wbResizingText, sh=wbShapes[d.idx];
+        wbResizingText=null;
+        if(sh && sh.fontSize!==d.before){
+          wbActionLog.push({type:'shape-resize', shape:sh, before:d.before, after:sh.fontSize});
+          wbActionRedoLog=[];
+        }
+        return;
+      }
       if(wbDraggingBox){ wbDraggingBox=null; return; }
+      if(wbDraggingText){ wbDraggingText=null; return; }
       if(dragging==='erase'){ dragging=false; return; }
       if(dragging!=='shape') return; dragging=false;
       const r=cv.getBoundingClientRect();
@@ -3459,7 +3550,7 @@ let atcCurChart=null; // {sc,tenCung,vM,vT,thMap,daiHan,chiNamSinh,birthYear,hoT
 // mỗi lần đổi sub-tab. Khung Đại Vận/Lưu Niên/ẩn cung/lọc niên hóa VẪN dùng chung 1 bộ trạng thái cho cả 2
 // sub-tab như thiết kế cũ (không tách riêng theo yêu cầu).
 let atcChartBySub={lls:null, thucong:null};
-let tlsSelectedDaiVanIdx=null, tlsSelectedLuuNienYear=null;
+let tlsSelectedDaiVanIdx=null, tlsSelectedLuuNienYear=null, tlsSelectedLuuNguyetMonth=null;
 let tlsHiddenCung=new Set();
 // tlsHoaFilter: mặc định TẮT hết (hiện đủ cả 4 loại). Bấm 1 (hoặc nhiều) nút Lộc/Quyền/Khoa/Kỵ sẽ CÔ LẬP
 // hiển thị - chỉ giữ lại đúng (các) loại đang bật, ẩn bớt loại còn lại - áp dụng cho TOÀN lá số (cả cung đang
@@ -3542,7 +3633,7 @@ async function tlsLapLaSo(){
       gioSinhLabel:d.thongTin.gioSinh, canChiNam:d.thongTin.canChiNam, rawApiData:d,
     };
     atcChartBySub.lls=atcCurChart;
-    tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsHiddenCung=new Set();
+    tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsSelectedLuuNguyetMonth=null; tlsHiddenCung=new Set();
     tlsHoaFilter={A:false,B:false,C:false,D:false};
     tlsRenderAll();
     atcRedrawCanvas();
@@ -4799,7 +4890,10 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
   let step2=flyFrom(step1.to,'D');
   if(step2 && step2.to===step1.from && step2.letter===step1.letter && step2.star===step1.star) step2=null;
   if(!step2) return {from:startIdx, steps, structureLetter:firstLetter};
-  step2.color=hoaArrowColor('D');
+  // FIX 2026-08-10: mũi tên CHUYỂN KỊ (CK) bên kết cấu HUNG (Kị, firstLetter==='D') giờ dùng CÙNG màu riêng
+  // theo cung (phiKyColorForCung(startIdx), giống màu bước hóa Kị gốc step1) - KHÔNG còn màu đen chung nữa.
+  // Màu đen (hoaArrowColor('D')) giờ CHỈ còn dùng cho mũi tên chuyển Kị bên kết cấu CÁT (Lộc, firstLetter==='A').
+  step2.color = firstLetter==='D' ? phiKyColorForCung(startIdx) : hoaArrowColor('D');
   steps.push(step2);
   // Từ đây trở đi: KHÔNG giới hạn chỉ 1 bước bổ sung - hễ điểm vừa đáp còn thỏa điều kiện (gặp niên cùng
   // loại với kết cấu, hoặc tự hóa cùng chữ+cùng tinh diệu, hoặc Kị xuất đối cung cho kết cấu Kị) thì vẫn còn
@@ -4877,7 +4971,9 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
       next.isRevisit = true;
     }
     visited.add(key);
-    next.color=hoaArrowColor('D');
+    // FIX 2026-08-10: xem giải thích ở step2.color phía trên - CK bên Hung dùng màu riêng theo cung, CK bên
+    // Cát vẫn đen.
+    next.color = firstLetter==='D' ? phiKyColorForCung(startIdx) : hoaArrowColor('D');
     steps.push(next);
     prev=next;
   }
@@ -4940,7 +5036,8 @@ function extendNienKyQuickChain(ch,structureLetter){
     const key=next.to+':'+next.star;
     if(visited.has(key)) break;
     visited.add(key);
-    next.color=hoaArrowColor('D');
+    // FIX 2026-08-10: CK bên kết cấu Hung (structureLetter==='D') dùng màu riêng theo cung, không còn đen.
+    next.color = structureLetter==='D' ? phiKyColorForCung(ch.from) : hoaArrowColor('D');
     steps.push(next);
     prev=next;
     guard++;
@@ -4993,7 +5090,10 @@ function recomputePhiHoaChainsRaw(){
   if(hcMode==='hung'){
     const directLandingTargets=new Set(chains.map(ch=>ch.steps[0]&&ch.steps[0].to).filter(t=>t!==undefined));
     chains.forEach(ch=>{
-      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=hoaArrowColor('D');
+      // FIX 2026-08-10: trước đây tô ĐEN cạnh dùng chung này (vì nó vừa là hóa Kị gốc của X vừa là CK của Y)
+      // - giờ theo yêu cầu mới "CK bên Hung không còn màu đen" nên đổi sang màu riêng của X (phiKyColorForCung),
+      // nhất quán với các CK khác trong kết cấu Hung.
+      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=phiKyColorForCung(ch.from);
     });
   }
   // Trùng đoạn chuyển Kị: dù kết cấu Lộc hay Kị, hễ 2 cung khác nhau cùng đáp (hóa Lộc/Kị gốc) trúng đúng 1
@@ -6608,6 +6708,9 @@ function drawShape(ctx,sh){
 // Chèn chữ trực tiếp tại vị trí bấm (input nổi trên wrap) thay vì hiện hộp thoại prompt() rời rạc.
 // wrap phải là phần tử position:relative (banWrap/atcBanWrap) để input định vị đúng theo x,y truyền vào
 // (cùng hệ tọa độ với canvas, vì canvas cũng position:absolute;inset:0 bên trong wrap đó).
+// 8 hướng núm bao quanh khung (giống kiểu resize ảnh chuẩn): 4 góc chỉnh CẢ bề rộng lẫn cỡ chữ, 2 cạnh
+// đứng trái/phải chỉnh RIÊNG bề rộng, 2 cạnh ngang trên/dưới chỉnh RIÊNG cỡ chữ.
+const INLINE_TEXT_HANDLE_DIRS=['nw','n','ne','e','se','s','sw','w'];
 function startInlineTextInput(wrap,x,y,color,onCommit,fontSize){
   const fs=fontSize||14;
   const inp=document.createElement('input');
@@ -6617,20 +6720,93 @@ function startInlineTextInput(wrap,x,y,color,onCommit,fontSize){
   inp.style.top=(y-fs*0.86)+'px';
   inp.style.color=color;
   inp.style.fontSize=fs+'px';
+  inp.style.width=Math.max(80, fs*8)+'px';
   wrap.appendChild(inp);
   inp.focus();
+  // 8 tay nắm bao quanh khung nhập, hiện NGAY khi đang gõ - chỉnh bề rộng/cỡ chữ trước khi Enter/blur chốt
+  // lại thành hình 'text' thật (trước đây chỉ chỉnh được SAU khi đã chốt xong, và chỉ có 1 núm).
+  const handles={};
+  const cursorFor={nw:'nwse-resize',n:'ns-resize',ne:'nesw-resize',e:'ew-resize',se:'nwse-resize',s:'ns-resize',sw:'nesw-resize',w:'ew-resize'};
+  INLINE_TEXT_HANDLE_DIRS.forEach(dir=>{
+    const h=document.createElement('div');
+    h.className='inline-text-resize-handle';
+    h.style.cursor=cursorFor[dir];
+    wrap.appendChild(h);
+    handles[dir]=h;
+  });
+  const syncHandlePos=()=>{
+    const left=parseFloat(inp.style.left), top=parseFloat(inp.style.top);
+    const w=parseFloat(inp.style.width)||inp.offsetWidth;
+    const h=inp.offsetHeight||fs*1.3;
+    const pos={nw:[left,top],n:[left+w/2,top],ne:[left+w,top],e:[left+w,top+h/2],
+      se:[left+w,top+h],s:[left+w/2,top+h],sw:[left,top+h],w:[left,top+h/2]};
+    INLINE_TEXT_HANDLE_DIRS.forEach(dir=>{
+      handles[dir].style.left=(pos[dir][0]-4)+'px';
+      handles[dir].style.top=(pos[dir][1]-4)+'px';
+    });
+  };
+  syncHandlePos();
+  let resizing=null, sx=0, sy=0, w0=0, left0=0, top0=0, fs0=fs;
+  const beginResize=(dir,cx,cy)=>{
+    resizing=dir; sx=cx; sy=cy;
+    w0=parseFloat(inp.style.width)||inp.offsetWidth;
+    left0=parseFloat(inp.style.left); top0=parseFloat(inp.style.top); fs0=parseFloat(inp.style.fontSize)||fs;
+  };
+  const doResize=(cx,cy)=>{
+    if(!resizing) return;
+    const dx=cx-sx, dy=cy-sy;
+    // Ngang (trái/phải/góc) -> đổi bề rộng khung; núm bên TRÁI (w/nw/sw) giữ mép phải cố định.
+    if(resizing.includes('e')) inp.style.width=Math.max(40, w0+dx)+'px';
+    else if(resizing.includes('w')){
+      const newW=Math.max(40, w0-dx);
+      inp.style.width=newW+'px';
+      inp.style.left=(left0+(w0-newW))+'px';
+    }
+    // Dọc (trên/dưới/góc) -> đổi cỡ chữ; núm PHÍA TRÊN (n/nw/ne) giữ mép dưới cố định (top dịch theo).
+    if(resizing.includes('s')){
+      inp.style.fontSize=Math.max(8,Math.min(96, fs0+dy))+'px';
+    }else if(resizing.includes('n')){
+      const newFs=Math.max(8,Math.min(96, fs0-dy));
+      inp.style.fontSize=newFs+'px';
+      inp.style.top=(top0+(fs0-newFs)*0.86)+'px';
+    }
+    syncHandlePos();
+  };
+  const endResize=()=>{ resizing=null; };
+  INLINE_TEXT_HANDLE_DIRS.forEach(dir=>{
+    const h=handles[dir];
+    h.addEventListener('mousedown',e=>{ e.preventDefault(); e.stopPropagation(); beginResize(dir,e.clientX,e.clientY); });
+    h.addEventListener('touchstart',e=>{ e.preventDefault(); e.stopPropagation(); const t=e.touches[0]; beginResize(dir,t.clientX,t.clientY); },{passive:false});
+  });
+  const onMove=e=>doResize(e.clientX,e.clientY);
+  const onTouchMove=e=>{ if(resizing){ e.preventDefault(); const t=e.touches[0]; doResize(t.clientX,t.clientY); } };
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('touchmove',onTouchMove,{passive:false});
+  document.addEventListener('mouseup',endResize);
+  document.addEventListener('touchend',endResize);
   let done=false;
+  const cleanup=()=>{
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('touchmove',onTouchMove);
+    document.removeEventListener('mouseup',endResize);
+    document.removeEventListener('touchend',endResize);
+    INLINE_TEXT_HANDLE_DIRS.forEach(dir=>{ const h=handles[dir]; if(h.parentNode) h.parentNode.removeChild(h); });
+  };
   const finish=(commit)=>{
     if(done) return; done=true;
+    cleanup();
     const txt=inp.value.trim();
+    const finalFontSize=parseFloat(inp.style.fontSize)||fs;
     wrap.removeChild(inp);
-    if(commit && txt) onCommit(txt);
+    if(commit && txt) onCommit(txt,finalFontSize);
   };
   inp.addEventListener('keydown',e=>{
     if(e.key==='Enter'){ e.preventDefault(); finish(true); }
     else if(e.key==='Escape'){ e.preventDefault(); finish(false); }
   });
-  inp.addEventListener('blur',()=>finish(true));
+  // Bấm vào tay nắm resize (mousedown có preventDefault) không làm input blur thật - chỉ blur thật (chuột
+  // click ra ngoài) mới chốt chữ.
+  inp.addEventListener('blur',()=>{ if(!resizing) finish(true); });
 }
 function pushShapeAction(shape){
   shapes.push(shape);
@@ -6659,8 +6835,8 @@ function onOff(el,mouseType,touchType,handler,opts){
       const {clientX,clientY}=clientPointFrom(e);
       const x=clientX-r.left, y=clientY-r.top;
       if(drawTool==='text'){
-        startInlineTextInput(document.getElementById('banWrap'),x,y,drawColor,txt=>{
-          pushShapeAction({type:'text',x1:x,y1:y,text:txt,color:drawColor,fontSize:drawFontSize}); redrawCanvas();
+        startInlineTextInput(document.getElementById('banWrap'),x,y,drawColor,(txt,fs)=>{
+          pushShapeAction({type:'text',x1:x,y1:y,text:txt,color:drawColor,fontSize:fs}); redrawCanvas();
         },drawFontSize);
         return;
       }
@@ -7243,7 +7419,8 @@ function computeKetCauStructuresRaw(mode){
         if(mustContinueKy(lastStep,letter)){
           const nat=flyFrom(lastStep.to,'D');
           if(nat && !steps.some(s=>s.to===nat.to && s.star===nat.star) && nat.to!==root){
-            nat.color=hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu (visiblePhiHoaChains dùng lại đúng steps này)
+            // FIX 2026-08-10: CK bên Hung (letter==='D') dùng màu riêng theo cung root, không còn đen.
+            nat.color = letter==='D' ? phiKyColorForCung(root) : hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu (visiblePhiHoaChains dùng lại đúng steps này)
             steps.push(nat);
             continue;
           }
@@ -7257,7 +7434,8 @@ function computeKetCauStructuresRaw(mode){
             const next=flyFrom(lastStep.to,'D');
             if(next && !steps.some(s=>s.to===next.to && s.star===next.star)){
               next.bomLucFrom=M; // đánh dấu bước này CHỈ tồn tại nhờ M truy Lộc/Kị bơm lực, để ghi rõ trên dòng chảy
-              next.color=hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu
+              // FIX 2026-08-10: CK bên Hung (letter==='D') dùng màu riêng theo cung root, không còn đen.
+              next.color = letter==='D' ? phiKyColorForCung(root) : hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu
               steps.push(next); injected=true;
             }
             break;
@@ -7303,6 +7481,30 @@ function computeKetCauStructuresRaw(mode){
     // từ bước 1 trở đi luôn là CK (chuyển Kị, dùng Can cung vừa đáp). Riêng KXĐC (Kị xuất đối cung) xuống
     // dòng, chĩa mũi tên xuống (↓ KXĐC) để tách biệt khỏi luồng CK bình thường.
     const isNienRoot = root===nienIdx;
+    // FIX 2026-08-10 "Cung Mấu chốt do Niên D tọa root" (Ngọc xác nhận trực tiếp): khi Niên D tọa NGAY CHÍNH
+    // cung triệu nhân/root (root===nienIdx) mà root KHÔNG tự hóa về chính nó (rootSelfLoop=false, tức root
+    // hóa Kị ra 1 cung KHÁC trước, rồi sau đó mạch mới CK quay trở lại đúng root) - đây KHÔNG phải "root vừa
+    // tự hóa vừa gặp niên" (case đó đã xử lý riêng ở rootSelfLoop/rootNienTag phía trên) mà là: Niên D được
+    // coi như 1 "cung Thể/Dụng ảo" tự nó đang tọa ngay tại root, và vì root CŨNG LÀ Thể/Dụng thật → root trở
+    // thành 1 "Cung Mấu chốt" (giống hệt cơ chế Cung A hóa Kị thẳng vào Cung B, chỉ khác nguồn kích hoạt là
+    // Niên D chứ không phải 1 cung Thể/Dụng khác). Chỉ áp dụng cho Hung (letter==='D') - Cát không có khái
+    // niệm Cung Mấu chốt. Ví dụ: Thể=Điền, Dụng=Mệnh/Phúc/Di, Niên D tọa Di, Di HK→Tật—CK→Di: Di=Mấu chốt,
+    // quay lại đúng Di (mấu chốt) → +1K qua đúng cơ chế "quay về Cung Mấu chốt" (xem mauChotBonusLine bên
+    // dưới), KHÔNG PHẢI qua đường "niên D" gộp nhãn ở header như trước (dễ hiểu lầm/đếm nhầm 2 lần +1 cùng 1
+    // sự kiện khi cơ chế niên D thông thường CŨNG fire lúc mạch quay lại đúng root).
+    // BUG ĐÃ SỬA 2 LẦN (2026-08-10, phát hiện sau khi Ngọc test thực tế):
+    // (1) KHÔNG dùng "isNienRoot" (root===nienIdx) - `nienIdx` bị set NULL đúng lúc cung mang niên CŨNG LÀ
+    //     Thể/Dụng (chính trường hợp cần bắt ở đây).
+    // (2) KHÔNG dùng "nienGlow.idx===root" - `nienGlowTarget` CHỈ được set khi người dùng bấm tay nút
+    //     "N.Kỵ"/"N.Lộc" (xem quickFlyLetter, dòng ~4475-4479) - đây là 1 UI STATE hoàn toàn khác, KHÔNG
+    //     phải "cung này có đang mang niên Kỵ của năm hay không". Nếu người dùng chưa bấm nút đó, nienGlow
+    //     luôn null bất kể lá số thật có niên D ở đâu, khiến điều kiện luôn false.
+    // ĐÚNG: phải dùng `nienTagFor(root,null)` - hàm NÀY mới thật sự tra trực tiếp dữ liệu lá số
+    // (c.data.saoCung[root] có sao nào mang niên D qua c.thMap không), độc lập hoàn toàn với UI/nienIdx.
+    // Đây CHÍNH XÁC là cách `detectBonusTags`/`pointBonus` đang dùng để chấm niên D cho MỌI cung khác - giờ
+    // áp dụng thêm cho chính root.
+    const rootNienMauChot = letter==='D' && !rootSelfLoop && !!nienTagFor(root,null);
+    if(rootNienMauChot) nienCap.used=true; // chặn đường niên D thông thường double-count đúng sự kiện này
     // rootNienTag chỉ set khi rootSelfLoop && "gặp niên" - LUÔN kèm total+=1 thật (xem "if(rootSelfLoop &&
     // rootNienTag)" phía trên) nên tô đỏ + ghi +1 ở đây luôn đúng, không sợ cộng dư.
     // "Cung Triệu nhân phi X = 1" (total=1 nền, luôn cộng vô điều kiện dù rơi vào nhánh nào bên dưới) - ghi rõ
@@ -7311,7 +7513,7 @@ function computeKetCauStructuresRaw(mode){
     // chữ NGAY TRƯỚC nó thay vì là tổng dồn từ đầu dòng).
     const rootTag = rootSelfLoop
       ? (rootNienTag && rootNienSameStar ? `<span class="kk-red">${rootNienTag} (+1${lettAbbr})</span> - ${steps[0].star} + tự hóa ${letter} xuất (+1${lettAbbr})` : `tự hóa ${letterName} xuất - ${steps[0].star} (+1${lettAbbr})`)
-      : (isNienRoot ? `niên ${mode==='cat'?'A':'D'} (+1${lettAbbr})` : `hóa ${letterName} (+1${lettAbbr})`);
+      : (isNienRoot && !rootNienMauChot ? `niên ${mode==='cat'?'A':'D'} (+1${lettAbbr})` : `hóa ${letterName} (+1${lettAbbr})`);
     let spine = `<b>${label(root)}</b> (${rootTag})`;
     // Nhãn "trùng lặp" thuộc về CHÍNH cung vừa đáp (step.to), không phải cung kế tiếp - đây là cung mà Can
     // của nó sắp bị bước SAU tái dùng để chuyển Kị tiếp. Nếu Di, Tật, Điền đều thuộc tập Thể/Dụng đã chọn,
@@ -7332,7 +7534,11 @@ function computeKetCauStructuresRaw(mode){
     // của nó (idx+6)%12, thì đây là 1 nguồn Kị MỚI độc lập (không còn là trùng lặp) → +1 Kị (xem đoạn cộng
     // total bên dưới forEach). Ví dụ: Mệnh HK Phúc (trùng lặp, Phúc=Mấu chốt) → Phúc CK→ Tật → Tật CK→ Tài
     // (đối cung của Phúc Đức) → +1 Kị, tổng 3 Kị thay vì 2.
-    let mauChotIdx=null;
+    // Khởi tạo mauChotIdx=root NGAY nếu rootNienMauChot (niên D tọa root) - xem giải thích ở khai báo
+    // rootNienMauChot phía trên. Giới hạn: nếu 1 kết cấu vừa có "niên D tại root" vừa có "Cung A HK Cung B" ở
+    // i=0 (2 mấu chốt khác cung), tạm chỉ tính mấu chốt do niên (chưa hỗ trợ nhiều Cung Mấu chốt cùng lúc
+    // trong 1 kết cấu - case hiếm, Ngọc chưa yêu cầu, để dành nếu gặp thực tế).
+    let mauChotIdx = rootNienMauChot ? root : null;
     // Cung THẬT SỰ thuộc Thể/Dụng (realAnchorSet) nằm ngay TRÊN mạch chính của root (kể cả khi bị đánh dấu
     // "trùng lặp"/suppressed, tức bị 1 bước chuyển Kị "tiêu thụ" làm nguồn Can tái dùng) - vẫn phải được coi
     // là 1 thành viên THẬT SỰ của kết cấu này (xem realMembersOfKetCau), vì nó chính là 1 phần nội dung của
@@ -7360,8 +7566,9 @@ function computeKetCauStructuresRaw(mode){
       // nên không được ghi nhãn "(trùng lặp)" (dễ hiểu lầm là 1 cung Thể/Dụng thật sự).
       const isSelectedHere = step.to===root || realAnchorSet.has(step.to);
       const isTrungLapCung = letter==='D' && hasNextStep && step.to!==root && stillConsecutive && realAnchorSet.has(step.to);
-      // "Cung Mấu chốt" (xem giải thích ở khai báo mauChotIdx) - CHỈ ghi nhận đúng tại i===0.
-      if(i===0 && isTrungLapCung) mauChotIdx=step.to;
+      // "Cung Mấu chốt" (xem giải thích ở khai báo mauChotIdx) - CHỈ ghi nhận đúng tại i===0. Không ghi đè
+      // nếu đã có mauChotIdx từ trước (vd rootNienMauChot) - xem giải thích giới hạn ở khai báo mauChotIdx.
+      if(i===0 && isTrungLapCung && mauChotIdx==null) mauChotIdx=step.to;
       if(step.to!==root && realAnchorSet.has(step.to)) spineRealMembers.add(step.to);
       if(!isSelectedHere) stillConsecutive=false;
       // Niên A/D và "tự hóa Lộc" ở đây LUÔN là 1 lần cộng MỚI, THẬT SỰ (bonus.tags chỉ chứa các nhãn này khi
@@ -7410,7 +7617,11 @@ function computeKetCauStructuresRaw(mode){
       if(hitStep){
         total+=1;
         const isDoi=hitStep.to===doiMauChot;
-        mauChotBonusLine=`<li class="hoa-sub hoa-plus hoa-red">⤷ quay về ${isDoi?'đối cung của ':''}Cung Mấu chốt (${label(mauChotIdx)}) tại ${label(hitStep.to)} [+1${lettAbbr}]</li>`;
+        // Ghi rõ lý do Mấu chốt là do Niên D tọa root (rootNienMauChot) hay do trùng lặp phi hóa thường -
+        // giúp đọc dòng chảy không hiểu nhầm là "niên D thông thường" (đã bị nienCap chặn, không cộng ở
+        // đây nữa - toàn bộ +1 này giờ đi qua đúng 1 đường Mấu chốt duy nhất, không đếm đúp).
+        const mauChotReason = rootNienMauChot && mauChotIdx===root ? `, do niên ${letter} tọa` : '';
+        mauChotBonusLine=`<li class="hoa-sub hoa-plus hoa-red">⤷ quay về ${isDoi?'đối cung của ':''}Cung Mấu chốt (${label(mauChotIdx)}${mauChotReason}) tại ${label(hitStep.to)} [+1${lettAbbr}]</li>`;
       }
     }
     // KHÔNG còn ghi ngoặc tổng dồn "[X]" ở cuối dòng mạch chính nữa (yêu cầu người dùng: ngoặc tổng dồn đặt
@@ -7482,7 +7693,16 @@ function computeKetCauStructuresRaw(mode){
           // cung/khác sự kiện) mà vẫn tính đúng case hợp lệ: M tự hóa Lộc ra ĐÚNG sao + ĐÚNG cung mà mạch
           // chính root cũng đi qua ở 1 bước CK sau đó (vd Phúc Đức tự hóa Lộc ra Tham Lang đáp đúng Điền
           // Trạch, trùng khớp cả cung lẫn sao với bước CK cuối của root Mệnh → Tật → Điền/Tham Lang).
-          else if(steps.slice(1).some(s=>s.to===p0.to && s.star===p0.star)) found={p:p0, via:null};
+          // FIX BUG ĐẾM ĐÚP 2026-08-11 (Ngọc phát hiện thực tế): PHẢI loại trừ trường hợp M tự hóa Lộc XUẤT
+          // TẠI CHỖ (p0.to===M) mà chính M ĐÃ LÀ 1 nút CÓ SẴN ngay trên mạch chính (steps.some(s=>s.to===M))
+          // - vd Điền Trạch (Thể) tự hóa Lộc xuất bằng Liêm Trinh, mà mạch chính CỦA CHÍNH Phúc Đức (root)
+          // CŨNG vừa CK đáp trúng đúng Điền/Liêm Trinh (steps[1]) - sự kiện "Điền tự hóa Lộc" NÀY đã được
+          // spine tự đếm +1 rồi (qua detectBonusTags/'tự hóa Lộc' ngay tại bước steps[1] đó), nên nhánh này
+          // KHÔNG được khớp lại và cộng thêm 1 lần nữa dưới dạng "hội tụ riêng của Điền" - nếu không sẽ ra
+          // ĐẾM ĐÚP đúng 1 sự kiện (+1L header spine + +1L dòng "⤷ Điền: tự hóa A xuất..." bên dưới, cùng 1
+          // lý do). Nhánh self-loop-rồi-CK-tiếp hợp lệ (M tự hóa rồi CK sang 1 điểm KHÁC) đã có sẵn ở nhánh
+          // riêng bên dưới (`p0.to===M && !steps.some(s=>s.to===M) && pts[1]...`), không bị ảnh hưởng.
+          else if(steps.slice(1).some(s=>s.to===p0.to && s.star===p0.star) && !(p0.to===M && steps.some(s=>s.to===M))) found={p:p0, via:null};
           // ĐÃ BỎ (lỗi): trước đây còn 1 nhánh "else if(steps.slice(1).some(s=>s.star===p0.star))" - so khớp
           // p0.star với BẤT KỲ sao nào xuất hiện ở CÁC BƯỚC SAU (steps.slice(1)) của mạch chính root. Các bước
           // sau bước đầu LUÔN là bước CHUYỂN KỊ (chữ D, xem computeSingleChain: step2 trở đi luôn flyFrom(...,
@@ -8591,7 +8811,9 @@ function dualComputeSingleChain(c,startIdx,letter,singleStepOnly,realAnchorSet){
   let step2=dualFlyFrom(c,step1.to,'D');
   if(step2 && step2.to===step1.from && step2.letter===step1.letter && step2.star===step1.star) step2=null;
   if(!step2) return {from:startIdx,steps,structureLetter:letter};
-  step2.color=hoaArrowColor('D');
+  // FIX 2026-08-10: CK bên Hung (letter==='D') dùng màu riêng theo cung, không còn đen - xem giải thích ở
+  // computeSingleChain bên lá số đơn.
+  step2.color = letter==='D' ? phiKyColorForCung(startIdx) : hoaArrowColor('D');
   steps.push(step2);
   const visited=new Set([step1.to+':'+step1.star, step2.to+':'+step2.star]);
   let prev=step2;
@@ -8606,7 +8828,7 @@ function dualComputeSingleChain(c,startIdx,letter,singleStepOnly,realAnchorSet){
     const key=next.to+':'+next.star;
     if(visited.has(key)) break;
     visited.add(key);
-    next.color=hoaArrowColor('D');
+    next.color = letter==='D' ? phiKyColorForCung(startIdx) : hoaArrowColor('D');
     steps.push(next);
     prev=next;
   }
@@ -8629,7 +8851,8 @@ function dualExtendNienKyQuickChain(c,ch,structureLetter){
     const key=next.to+':'+next.star;
     if(visited.has(key)) break;
     visited.add(key);
-    next.color=hoaArrowColor('D');
+    // FIX 2026-08-10: CK bên Hung dùng màu riêng theo cung, không còn đen.
+    next.color = structureLetter==='D' ? phiKyColorForCung(ch.from) : hoaArrowColor('D');
     steps.push(next);
     prev=next;
     guard++;
@@ -8652,7 +8875,8 @@ function dualRecomputeChains(side){
   if(inst.hcMode==='hung'){
     const directLandingTargets=new Set(chains.map(ch=>ch.steps[0]&&ch.steps[0].to).filter(t=>t!==undefined));
     chains.forEach(ch=>{
-      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=hoaArrowColor('D');
+      // FIX 2026-08-10: đổi từ đen sang màu riêng theo cung - xem giải thích ở recomputePhiHoaChainsRaw bản đơn.
+      if(directLandingTargets.has(ch.from) && ch.steps[0]) ch.steps[0].color=phiKyColorForCung(ch.from);
     });
   }
   // Không còn gọi suppressTrungLapChains() nữa - xem giải thích chi tiết ở recomputePhiHoaChains (bản đơn):
@@ -9165,8 +9389,8 @@ function wireDualDrawEvents(side){
     const r=cv.getBoundingClientRect();
     const x=e.clientX-r.left, y=e.clientY-r.top;
     if(dualDrawTool[side]==='text'){
-      startInlineTextInput(document.getElementById('dualBanWrap_'+side),x,y,dualDrawColor[side],txt=>{
-        dualPushShape(side,{type:'text',x1:x,y1:y,text:txt,color:dualDrawColor[side]}); dualRedrawCanvas(side);
+      startInlineTextInput(document.getElementById('dualBanWrap_'+side),x,y,dualDrawColor[side],(txt,fs)=>{
+        dualPushShape(side,{type:'text',x1:x,y1:y,text:txt,color:dualDrawColor[side],fontSize:fs}); dualRedrawCanvas(side);
       });
       return;
     }
