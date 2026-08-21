@@ -114,27 +114,74 @@ body.theme-dark .btn-blue{background:linear-gradient(135deg,#8a6d1d,#f0c040);col
 .btn-purple{padding:5px 13px;border:none;border-radius:5px;background:linear-gradient(135deg,#6d28d9,#c4b5fd);color:#fff;font-size:.74rem;font-weight:500}
 .btn-brown{padding:5px 13px;border:none;border-radius:5px;background:linear-gradient(135deg,#7c4a1e,#d8a86a);color:#fff;font-size:.74rem;font-weight:500}
 .btn-purple:hover,.btn-brown:hover{filter:brightness(1.05)}
-.atc-flat{padding:14px}
+/* Nền kiểu "Mica" Windows 11 (xám-xanh nhạt trong suốt) cho TOÀN BỘ tab An Thủ Công (quanh khung lá số, cột
+   công cụ vẽ, cột form) - ghi đè nền trắng đặc mặc định của .panel-flat. KHÔNG đụng khung lá số: #atcBanWrap
+   (.ban-wrap) có background:var(--panel) RIÊNG của chính nó nên vẫn trắng/đen như cũ dù cha đổi màu gì. */
+#panelGio.atc-flat{padding:14px;
+  background:linear-gradient(155deg,rgba(238,242,251,.95),rgba(230,236,249,.9));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+body.theme-dark #panelGio.atc-flat{
+  background:linear-gradient(155deg,rgba(20,24,36,.95),rgba(14,17,27,.92));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
 .atc-layout{display:flex;gap:12px;align-items:flex-start}
-.atc-tools-col{flex:0 0 46px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
+.atc-tools-col{flex:0 0 92px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
+/* Bảng màu/độ dày/cỡ chữ HIỂN THỊ LUÔN gọn ngay dưới hàng công cụ (không dùng popup bay ra như bên "Nhập
+   thông tin") - cột atc-tools-col nằm sát mép TRÁI màn hình, trong khi .color-palette-popup gốc định vị
+   right:calc(100%+6px) (mở SANG TRÁI, đúng hướng cho toolbar bên "Nhập thông tin" nằm ở sidebar-right) nên
+   khi dùng lại y nguyên cho cột bên trái này, popup bị đẩy hẳn ra NGOÀI viewport (mất tích, đúng lỗi Ngọc
+   báo "nhích qua bên trái nên mất hiển thị"). Thay bằng khối tĩnh, luôn nằm trong luồng layout bình thường. */
+.atc-inline-tools{display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel)}
+.atc-swatch-grid{display:grid;grid-template-columns:repeat(4,16px);gap:3px;justify-content:center}
+.atc-swatch-opt{width:16px;height:16px;border-radius:4px;border:1px solid var(--border-lt);cursor:pointer;padding:0}
+.atc-swatch-opt.active{outline:2px solid var(--accent);outline-offset:1px}
+.atc-width-row{display:flex;align-items:center;gap:3px;font-size:.6rem;color:var(--muted)}
+.atc-width-row input[type="range"]{flex:1;min-width:0}
+.atc-width-row .lw-val{width:16px;text-align:right;flex-shrink:0}
+.atc-width-row .lw-icon{flex-shrink:0;font-size:.68rem}
 .atc-chart-col{flex:0 0 780px;max-width:780px}
-.atc-panel-col{flex:1;min-width:320px;border-left:1px solid var(--border-lt);padding-left:14px}
+.atc-panel-col{flex:1;min-width:320px}
 #atcBanWrap{padding:48px}
 #atcBanWrap .ban-tuvi{border:1px solid var(--border-lt);background:var(--border-lt)}
-.atc-wrap{display:flex;flex-direction:column;gap:6px}
+/* Bố cục lại theo đúng mẫu tool Đài Ngọc gửi: mỗi NHÓM chức năng nằm trong 1 khung viền bo tròn riêng biệt
+   (card), có khoảng cách rõ ràng giữa các khung - thay vì các dòng rời rạc dính sát nhau như trước. */
+.atc-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;border:1px solid var(--border-lt);border-radius:10px;padding:10px 12px;background:var(--panel)}
 .atc-row{display:flex;align-items:center;gap:10px}
-.atc-label{flex:0 0 46px;font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.2px}
+/* Khối #atcSharedToggles (ĐẠI HẠN/LƯU NIÊN/7 nút Ẩn) tự nó cũng là 1 atc-wrap (đã có khung riêng ở trên) -
+   khi nằm LỒNG bên trong khung An Thủ Công (CAN...MỆNH) thì bớt margin/viền ngoài để đỡ bị khung-trong-khung
+   quá dày, chỉ giữ 1 gạch phân cách nhẹ phía trên cho dễ nhận nhóm. */
+#atcPanelThuCong #atcSharedToggles{border:none;border-radius:0;padding:10px 0 0;margin-bottom:0;background:transparent;border-top:1px dashed var(--border-lt)}
+.atc-label{flex:0 0 54px;font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.2px;white-space:nowrap}
 .atc-grid{display:grid;gap:3px;flex:1}
 .atc-grid-10{grid-template-columns:repeat(10,1fr)}
 .atc-grid-12{grid-template-columns:repeat(12,1fr)}
 .atc-btn{padding:3px 1px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.58rem;font-weight:600}
 .atc-btn:hover{background:var(--hover)}
 .atc-btn.active{background:#2563eb;border-color:#2563eb;color:#fff}
-.atc-actions{justify-content:center;gap:8px;margin-top:4px}
+/* Mỗi dòng An Thủ Công 1 màu riêng tươi trẻ (theo mẫu Ngọc gửi) thay vì 1 màu xanh dương chung cho tất cả -
+   dễ phân biệt đang bấm ở dòng nào khi nhìn lướt qua. */
+#atcCan .atc-btn.active{background:#ef5350;border-color:#ef5350;color:#fff}
+#atcTuVi .atc-btn.active{background:#43a047;border-color:#43a047;color:#fff}
+#atcThang .atc-btn.active{background:#00acc1;border-color:#00acc1;color:#fff}
+#atcGioSinh .atc-btn.active{background:#fb8c00;border-color:#fb8c00;color:#fff}
+#atcMenh .atc-btn.active{background:#7e57c2;border-color:#7e57c2;color:#fff}
+/* FIX 2026-08-20: ĐẠI HẠN/LƯU NIÊN trước dùng màu hồng/xanh ngọc riêng (không liên quan gì), trong khi ngay
+   trên khung lá số, cung đang là Đại Vận/Lưu Niên lại tô viền ĐỎ/XANH LÁ (.cung.hl-daivan/.hl-luunien, dùng
+   chung cho cả tab Nhập Thông Tin) - Ngọc yêu cầu 2 dòng nút này ĐỒNG BỘ đúng màu đỏ/xanh lá đó, không bịa
+   màu riêng, để nhìn là biết ngay Đại Hạn=đỏ, Lưu Niên=xanh lá xuyên suốt cả 2 tab. */
+#atcDaiHan .atc-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+#atcLuuNien .atc-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+/* Dòng GIỚI TÍNH + 3 nút Xuất/Xóa hết/Hiện đủ chung 1 hàng (Ngọc yêu cầu gộp lại) - nhãn "GIỚI TÍNH" và nút
+   "Nam" giữ nguyên cỡ vừa khít nội dung, riêng 3 nút hành động (Xuất/Xóa hết/Hiện đủ) tự giãn lấp phần còn
+   lại của hàng để mép phải khớp đúng với các hàng CAN/TỬ VI/... phía trên. */
+.atc-actions{gap:8px;margin-top:4px}
+.atc-actions button:not(.pill-btn){flex:1;min-width:0}
+/* Nút "Xuất qua Lập Lá Số" (.btn-dark) mặc định cỡ to hơn hẳn .btn-outline (padding/font lớn hơn) - thu nhỏ
+   lại đúng bằng 2 nút cạnh (Xóa hết/Hiện đủ) trong hàng này cho đồng bộ, không đổi .btn-dark ở chỗ khác. */
+.atc-actions .btn-dark{padding:5px 10px;font-size:.68rem;letter-spacing:normal;font-weight:500}
 .atc-error{color:var(--red);font-size:.7rem}
 .atc-select{padding:4px 5px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.64rem;flex:1;min-width:0}
 .atc-result{flex:0 0 auto;padding:4px 8px;border:1px solid var(--border-lt);border-radius:4px;background:var(--hover);color:var(--text);font-size:.64rem;font-weight:700;white-space:nowrap}
-@media(max-width:1000px){.atc-layout{flex-direction:column}.atc-tools-col{display:none}.atc-chart-col{flex:1 1 auto;max-width:100%}.atc-panel-col{border-left:none;padding-left:0;border-top:1px solid var(--border-lt);padding-top:14px}}
+@media(max-width:1000px){.atc-layout{flex-direction:column}.atc-tools-col{display:none}.atc-chart-col{flex:1 1 auto;max-width:100%}.atc-panel-col{margin-top:14px}}
 
 /* -- Tab "BẢNG VẼ": 2 CỘT TÁCH RIÊNG (đúng bố cục bản tham khảo người dùng gửi) - cột trái GỌN (lá số sát
    ngay bộ công cụ bên dưới, không khoảng trống thừa) : cột phải là khung trắng RIÊNG (#wbBoard/#wbCanvas),
@@ -414,7 +461,11 @@ body.theme-dark .can-letter-btn.active.can-letter-D{background:var(--gold);color
 .cung{background:var(--panel);padding:12px 8px 22px 8px;min-height:142px;min-width:0;position:relative;border:1px solid var(--border);cursor:default;text-align:center}
 .cung:hover{background:var(--hover)}
 .cung.sel-ring{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
-.cung.hl-daivan{outline:2px solid var(--red);outline-offset:-2px}
+/* FIX 2026-08-20: .hl-daivan trước đây CHỈ có viền đỏ, không hề có nền tô (khác hẳn hl-luunien/hl-luunguyet
+   đều có nền tô riêng) - Ngọc báo "bấm Đại Vận không thấy nền màu" là đúng, thiếu từ trước (lỗi có ở CẢ 2
+   tab vì đây là class CSS dùng chung). Thêm nền hồng nhạt cho đúng tinh thần "Đại Vận = đỏ/hồng" xuyên suốt. */
+.cung.hl-daivan{outline:2px solid var(--red);outline-offset:-2px;background:#fde8e8}
+body.theme-dark .cung.hl-daivan{background:#2a1414}
 .cung.hl-luunien{outline:2px solid var(--green);outline-offset:-2px;background:#fdf6e3}
 body.theme-dark .cung.hl-luunien{background:#2a2410}
 .cung.hl-luunguyet{outline:2px dashed #16a34a;outline-offset:-2px;background:#eafbe8}
@@ -428,7 +479,34 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 .cung.center:hover{background:var(--panel)}
 
 .cung-cc-top{position:absolute;top:5px;left:7px;font-size:.76rem;color:var(--text);font-weight:600;text-align:left;line-height:1.15}
-.can-hl{background:var(--blue);color:#fff;font-weight:700;padding:0 3px;border-radius:2px}
+.can-hl{background:var(--green);color:#fff;font-weight:700;padding:0 3px;border-radius:2px}
+/* Hàng 7 nút Ẩn/Hiện của An Thủ Công (niên hóa/tự hóa/tên cung/tinh diệu/thiên can/lai nhân/số đại vận) -
+   dùng CSS grid 4 cột đều nhau nên hàng 1 (4 nút) và hàng 2 (3 nút còn lại) LUÔN canh lề trái đúng theo cột,
+   không lệch dù số nút hàng dưới ít hơn (yêu cầu "canh lề trái phải bằng nhau" của Ngọc). */
+.atc-hide-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.atc-hide-btn{padding:5px 4px;border:1px solid var(--border-lt);border-radius:4px;background:var(--panel);color:var(--text);font-size:.62rem;font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atc-hide-btn:hover{background:var(--hover)}
+.atc-hide-btn.active{background:#dcfce7;border-color:#86efac;color:#166534}
+/* Các lớp .atc-hide-* gắn lên #atcPreviewGrid khi bấm nút tương ứng ở trên - ẩn thuần CSS (không render lại
+   HTML) nên bấm phát ăn ngay, không tốn thời gian tính lại toàn bộ lá số. */
+/* Dùng visibility:hidden (KHÔNG dùng display:none) cho .cung-chuc/.sao-chinh-wrap/.sao-phu-wrap: đây là các
+   khối nằm trong luồng bình thường (không position:absolute) và thường là nội dung DÀI NHẤT trong ô - lỡ
+   display:none thì bề rộng nội dung tối thiểu (min-content) của cả cột lưới 4 cột co lại theo, kéo sập luôn
+   bề rộng khung #atcBanWrap (đã tự kiểm chứng bằng browser: hiện tượng lá số bị bóp méo còn ~160px). Còn
+   .cung-cc-top/.dv/.dv-chuc/.ln-chuc vốn position:absolute nên display:none với chúng an toàn, không ảnh
+   hưởng layout dòng chảy bình thường của ô. */
+/* FIX 2026-08-20 (b): 7 nút Ẩn giờ có thể áp riêng cho 1 vài cung (atcHideTargets) thay vì cả lá số - class
+   atc-hide-X giờ gắn trực tiếp lên ĐÚNG ô .cung phù hợp (tính trong tlsRenderGrid), không còn gắn 1 lần duy
+   nhất trên #atcPreviewGrid nữa nên scope CSS đổi từ `#atcPreviewGrid.atc-hide-X` sang `.cung.atc-hide-X`. */
+#atcPreviewGrid .cung.atc-hide-nienHoa .th{visibility:hidden}
+#atcPreviewGrid .cung.atc-hide-tenCung .cung-chuc{visibility:hidden}
+#atcPreviewGrid .cung.atc-hide-tenCung .dv-chuc,
+#atcPreviewGrid .cung.atc-hide-tenCung .ln-chuc{display:none}
+#atcPreviewGrid .cung.atc-hide-tinhDieu .sao-name{visibility:hidden}
+#atcPreviewGrid .cung.atc-hide-thienCan .cung-cc-top>div:first-child{display:none}
+#atcPreviewGrid .cung.atc-hide-laiNhan .can-hl{background:none!important;color:inherit!important;font-weight:inherit!important;padding:0!important;border-radius:0!important}
+#atcPreviewGrid .cung.atc-hide-soDaiVan .dv{display:none}
+#atcPreviewGrid .cung.atc-hide-luuNien .ln{visibility:hidden}
 .cung-chuc{font-size:.88rem;color:var(--text);font-weight:500;letter-spacing:.3px;text-transform:uppercase;text-align:center;margin-bottom:4px}
 .b-menh{font-size:.63rem;background:var(--red);color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
 .b-than{font-size:.63rem;background:#6d28d9;color:#fff;padding:1px 4px;border-radius:3px;font-weight:700;margin-left:2px}
@@ -960,7 +1038,6 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
             <svg viewBox="0 0 24 24" width="16" height="16"><line x1="5" y1="19" x2="18" y2="6" stroke="currentColor" stroke-width="2"/><polygon points="18,6 11,8 16,11" fill="currentColor"/></svg>
           </button>
           <button class="icon-btn" id="atcToolText" title="Chèn chữ" onclick="atcSetDrawTool('text')">Aa</button>
-          <label class="icon-btn swatch" title="Chọn màu"><input type="color" id="atcDrawColorInput" value="#c0392b" onchange="atcOnColorChange()"></label>
         </div>
         <div class="icon-grid">
           <button class="icon-btn" title="Hoàn tác" onclick="atcUndoDraw()">
@@ -970,7 +1047,25 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
             <svg viewBox="0 0 24 24" width="15" height="15"><path d="M15 14l5-5-5-5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 9h-9a6 6 0 1 0 0 12h3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
           </button>
         </div>
-        <button class="btn-danger" onclick="atcClearDraw()">XÓA NÉT</button>
+        <div class="atc-inline-tools">
+          <div class="atc-swatch-grid" id="atcSwatchGrid"></div>
+          <div class="atc-width-row" title="Độ dày khung ô vuông">
+            <span class="lw-icon">▭</span>
+            <input type="range" id="atcLineWidthSlider" min="1" max="8" step="0.5" value="4.5" oninput="atcSetDrawLineWidth(this.value)">
+            <span id="atcLineWidthLabel" class="lw-val">4.5</span>
+          </div>
+          <div class="atc-width-row" title="Độ dày mũi tên">
+            <span class="lw-icon">➔</span>
+            <input type="range" id="atcArrowWidthSlider" min="1" max="8" step="0.5" value="2.5" oninput="atcSetDrawArrowWidth(this.value)">
+            <span id="atcArrowWidthLabel" class="lw-val">2.5</span>
+          </div>
+          <div class="atc-width-row" id="atcFontSizeRow" title="Cỡ chữ" hidden>
+            <span class="lw-icon">Aa</span>
+            <input type="range" id="atcFontSizeSlider" min="10" max="32" step="1" value="14" oninput="atcSetDrawFontSize(this.value)">
+            <span id="atcFontSizeLabel" class="lw-val">14</span>
+          </div>
+        </div>
+        <button class="btn-danger" onclick="atcClearDraw()">XÓA</button>
         <button class="btn-plainbw compact" id="atcBtnBangTrang" onclick="togglePlainBw()">Đổi màu</button>
       </div>
       <div class="atc-chart-col">
@@ -1069,10 +1164,7 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
             <div class="atc-row"><div class="atc-label">THÁNG</div><div class="atc-grid atc-grid-12" id="atcThang"></div></div>
             <div class="atc-row"><div class="atc-label">G.SINH</div><div class="atc-grid atc-grid-12" id="atcGioSinh"></div></div>
             <div class="atc-row"><div class="atc-label">MỆNH</div><div class="atc-grid atc-grid-12" id="atcMenh"></div></div>
-            <div class="atc-row">
-              <div class="atc-label">GIỚI TÍNH</div>
-              <button class="pill-btn" id="atcGioiTinhBtn" onclick="atcToggleGioiTinh()">Nam</button>
-            </div>
+            <div id="atcSharedTogglesAnchorThuCong"></div>
             <div class="atc-row">
               <div class="atc-label">TÌM TV</div>
               <select class="atc-select" id="atcTimSao"></select>
@@ -1081,10 +1173,37 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
               <span class="atc-result" id="atcTimResult">Tử Vi: --</span>
             </div>
             <div class="atc-row atc-actions">
-              <button class="btn-dark" onclick="atcExportToLapLaSo()">Xuất qua Lập Lá Số</button>
+              <div class="atc-label">GIỚI TÍNH</div>
+              <button class="pill-btn" id="atcGioiTinhBtn" onclick="atcToggleGioiTinh()">Nam</button>
+              <button class="btn-dark" onclick="atcExportToLapLaSo()" title="Xuất qua Lập Lá Số">Xuất</button>
               <button class="btn-outline" onclick="atcReset()">Xóa hết</button>
+              <button class="btn-outline" onclick="tlsShowAllCung()">Hiện đủ</button>
             </div>
             <div class="atc-row"><span id="atcError" class="atc-error"></span></div>
+          </div>
+        </div>
+
+        <!-- Khối ĐẠI HẠN/LƯU NIÊN (chọn nhanh cung theo Chi) + 7 nút Ẩn/Hiện: DÙNG CHUNG cho cả 2 sub-tab
+             "Lập Lá Số"/"An Thủ Công" (và cả top-tab "BẢNG VẼ" vì DOM này dùng chung) - CHỈ 1 bản duy nhất
+             (#atcSharedToggles) nhưng được DI CHUYỂN đúng vị trí neo theo sub-tab đang chọn (switchAtcSubTab):
+             bên "An Thủ Công" phải nằm NGAY SAU dòng MỆNH (atcSharedTogglesAnchorThuCong, xem trong
+             #atcPanelThuCong), bên "Lập Lá Số" thì nằm ở vị trí mặc định này (atcSharedTogglesAnchorLls, ngay
+             sau khối form ngày sinh thật, trước hàng stepper Đ.VẬN/L.NIÊN/L.NGUYỆT) - không thể ĐẶT CỐ ĐỊNH 1
+             chỗ vì 2 sub-tab cần thứ tự hiển thị khác nhau, mà lại không được TẠO 2 BẢN (trùng id nút bấm). -->
+        <div id="atcSharedTogglesAnchorLls">
+          <div class="atc-wrap" id="atcSharedToggles">
+            <div class="atc-row"><div class="atc-label">ĐẠI HẠN</div><div class="atc-grid atc-grid-12" id="atcDaiHan"></div></div>
+            <div class="atc-row"><div class="atc-label">LƯU NIÊN</div><div class="atc-grid atc-grid-12" id="atcLuuNien"></div></div>
+            <div class="atc-row atc-hide-row">
+              <button class="atc-hide-btn" id="atcHideBtn-nienHoa" onclick="atcToggleHideFlag('nienHoa')">Ẩn niên hóa</button>
+              <button class="atc-hide-btn" id="atcHideBtn-tuHoa" onclick="atcToggleHideFlag('tuHoa')">Ẩn tự hóa</button>
+              <button class="atc-hide-btn" id="atcHideBtn-tenCung" onclick="atcToggleHideFlag('tenCung')">Ẩn tên cung</button>
+              <button class="atc-hide-btn" id="atcHideBtn-tinhDieu" onclick="atcToggleHideFlag('tinhDieu')">Ẩn tinh diệu</button>
+              <button class="atc-hide-btn" id="atcHideBtn-thienCan" onclick="atcToggleHideFlag('thienCan')">Ẩn thiên can</button>
+              <button class="atc-hide-btn" id="atcHideBtn-laiNhan" onclick="atcToggleHideFlag('laiNhan')">Ẩn lai nhân</button>
+              <button class="atc-hide-btn" id="atcHideBtn-soDaiVan" onclick="atcToggleHideFlag('soDaiVan')">Ẩn số đại vận</button>
+              <button class="atc-hide-btn" id="atcHideBtn-luuNien" onclick="atcToggleHideFlag('luuNien')">Ẩn lưu niên</button>
+            </div>
           </div>
         </div>
 
@@ -1104,7 +1223,6 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
             <button class="step-label" id="tlsNavLg" onclick="tlsToggleLuuNguyetActive()">L.NGUYỆT</button>
             <button class="step-arrow" onclick="tlsStepLuuNguyet(1)">&rsaquo;</button>
           </div>
-          <button class="btn-outline" onclick="tlsShowAllCung()">Hiện đủ</button>
         </div>
 
         <div class="tls-hide-panel">
@@ -2459,6 +2577,12 @@ function switchAtcSubTab(name){
   document.querySelectorAll('.atc-subtab').forEach(t=>t.classList.toggle('active',t.dataset.atcsub===name));
   document.getElementById('atcPanelLls').hidden = name!=='lls';
   document.getElementById('atcPanelThuCong').hidden = name!=='thucong';
+  // Dời #atcSharedToggles (ĐẠI HẠN/LƯU NIÊN/7 nút Ẩn) sang đúng điểm neo của sub-tab đang chọn - xem giải
+  // thích ở comment HTML #atcSharedTogglesAnchorLls. appendChild với node đã tồn tại trong DOM sẽ tự ĐEM nó
+  // ra khỏi vị trí cũ (không nhân bản, không mất event listener vì vẫn cùng 1 node).
+  const shared=document.getElementById('atcSharedToggles');
+  const anchor=document.getElementById(name==='thucong' ? 'atcSharedTogglesAnchorThuCong' : 'atcSharedTogglesAnchorLls');
+  if(shared && anchor && shared.parentElement!==anchor) anchor.appendChild(shared);
   if(name==='thucong') initAtcPanelOnce();
   atcCurChart=atcChartBySub[name];
   tlsRenderAll();
@@ -2545,6 +2669,12 @@ function initAtcPanelOnce(){
   mk('atcThang',Array.from({length:12},(_,i)=>i+1),'thang');
   mk('atcGioSinh',DC,'gioSinh');
   mk('atcMenh',DC,'menh');
+  // ĐẠI HẠN/LƯU NIÊN: KHÔNG dùng mk()/atcSel như 5 dòng trên (những dòng đó là dữ kiện GỐC để an sao) - đây
+  // là 2 dòng CHỌN NHANH cung Đại Hạn/Lưu Niên hiện hành (tương đương click cung tương ứng ở bước Đại Vận/
+  // Lưu Niên bên dưới), nên có hàm bấm riêng atcPickDaiHanChi/atcPickLuuNienChi, đồng bộ trạng thái active
+  // qua atcSyncDaiHanLuuNienBtns() (gọi trong tlsUpdateStepperUI).
+  document.getElementById('atcDaiHan').innerHTML=DC.map(v=>`<button class="atc-btn" data-v="${v}" onclick="atcPickDaiHanChi('${v}')">${v}</button>`).join('');
+  document.getElementById('atcLuuNien').innerHTML=DC.map(v=>`<button class="atc-btn" data-v="${v}" onclick="atcPickLuuNienChi('${v}')">${v}</button>`).join('');
   const saoNames=[...ATC_TUVI_HE,...ATC_THIENPHU_HE].map(([,ten])=>ten);
   document.getElementById('atcTimSao').innerHTML=saoNames.map(t=>`<option value="${t}">${t}</option>`).join('');
   document.getElementById('atcTimCung').innerHTML=DC.map(v=>`<option value="${v}">${v}</option>`).join('');
@@ -2577,6 +2707,49 @@ function atcPick(field,val){
   });
   document.getElementById('atcError').textContent='';
   atcRenderPreview();
+}
+// Bấm trực tiếp 1 chi (Tý...Hợi) ở dòng ĐẠI HẠN trong An Thủ Công -> chọn luôn cung đó làm Đại Hạn hiện
+// hành, KHÔNG cần bấm mũi tên < > của stepper Đ.VẬN bên dưới nhiều lần mới tới đúng cung muốn xem. Bấm lại
+// đúng chi đang chọn -> bỏ chọn (giống hành vi atcPick các dòng khác). Chỉ hoạt động khi đã đủ dữ kiện tính
+// được atcCurChart.daiHan (cần Can+Mệnh+Giới tính, xem atcRenderPreview).
+function atcPickDaiHanChi(chiStr){
+  const c=atcCurChart;
+  if(!c||!c.daiHan||!c.daiHan.length){ document.getElementById('atcError').textContent='Cần chọn đủ CAN + MỆNH (+ Giới tính) trước khi chọn Đại Hạn.'; return; }
+  const chiIdx=DC.indexOf(chiStr);
+  const curCung=tlsSelectedDaiVanIdx!==null? c.daiHan[tlsSelectedDaiVanIdx].cung : null;
+  if(curCung===chiIdx){ tlsSelectedDaiVanIdx=null; tlsSelectedLuuNienYear=null; tlsRenderGrid(); tlsUpdateStepperUI(); return; }
+  const idx=c.daiHan.findIndex(d=>d.cung===chiIdx);
+  if(idx<0) return;
+  tlsSelectedLuuNienYear=null; // đổi Đại Hạn thì bỏ chọn Lưu Niên cũ, tránh lệch tầng (giống tlsToggleDaiVanActive)
+  tlsPickDaiVan(idx);
+}
+// Tương tự cho dòng LƯU NIÊN: chọn theo CHI thay vì theo NĂM cụ thể (khác tlsPickLuuNien(y) hiện có) - vì
+// 1 chi lặp lại mỗi 12 năm, lấy năm gần nhất quanh mốc đang xem (năm Lưu Niên đang chọn, hoặc năm sinh giả
+// định nếu chưa chọn) có đúng chi đó, không tự nhảy xa hàng chục năm.
+function atcPickLuuNienChi(chiStr){
+  const c=atcCurChart;
+  if(!c){ document.getElementById('atcError').textContent='Cần chọn đủ CAN + MỆNH trước khi chọn Lưu Niên.'; return; }
+  const chiIdx=DC.indexOf(chiStr);
+  const curChi=tlsSelectedLuuNienYear!==null? chiOfYear(tlsSelectedLuuNienYear) : null;
+  if(curChi===chiIdx){ tlsSelectedLuuNienYear=null; tlsRenderGrid(); tlsUpdateStepperUI(); return; }
+  const base=tlsSelectedLuuNienYear!==null? tlsSelectedLuuNienYear : (c.birthYear||new Date().getFullYear());
+  const diff=(chiIdx-chiOfYear(base)+12)%12;
+  tlsPickLuuNien(base+diff);
+}
+// Đồng bộ nút đang bấm sáng (.active) ở 2 dòng ĐẠI HẠN/LƯU NIÊN theo đúng trạng thái tlsSelectedDaiVanIdx/
+// tlsSelectedLuuNienYear hiện hành - gọi trong tlsUpdateStepperUI() vì hàm đó đã được gọi ở MỌI nơi state 2
+// biến này thay đổi (tlsPickDaiVan, tlsPickLuuNien, tlsToggleDaiVanActive/LuuNienActive, tlsStepDaiVan/
+// LuuNien, tlsRenderAll) - không cần rải thêm lời gọi ở chỗ khác.
+function atcSyncDaiHanLuuNienBtns(){
+  const c=atcCurChart;
+  const dhCung=(c&&c.daiHan&&tlsSelectedDaiVanIdx!==null)? c.daiHan[tlsSelectedDaiVanIdx].cung : null;
+  document.querySelectorAll('#atcDaiHan .atc-btn').forEach(b=>{
+    b.classList.toggle('active', dhCung!==null && DC.indexOf(b.dataset.v)===dhCung);
+  });
+  const lnChi=tlsSelectedLuuNienYear!==null? chiOfYear(tlsSelectedLuuNienYear) : null;
+  document.querySelectorAll('#atcLuuNien .atc-btn').forEach(b=>{
+    b.classList.toggle('active', lnChi!==null && DC.indexOf(b.dataset.v)===lnChi);
+  });
 }
 function atcToggleGioiTinh(){
   atcSel.gioiTinh = atcSel.gioiTinh==='nam' ? 'nu' : 'nam';
@@ -2669,11 +2842,30 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
   // chỉ ở cung đang ẩn nữa; không bật nút nào thì hiện đủ như cũ (mặc định).
   const anyHoaFilterActive=Object.values(tlsHoaFilter).some(v=>v);
   arrows=arrows.filter(a=>{
-    const fromHidden=tlsHiddenCung.has(a.from);
-    const toHidden=a.to!==undefined && tlsHiddenCung.has(a.to);
-    if(fromHidden || toHidden) return !!tlsHoaFilter[a.letter];
+    // FIX 2026-08-20 (k): bản sửa (i) trước đó SAI với mũi tên LY TÂM (type='out', chỉ có 1 đầu, a.to luôn
+    // undefined) - vì `toHidden` luôn tính ra false với loại này, công thức `fromHidden && toHidden` luôn ra
+    // false bất kể fromHidden gì → mũi tên out LUÔN hiện dù cung gốc còn đang ẩn thật (KHÔNG được chọn). Phải
+    // tách 2 nhánh: loại 'out' chỉ phụ thuộc ĐÚNG 1 đầu (from); loại 'cross' (2 đầu, có a.to) mới áp dụng
+    // "chỉ ẩn khi CẢ 2 đầu đều ẩn" (ý đúng của Ngọc: lộ 1 đầu là thấy mũi tên nối từ đầu đó).
+    const fromHidden=tlsHiddenCung.has(a.from) !== atcHideTargets.has(a.from);
+    let bothEndsHidden;
+    if(a.to===undefined){
+      bothEndsHidden = fromHidden; // out: chỉ có 1 đầu, "cả 2 đầu ẩn" tương đương chính đầu đó ẩn
+    }else{
+      const toHidden=tlsHiddenCung.has(a.to) !== atcHideTargets.has(a.to);
+      bothEndsHidden = fromHidden && toHidden; // cross: chỉ ẩn khi CẢ 2 đầu đều ẩn
+    }
+    if(bothEndsHidden) return !!tlsHoaFilter[a.letter];
     return !anyHoaFilterActive || !!tlsHoaFilter[a.letter];
   });
+  // Nút "Ẩn tự hóa" (atcHideFlags.tuHoa): atcHideTargets RỖNG -> ẩn HẾT (như cũ); có phần tử -> chỉ ẩn đúng
+  // mũi tên có 1 đầu (from hoặc to, kể cả hướng tâm 2 đầu) nằm trong đó, giữ nguyên mũi tên ở cung khác.
+  if(atcHideFlags.tuHoa){
+    arrows=arrows.filter(a=>{
+      const inScope = atcHideTargets.size===0 || atcHideTargets.has(a.from) || (a.to!==undefined && atcHideTargets.has(a.to));
+      return !inScope;
+    });
+  }
   if(!arrows.length) return;
   // Kích thước CSS thật (KHÔNG dùng cv.width/height - từ khi khớp devicePixelRatio, 2 giá trị đó đã bị nhân
   // lên theo dpr, dùng nhầm để giới hạn/kẹp tọa độ sẽ khiến mũi tên tràn ra ngoài khung trên màn hình HiDPI).
@@ -2692,8 +2884,14 @@ function atcDrawTuHoaArrows(ctx,sc,tenCung){
     const midX=(anchor.x+end.x)/2, midY=(anchor.y+end.y)/2;
     const basePt=isHorizontal? {x:midX,y:Math.min(anchor.y,end.y)-14} : {x:Math.max(anchor.x,end.x)+14,y:midY};
     const spacing=11, totalW=(group.length-1)*spacing;
+    // FIX 2026-08-20: mũi tên ly tâm dọc (cung hàng trên/hàng dưới, isHorizontal=false) lệch trục X so với
+    // đường thẳng (basePt.x=đường+14), nhưng cụm chữ A/B/C/D lại được CĂN GIỮA quanh basePt.x (off=i*spacing-
+    // totalW/2) - với cụm ≥3 chữ, chữ đầu tiên (bên trái) bị kéo lùi về gần sát đường thẳng (chỉ còn ~3px),
+    // đè lên mũi tên (đúng lỗi Ngọc báo ở cung Mùi có 3 tự hóa ly tâm). Với mũi tên NGANG (isHorizontal=true)
+    // thì không dính lỗi này vì trục lệch (Y) khác trục dàn hàng (X) nên không bao giờ tiến lại gần đường kẻ.
+    // Sửa: mũi tên dọc thì dàn cụm chữ VỀ 1 PHÍA duy nhất (xa dần khỏi đường thẳng), không căn giữa 2 bên nữa.
     group.forEach((a,i)=>{
-      const off=i*spacing-totalW/2;
+      const off = isHorizontal ? (i*spacing-totalW/2) : (i*spacing);
       drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),false);
     });
   });
@@ -2758,9 +2956,44 @@ function atcRedrawCanvas(preview){
   ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
   ctx.clearRect(0,0,cv.width,cv.height);
   // Vẽ mũi tên tự hóa theo state DÙNG CHUNG (atcCurChart) - khớp với đúng lá số đang hiển thị trong
-  // atcPreviewGrid, bất kể lập bằng Lập Lá Số (ngày sinh thật) hay An Thủ Công (chọn thủ công).
+  // atcPreviewGrid, bất kể lập bằng Lập Lá Số (ngày sinh thật) hay An Thủ Công (chọn thủ công). LUÔN gọi hàm
+  // (không chặn ở đây nữa) - việc lọc theo "Ẩn tự hóa" + atcHideTargets (toàn bộ hay chỉ 1 vài cung) đã
+  // chuyển HẲN vào bên trong atcDrawTuHoaArrows (lọc per-arrow), vì chặn thẳng ở đây chỉ có thể bật/tắt
+  // TOÀN BỘ chứ không lọc được riêng từng mũi tên theo phạm vi target.
   if(atcCurChart && atcCurChart.tenCung) atcDrawTuHoaArrows(ctx, atcCurChart.sc, atcCurChart.tenCung);
   [...atcShapes, ...(preview?[preview]:[])].forEach(sh=>drawShape(ctx,sh));
+}
+// 7 nút "Ẩn ..." của An Thủ Công (dòng atc-hide-row) - toggle 1 cờ boolean rồi gắn/gỡ class .atc-hide-<key>
+// lên #atcPreviewGrid (CSS lo phần ẩn, xem các rule #atcPreviewGrid.atc-hide-* ở <style>). Riêng "tuHoa"
+// (mũi tên canvas) không ẩn được bằng CSS nên phải gọi atcRedrawCanvas() vẽ lại luôn.
+let atcHideFlags={nienHoa:false,tuHoa:false,tenCung:false,tinhDieu:false,thienCan:false,laiNhan:false,soDaiVan:false,luuNien:false};
+// Phạm vi áp dụng của 7 nút Ẩn - RỖNG = áp cho cả lá số (hành vi mặc định/cũ); có phần tử = CHỈ áp cho đúng
+// (các) cung đó. Độc lập HOÀN TOÀN với tlsHiddenCung (ẩn trắng cung để luyện trí nhớ) - 2 khái niệm khác
+// nhau dùng chung layout Chi nhưng không đụng chạm gì tới nhau, theo đúng yêu cầu Ngọc đã chốt.
+let atcHideTargets=new Set();
+function atcToggleHideTarget(chiStr){
+  const idx=DC.indexOf(chiStr);
+  if(atcHideTargets.has(idx)) atcHideTargets.delete(idx); else atcHideTargets.add(idx);
+  // Nút hiển thị phạm vi giờ CHÍNH LÀ sơ đồ nhỏ "ẩn cung" (.tls-cung-btn) - không còn hàng MỤC TIÊU riêng.
+  tlsUpdateCungGridUI();
+  // Đổi phạm vi -> mọi thứ đang ẩn (nếu có nút Ẩn nào đang bật) phải tính lại theo phạm vi mới, nên render lại
+  // HTML lẫn canvas.
+  // FIX 2026-08-20 (l): TRƯỚC ĐÂY chỉ gọi atcRedrawCanvas() khi atcHideFlags.tuHoa đang bật - nhưng chọn/bỏ
+  // chọn cung ở sơ đồ nhỏ (kể cả lúc "Ẩn tự hóa" KHÔNG bật) vẫn làm đổi việc mũi tên tự hóa hiện/ẩn (qua
+  // atcHideTargets trong atcDrawTuHoaArrows, xem fix (h)/(k)) - nên PHẢI luôn vẽ lại canvas, không điều
+  // kiện nữa. Đây đúng là lỗi Ngọc báo: chọn cung không thấy mũi tên hướng tâm ngay, phải đổi tab mới thấy
+  // (trình duyệt tự vẽ lại canvas khi đổi tab, che giấu việc code quên gọi atcRedrawCanvas()).
+  tlsRenderGrid();
+  atcRedrawCanvas();
+}
+function atcToggleHideFlag(key){
+  atcHideFlags[key]=!atcHideFlags[key];
+  const btn=document.getElementById('atcHideBtn-'+key);
+  if(btn) btn.classList.toggle('active', atcHideFlags[key]);
+  // 6 nút CSS (mọi nút TRỪ tuHoa) giờ tính TOÁN LẠI ngay trong tlsRenderGrid() theo atcHideTargets (per-cell),
+  // không còn gắn 1 class chung trên #atcPreviewGrid nữa - phải render lại HTML mới áp dụng đúng.
+  tlsRenderGrid();
+  if(key==='tuHoa') atcRedrawCanvas();
 }
 function atcSizeCanvas(){
   const cv=document.getElementById('atcCanvas');
@@ -2783,14 +3016,43 @@ window.addEventListener('resize',atcSizeCanvas);
 // riêng và vẽ lên #atcCanvas thay vì #drawCanvas) --
 let atcDrawTool=null, atcShapes=[], atcDrawColor='#c0392b';
 let atcActionLog=[], atcActionRedoLog=[];
+// Độ dày khung/mũi tên + cỡ chữ - port nguyên xi từ toolbar vẽ tay bên "Nhập thông tin" (drawLineWidth/
+// drawArrowWidth/drawFontSize + toggleColorPalette/pickDrawColor/setDrawLineWidth/setDrawArrowWidth/
+// setDrawFontSize), đổi tên tiền tố "atc" để tách state riêng, dùng chung DRAW_PALETTE đã có sẵn.
+let atcDrawLineWidth=4.5, atcDrawArrowWidth=2.5, atcDrawFontSize=14;
 function atcSetDrawTool(t){
   atcDrawTool = atcDrawTool===t? null : t;
   document.getElementById('atcToolRect').classList.toggle('active',atcDrawTool==='rect');
   document.getElementById('atcToolArrow').classList.toggle('active',atcDrawTool==='arrow');
   document.getElementById('atcToolText').classList.toggle('active',atcDrawTool==='text');
   document.getElementById('atcBanWrap').classList.toggle('drawing',!!atcDrawTool);
+  const fsRow=document.getElementById('atcFontSizeRow');
+  if(fsRow) fsRow.hidden = atcDrawTool!=='text';
 }
-function atcOnColorChange(){ atcDrawColor=document.getElementById('atcDrawColorInput').value; }
+function atcSetDrawFontSize(v){
+  atcDrawFontSize=parseInt(v,10);
+  const label=document.getElementById('atcFontSizeLabel'); if(label) label.textContent=atcDrawFontSize;
+}
+// Bảng màu hiện TĨNH ngay dưới hàng công cụ (không phải popup bay ra) - dựng 1 lần duy nhất lúc khởi tạo
+// tab (initAtcPanelOnce gọi hàm này), xem giải thích tại CSS .atc-inline-tools.
+function atcRenderSwatchGrid(){
+  const box=document.getElementById('atcSwatchGrid'); if(!box || box.childElementCount) return;
+  box.innerHTML=DRAW_PALETTE.map(hex=>
+    `<button class="atc-swatch-opt${hex===atcDrawColor?' active':''}" data-hex="${hex}" style="background:${hex}" onclick="atcPickDrawColor('${hex}')" title="${hex}"></button>`
+  ).join('');
+}
+function atcPickDrawColor(hex){
+  atcDrawColor=hex;
+  document.querySelectorAll('#atcSwatchGrid .atc-swatch-opt').forEach(b=>b.classList.toggle('active',b.dataset.hex===hex));
+}
+function atcSetDrawLineWidth(v){
+  atcDrawLineWidth=parseFloat(v);
+  const label=document.getElementById('atcLineWidthLabel'); if(label) label.textContent=atcDrawLineWidth;
+}
+function atcSetDrawArrowWidth(v){
+  atcDrawArrowWidth=parseFloat(v);
+  const label=document.getElementById('atcArrowWidthLabel'); if(label) label.textContent=atcDrawArrowWidth;
+}
 function atcPushShapeAction(shape){
   atcShapes.push(shape);
   atcActionLog.push(shape);
@@ -2816,6 +3078,7 @@ function atcClearDraw(){
 }
 (function initAtcCanvasEvents(){
   document.addEventListener('DOMContentLoaded',()=>{
+    atcRenderSwatchGrid();
     const cv=document.getElementById('atcCanvas');
     let dragging=false, start=null;
     cv.addEventListener('mousedown',e=>{
@@ -2827,7 +3090,7 @@ function atcClearDraw(){
       if(atcDrawTool==='text'){
         startInlineTextInput(document.getElementById('atcBanWrap'),x,y,atcDrawColor,(txt,fs)=>{
           atcPushShapeAction({type:'text',x1:x,y1:y,text:txt,color:atcDrawColor,fontSize:fs}); atcRedrawCanvas();
-        });
+        },atcDrawFontSize);
         return;
       }
       dragging=true; start={x,y};
@@ -2836,14 +3099,16 @@ function atcClearDraw(){
       if(!dragging) return;
       const r=cv.getBoundingClientRect();
       const x=e.clientX-r.left, y=e.clientY-r.top;
-      atcRedrawCanvas({type:atcDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:atcDrawColor});
+      const lw=atcDrawTool==='arrow'?atcDrawArrowWidth:atcDrawLineWidth;
+      atcRedrawCanvas({type:atcDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:atcDrawColor,lineWidth:lw});
     });
     window.addEventListener('mouseup',e=>{
       if(!dragging) return; dragging=false;
       const r=cv.getBoundingClientRect();
       const x=e.clientX-r.left, y=e.clientY-r.top;
       if(atcDrawTool==='rect'||atcDrawTool==='arrow'){
-        atcPushShapeAction({type:atcDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:atcDrawColor});
+        const lw=atcDrawTool==='arrow'?atcDrawArrowWidth:atcDrawLineWidth;
+        atcPushShapeAction({type:atcDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:atcDrawColor,lineWidth:lw});
       }
       atcRedrawCanvas();
     });
@@ -3707,6 +3972,10 @@ function tlsRelevantCungSetForFilter(c){
 function tlsRenderGrid(){
   const wrap=document.getElementById('atcPreviewGrid'); if(!wrap) return;
   const c=atcCurChart;
+  // Cung Lai Nhân (Khâm Thiên Tứ Hóa): tô nền xanh đúng chữ Can trùng Can năm sinh, giống hệt tab Nhập Thông
+  // Tin (can-hl ở renderGridRaw dòng ~4294) - trước đây tlsRenderGrid (dùng chung cho "Lập Lá Số"/"An Thủ
+  // Công") thiếu highlight này nên 2 khung lá số không đồng bộ tính năng.
+  const birthCan=(c&&c.canChiNam? c.canChiNam.trim().split(' ')[0] : '');
   const anyHoaFilterActive=Object.values(tlsHoaFilter).some(v=>v);
   const relevantCungSet=(anyHoaFilterActive && c) ? tlsRelevantCungSetForFilter(c) : null;
   let h='';
@@ -3722,19 +3991,53 @@ function tlsRenderGrid(){
       const stars=(c.sc&&c.sc[idx])||(c.sc&&c.sc[String(idx)])||[];
       const cc=(c.tenCung&&(c.tenCung[idx]||c.tenCung[String(idx)]))||DC[idx];
       const [canPart,chiPart]=cc.split(' ');
+      const canHtml = (birthCan && canPart===birthCan)? `<span class="can-hl">${canPart}</span>` : (canPart||'');
       const chuc=c.vM!==null&&c.vM!==undefined? cungChucOf(idx,c.vM) : '';
       const iT=idx===c.vT;
       const dh=c.daiHan? c.daiHan.find(x=>x.cung===idx) : null;
       const dvTuoi=dh? dh.tuoiBatDau : '';
-      const ln=c.daiHan&&c.chiNamSinh!==undefined&&c.chiNamSinh!==null? luuNienList(idx,c.chiNamSinh).join(',') : '';
+      const ln=c.daiHan&&c.chiNamSinh!==undefined&&c.chiNamSinh!==null? luuNienList(idx,c.chiNamSinh).map(age=>`<span class="ln-age" onclick="atcOnLuuNienAgeClick(event,${age})">${age}</span>`).join(',') : '';
       const hidden=tlsHiddenCung.has(idx);
+      const isTarget=atcHideTargets.has(idx);
       let bgs=''; if(iT) bgs+='<span class="b-than">T</span>';
       const chinhs=stars.filter(s=>s.loai==='chinh');
       const phus=stars.filter(s=>s.loai==='phu');
-      const starSpan=(s,cls)=>`<span class="sao ${cls}">${displayStarName(s.ten)}${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden):''}</span>`;
+      // FIX 2026-08-20 (f): cung đang "Ẩn tất cả" nhưng LỘ RA nhờ được chọn làm mục tiêu (isTarget) - trước
+      // đây vẫn truyền `hidden`=true (giá trị GỐC) vào tlsRenderTuHoa khiến badge niên hóa bị ẩn tiếp (coi
+      // như đang ẩn thật), dù cung đã hiện đủ tên sao. Phải truyền `hidden && !isTarget` (trạng thái ẨN THỰC
+      // SỰ sau khi đã trừ phần lộ do target) thì niên hóa mới hiện đúng khi cung đã lộ ra.
+      // FIX 2026-08-20 (g): "Ẩn tinh diệu" phải CHỈ ẩn TÊN SAO, không được kèm ẩn luôn badge niên hóa (chữ
+      // A/B/C/D cạnh sao) - trước đây CSS ẩn nguyên .sao-chinh-wrap/.sao-phu-wrap (bao cả tên sao lẫn badge
+      // .th nằm lồng bên trong), badge bị ẩn theo do visibility:hidden kế thừa xuống con. Giờ bọc riêng tên
+      // sao trong <span class="sao-name">, CSS .atc-hide-tinhDieu chỉ nhắm đúng .sao-name (xem CSS liên quan).
+      const starSpan=(s,cls)=>`<span class="sao ${cls}"><span class="sao-name">${displayStarName(s.ten)}</span>${c.thMap?tlsRenderTuHoa(c.thMap[s.ten],hidden&&!isTarget):''}</span>`;
       const hlCls=(tlsSelectedDaiVanIdx!==null && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx] && c.daiHan[tlsSelectedDaiVanIdx].cung===idx)?' hl-daivan':'';
       const hlLnCls=(tlsSelectedLuuNienYear!==null && chiOfYear(tlsSelectedLuuNienYear)===idx)?' hl-luunien':'';
-      const cungMatchesFilter=anyHoaFilterActive && relevantCungSet.has(idx);
+      // Lưu Nguyệt (tính năng trước đây THIẾU hoàn toàn bên An Thủ Công - onclick gọi hàm tls* chưa từng
+      // định nghĩa, bấm không phản ứng gì) - cần CẢ Lưu Niên lẫn Lưu Nguyệt đều đang chọn mới xác định được
+      // đúng cung (Lưu Nguyệt tính lệch theo cung Mệnh của đúng Lưu Niên năm đó), giống hệt logic tab Nhập
+      // Thông Tin (reapplyNavHighlights/pickLuuNguyet).
+      let hlLgCls='';
+      if(tlsSelectedLuuNguyetMonth!==null && tlsSelectedLuuNienYear!==null){
+        const cungMenhLN=chiOfYear(tlsSelectedLuuNienYear);
+        const {thangSinh,chiGioSinh}=atcBirthThangChiGio(c);
+        if(thangSinh && chiGioSinh>=0 && cungThangLuuNguyet(cungMenhLN,thangSinh,chiGioSinh,tlsSelectedLuuNguyetMonth)===idx) hlLgCls=' hl-luunguyet';
+      }
+      // 7 nút Ẩn (trừ tuHoa vẽ canvas riêng): atcHideTargets RỖNG -> áp cho MỌI ô (hành vi cũ); có phần tử ->
+      // CHỈ áp cho đúng ô nằm trong đó. Tính ngay ở đây (per-cell) rồi gắn class atc-hide-X thẳng lên .cung,
+      // thay vì 1 class chung ở #atcPreviewGrid như trước (không scope được theo từng ô).
+      const inHideScope = atcHideTargets.size===0 || atcHideTargets.has(idx);
+      const hideCls = inHideScope ? Object.keys(atcHideFlags).filter(k=>k!=='tuHoa' && atcHideFlags[k]).map(k=>' atc-hide-'+k).join('') : '';
+      // FIX 2026-08-20: TRƯỚC ĐÂY khi có bộ lọc A/B/C/D đang bật, nhánh này bỏ qua HOÀN TOÀN biến `hidden`
+      // (ẩn cung thủ công) - khiến bấm nút ẩn/hiện ở sơ đồ thu nhỏ (tls-cung-grid) không còn tác dụng gì lên
+      // khung lá số chính nữa (nút vẫn sáng/tắt bình thường, chỉ là lá số không đổi theo) - đúng cảm giác
+      // "khóa cứng" Ngọc báo. Sửa: thêm `&& !hidden` - cung đã bị ẩn tay thì DÙ có khớp bộ lọc vẫn ẩn trắng,
+      // cho phép kết hợp "chỉ hiện Lộc" + "tự ẩn thêm vài cung trong đó" để luyện trí nhớ sâu hơn.
+      // FIX 2026-08-20 (d): bấm 1 cung ở sơ đồ nhỏ khi ĐANG có bộ lọc A/B/C/D giờ KIÊM LUÔN "Bật/Tắt thông
+      // tin cung đó" - cung nào bình thường bị ẩn (không khớp bộ lọc) mà được chọn (atcHideTargets) thì LỘ
+      // RA; cung nào bình thường đang hiện (khớp bộ lọc) mà bị chọn thì lại ẨN ĐI - dùng XOR để lật đúng 1
+      // cung đó, bấm lại thì về đúng trạng thái mặc định của bộ lọc.
+      const cungMatchesFilter=anyHoaFilterActive && !hidden && (relevantCungSet.has(idx)!==isTarget);
       if(anyHoaFilterActive){
         // Có ít nhất 1 nút Lộc/Quyền/Khoa/Kỵ đang bật (dù cung đang bị ẩn thủ công hay đang hiện bình thường):
         // CHỈ cung nào có sao mang đúng loại hóa đang bật mới hiện - và hiện ĐỦ Can-Chi + cung chức + đại vận
@@ -3747,8 +4050,8 @@ function tlsRenderGrid(){
         // lỗi console, chỉ thiếu chữ). Thêm luôn hlCls/hlLnCls để tô sáng đúng cung đang là Đại Vận/Lưu Niên
         // hiện hành, kể cả khi cung đó đang được lộ qua bộ lọc thay vì hiện bình thường.
         h+= cungMatchesFilter ? `
-      <div class="cung tls-cung-hidden${hlCls}${hlLnCls}" data-idx="${idx}">
-        <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
+      <div class="cung tls-cung-hidden${hlCls}${hlLnCls}${hlLgCls}${hideCls}" data-idx="${idx}">
+        <div class="cung-cc-top"><div>${canHtml}</div><div>${chiPart||''}</div></div>
         ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
         ${chuc?`<div class="cung-chuc">${chuc}</div>`:''}
         <div class="sao-chinh-wrap">${chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh')).join('')}</div>
@@ -3756,18 +4059,22 @@ function tlsRenderGrid(){
         <div class="ln">${ln}</div>
         <div class="dv-chuc" data-idx="${idx}"></div>
         <div class="ln-chuc" data-idx="${idx}"></div>
+        <div class="lg-chuc" data-idx="${idx}"></div>
       </div>` : `<div class="cung tls-cung-hidden" data-idx="${idx}"></div>`;
         continue;
       }
-      if(hidden){
-        // Không có bộ lọc nào đang bật + cung đang bị ẩn thủ công -> ẩn trắng hoàn toàn (mặc định của tính
-        // năng "ẩn cung" để luyện trí nhớ).
+      // FIX 2026-08-20 (h): Ngọc xác nhận lại - khi KHÔNG có bộ lọc nào, bấm 1 cung ở sơ đồ nhỏ PHẢI LẬT
+      // NGƯỢC trạng thái ẩn/hiện mặc định của đúng cung đó, y hệt cơ chế XOR đã dùng cho bộ lọc A/B/C/D ở
+      // trên - không phải chỉ 1 chiều "lộ ra" như bản sửa (e) trước (đã SAI, quay lại XOR đối xứng):
+      // • Bình thường hiện đủ (hidden=false) + chọn cung đó -> ẨN đi (kèm ẩn tự hóa, xem atcDrawTuHoaArrows).
+      // • Đang "Ẩn tất cả" (hidden=true) + chọn cung đó -> LỘ RA đầy đủ (đã xác nhận đúng ở bản sửa trước).
+      if(hidden !== isTarget){
         h+=`<div class="cung tls-cung-hidden" data-idx="${idx}"></div>`;
         continue;
       }
       h+= `
-      <div class="cung${hlCls}${hlLnCls}" data-idx="${idx}">
-        <div class="cung-cc-top"><div>${canPart||''}</div><div>${chiPart||''}</div></div>
+      <div class="cung${hlCls}${hlLnCls}${hlLgCls}${hideCls}" data-idx="${idx}">
+        <div class="cung-cc-top"><div>${canHtml}</div><div>${chiPart||''}</div></div>
         ${dvTuoi!==''?`<div class="dv">${dvTuoi}</div>`:''}
         ${chuc?`<div class="cung-chuc">${chuc}${bgs}</div>`:''}
         <div class="sao-chinh-wrap">${chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh')).join('')}</div>
@@ -3775,6 +4082,7 @@ function tlsRenderGrid(){
         <div class="ln">${ln}</div>
         <div class="dv-chuc" data-idx="${idx}"></div>
         <div class="ln-chuc" data-idx="${idx}"></div>
+        <div class="lg-chuc" data-idx="${idx}"></div>
       </div>`;
     }
   }
@@ -3783,6 +4091,63 @@ function tlsRenderGrid(){
   equalizeCungRowHeights('atcPreviewGrid');
   if(tlsSelectedDaiVanIdx!==null && c && c.daiHan && c.daiHan[tlsSelectedDaiVanIdx]) tlsRenderDaiVanChuc(c.daiHan[tlsSelectedDaiVanIdx].cung);
   if(tlsSelectedLuuNienYear!==null) tlsRenderLuuNienChuc(chiOfYear(tlsSelectedLuuNienYear));
+  if(tlsSelectedLuuNguyetMonth!==null && tlsSelectedLuuNienYear!==null && c){
+    const cungMenhLN=chiOfYear(tlsSelectedLuuNienYear);
+    const {thangSinh,chiGioSinh}=atcBirthThangChiGio(c);
+    if(thangSinh && chiGioSinh>=0) tlsRenderLuuNguyetChuc(cungThangLuuNguyet(cungMenhLN,thangSinh,chiGioSinh,tlsSelectedLuuNguyetMonth));
+  }
+}
+// Lấy thangSinh (tháng âm lịch sinh)/chiGioSinh (chi giờ sinh, 0-11) từ atcCurChart - dùng cho công thức an
+// Lưu Nguyệt (cungThangLuuNguyet, đã có sẵn cho tab Nhập Thông Tin). Ưu tiên đọc từ ngayAm/gioSinhLabel thật
+// (khi lập lá số bằng ngày sinh thật, kể cả xuất từ ngày sinh qua) - nếu trống (đang ở An Thủ Công, dựng tay
+// không qua API) thì lùi về atcSel.thang/atcSel.gioSinh (đúng 2 mục đã chọn tay ở khối CAN/TỬ VI phía trên).
+function atcBirthThangChiGio(c){
+  let thangSinh=null, chiGioSinh=-1;
+  if(c && c.ngayAm){
+    const parts=c.ngayAm.split('/');
+    if(parts[1]) thangSinh=parseInt(parts[1]);
+  }
+  if(thangSinh===null || isNaN(thangSinh)) thangSinh=atcSel.thang||null;
+  const gioLabel=(c&&c.gioSinhLabel)||(atcSel.gioSinh?`${atcSel.gioSinh} thời`:'');
+  const chiTen=(gioLabel||'').trim().split(' ')[0];
+  chiGioSinh=DC.indexOf(chiTen);
+  return {thangSinh, chiGioSinh};
+}
+// 3 hàm Lưu Nguyệt cho An Thủ Công (TRƯỚC ĐÂY hoàn toàn CHƯA CÓ - nút "L.NGUYỆT" gọi tlsToggleLuuNguyetActive/
+// tlsStepLuuNguyet nhưng 2 hàm đó chưa từng được định nghĩa, bấm im re không phản ứng gì, đúng lỗi Ngọc báo).
+// Viết theo đúng mẫu tlsPickDaiVan/tlsPickLuuNien đã có.
+function tlsRenderLuuNguyetChuc(lgCungIdx){
+  for(let idx=0;idx<12;idx++){
+    const el=document.querySelector(`#atcPreviewGrid .lg-chuc[data-idx="${idx}"]`);
+    const off=(idx-lgCungIdx+12)%12;
+    if(el) el.textContent = (off===0?'MỆNH':SHORT_CHUC[off].toUpperCase())+' T'+tlsSelectedLuuNguyetMonth;
+  }
+}
+function tlsPickLuuNguyet(m){
+  if(!atcCurChart || tlsSelectedLuuNienYear===null) return;
+  tlsSelectedLuuNguyetMonth=m;
+  tlsRenderGrid();
+  tlsUpdateStepperUI();
+}
+function tlsToggleLuuNguyetActive(){
+  if(!atcCurChart) return;
+  if(tlsSelectedLuuNguyetMonth===null){
+    // Cần có Lưu Niên trước mới xác định được cung Mệnh Lưu Nguyệt - tự bật Lưu Niên (năm hiện tại) nếu
+    // chưa chọn, giống hệt cách tab Nhập Thông Tin đòi hỏi (pickLuuNguyet cần selectedLuuNienYear).
+    if(tlsSelectedLuuNienYear===null) tlsPickLuuNien(new Date().getFullYear());
+    tlsPickLuuNguyet(1);
+  }else{
+    tlsSelectedLuuNguyetMonth=null;
+    tlsRenderGrid();
+    tlsUpdateStepperUI();
+  }
+}
+function tlsStepLuuNguyet(dir){
+  if(!atcCurChart) return;
+  if(tlsSelectedLuuNguyetMonth===null){ tlsToggleLuuNguyetActive(); return; }
+  let m=tlsSelectedLuuNguyetMonth+dir;
+  if(m<1) m=12; if(m>12) m=1;
+  tlsPickLuuNguyet(m);
 }
 function tlsRenderCungGrid(){
   const wrap=document.getElementById('tlsCungGrid'); if(!wrap) return;
@@ -3791,36 +4156,53 @@ function tlsRenderCungGrid(){
     for(let col=0;col<4;col++){
       const idx=LAYOUT[r][col];
       if(idx===-1){
-        if(r===1&&col===1) h+=`<button class="tls-cung-all" onclick="tlsToggleAllCung()">Ẩn tất cả</button>`;
+        if(r===1&&col===1) h+=`<button class="tls-cung-all" id="tlsCungAllBtn" onclick="tlsToggleAllCung()">Ẩn tất cả</button>`;
         continue;
       }
-      h+=`<button class="tls-cung-btn" data-idx="${idx}" onclick="tlsToggleCung(${idx})">${DC[idx]}</button>`;
+      // FIX 2026-08-20 (c): Ngọc yêu cầu BỎ hàng "MỤC TIÊU" riêng, dùng LUÔN sơ đồ nhỏ này để chọn phạm vi
+      // cho 7 nút Ẩn - 12 nút cung (KHÔNG PHẢI "Ẩn tất cả" ở giữa) giờ gọi thẳng atcToggleHideTarget (đã có
+      // sẵn cho tính năng MỤC TIÊU cũ, chỉ đổi nguồn kích hoạt) thay vì tlsToggleCung (ẩn trắng riêng lẻ cũ -
+      // đã bỏ). Riêng "Ẩn tất cả" ở giữa GIỮ NGUYÊN 100%, vẫn dùng tlsHiddenCung/tlsToggleAllCung độc lập.
+      h+=`<button class="tls-cung-btn" data-idx="${idx}" onclick="atcToggleHideTarget('${DC[idx]}')">${DC[idx]}</button>`;
     }
   }
   wrap.innerHTML=h;
 }
 function tlsUpdateCungGridUI(){
   document.querySelectorAll('.tls-cung-btn').forEach(b=>{
-    b.classList.toggle('active', tlsHiddenCung.has(parseInt(b.dataset.idx,10)));
+    b.classList.toggle('active', atcHideTargets.has(parseInt(b.dataset.idx,10)));
   });
-}
-// Cả 4 hàm ẩn/hiện cung bên dưới đều phải gọi thêm atcRedrawCanvas() - trước đây chỉ render lại HTML
-// (tlsRenderGrid) nên mũi tên tự hóa (ly tâm/hướng tâm) vẽ trên canvas không hề bị ẩn theo dù cung đã ẩn.
-function tlsToggleCung(idx){
-  if(tlsHiddenCung.has(idx)) tlsHiddenCung.delete(idx); else tlsHiddenCung.add(idx);
-  tlsUpdateCungGridUI();
-  tlsRenderGrid();
-  atcRedrawCanvas();
+  // FIX 2026-08-20 (j): nút giữa lúc nào cũng ghi cứng "Ẩn tất cả" dù đã bấm ẩn hết rồi (đáng lẽ phải đổi
+  // thành "Hiện tất cả" để báo đúng việc bấm LẦN TIẾP THEO sẽ làm gì) - đổi chữ theo đúng trạng thái hiện
+  // tại của tlsHiddenCung (đã ẩn đủ 12/12 hay chưa).
+  const allBtn=document.getElementById('tlsCungAllBtn');
+  if(allBtn) allBtn.textContent = tlsHiddenCung.size>=12 ? 'Hiện tất cả' : 'Ẩn tất cả';
 }
 // Ô giữa "Ẩn tất cả" - bấm sẽ TOGGLE: đang có cung nào hiện thì ẩn hết, đã ẩn hết rồi thì mở lại hết.
 function tlsToggleAllCung(){
-  if(tlsHiddenCung.size>=12) tlsHiddenCung=new Set();
+  // FIX 2026-08-20 (m): bấm "Hiện tất cả" chỉ xóa tlsHiddenCung nhưng QUÊN xóa atcHideTargets (mục tiêu
+  // đang chọn từ lúc còn "Ẩn tất cả") - công thức XOR (hidden!==isTarget) sau đó tính SAI: hidden=false (đã
+  // hiện tất cả) nhưng isTarget vẫn true ở đúng (các) cung vừa chọn -> false!==true -> LẬT thành ẨN NGƯỢC
+  // lại đúng những cung Ngọc vừa chọn (ngược hẳn ý "Hiện tất cả"). Sửa: "Hiện tất cả" phải RESET luôn mục
+  // tiêu, đảm bảo hiện sạch 100% không sót cung nào.
+  if(tlsHiddenCung.size>=12){ tlsHiddenCung=new Set(); atcHideTargets=new Set(); }
   else tlsHiddenCung=new Set(Array.from({length:12},(_,i)=>i));
   tlsUpdateCungGridUI();
   tlsRenderGrid();
   atcRedrawCanvas();
 }
-function tlsShowAllCung(){ tlsHiddenCung=new Set(); tlsUpdateCungGridUI(); tlsRenderGrid(); atcRedrawCanvas(); }
+// "Hiện đủ" giờ gộp luôn 2 việc: (1) bỏ ẩn cung thủ công (tlsHiddenCung, tính năng cũ), (2) tắt hết bộ lọc
+// Lộc/Quyền/Khoa/Kỵ đang bật ở legend A/B/C/D (tlsHoaFilter) - Ngọc yêu cầu gộp vào đây thay vì thêm nút
+// riêng "Bỏ lọc" (kiểu 祿權科忌 của tool Đài), đỡ phải nhớ bấm tắt từng nút A/B/C/D đang bật.
+function tlsShowAllCung(){
+  tlsHiddenCung=new Set();
+  atcHideTargets=new Set();
+  tlsHoaFilter={A:false,B:false,C:false,D:false};
+  tlsUpdateCungGridUI();
+  tlsUpdateHoaFilterUI();
+  tlsRenderGrid();
+  atcRedrawCanvas();
+}
 function tlsUpdateHoaFilterUI(){
   document.querySelectorAll('.tls-hoa-btn').forEach(b=>{
     b.classList.toggle('active', !!tlsHoaFilter[b.dataset.letter]);
@@ -3844,6 +4226,12 @@ function tlsUpdateStepperUI(){
     ln.classList.toggle('active', tlsSelectedLuuNienYear!==null);
     ln.textContent=tlsSelectedLuuNienYear!==null?('L.NIÊN '+tlsSelectedLuuNienYear):'L.NIÊN';
   }
+  const lg=document.getElementById('tlsNavLg');
+  if(lg){
+    lg.classList.toggle('active', tlsSelectedLuuNguyetMonth!==null);
+    lg.textContent=tlsSelectedLuuNguyetMonth!==null?('L.NGUYỆT T'+tlsSelectedLuuNguyetMonth):'L.NGUYỆT';
+  }
+  atcSyncDaiHanLuuNienBtns();
 }
 function tlsRenderDaiVanChuc(dvCungIdx){
   for(let idx=0;idx<12;idx++){
@@ -3905,6 +4293,16 @@ function tlsStepLuuNien(dir){
   if(!atcCurChart) return;
   if(tlsSelectedLuuNienYear===null){ tlsToggleLuuNienActive(); return; }
   tlsPickLuuNien(tlsSelectedLuuNienYear+dir);
+}
+// Bấm trực tiếp vào 1 số tuổi lưu niên trong ô cung (khối "An Thủ Công"/"Lập Lá Số" dùng chung tlsRenderGrid)
+// -> tự nhảy Đại Vận + Lưu Niên đúng năm đó, y hệt onLuuNienAgeClick() bên tab "Nhập thông tin" (renderGridRaw).
+function atcOnLuuNienAgeClick(event,age){
+  event.stopPropagation();
+  const c=atcCurChart; if(!c||!c.daiHan) return;
+  const dhIdx=c.daiHan.findIndex(dh=>age>=dh.tuoiBatDau&&age<=dh.tuoiKetThuc);
+  if(dhIdx>=0) tlsPickDaiVan(dhIdx);
+  const year=c.birthYear+age-1;
+  tlsPickLuuNien(year);
 }
 function tlsRenderAll(){
   tlsRenderGrid();
@@ -4256,7 +4654,11 @@ function renderGridRaw(c){
   const birthCan=(d.thongTin.canChiNam||'').trim().split(' ')[0];
   const phiTargets=phiHoaTargetSet();
   const phiGlow=phiHoaGlowSet();
-  const ldkkSet=hcMode==='hung' ? luongDauKienKyCungSet('hung') : new Set();
+  const ldkkInfo=hcMode==='hung' ? luongDauKienKyStarSet('hung') : {cungSet:new Set(),starSet:new Set(),hasAnyStarInfo:new Set()};
+  const ldkkSet=ldkkInfo.cungSet;
+  // Gạch đỏ LĐKK chỉ áp đúng tinh diệu nhận chuyển Kỵ (ldkkInfo.starSet) khi cung đó có dữ liệu sao cụ thể;
+  // cung 'the'-only không có sao cụ thể (hasAnyStarInfo) thì fallback gạch cả cung như cũ (2026-08-19 fix).
+  const ldkkStarHit=(idx,starTen)=>ldkkInfo.hasAnyStarInfo.has(idx) ? ldkkInfo.starSet.has(idx+':'+starTen) : ldkkSet.has(idx);
   const manualUnderlineSet=manualArrowUnderlineTargets();
   let h='';
   for(let r=0;r<4;r++){
@@ -4309,14 +4711,14 @@ function renderGridRaw(c){
         }).join('')}</span>`:'';
         // Gạch dưới thủ công do vẽ mũi tên tay (tool phải) chạm tới sao này - giữ nguyên tới khi xóa mũi tên
         // đó (xem manualArrowUnderlineTargets), không phải trạng thái hover tạm thời.
-        const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
+        const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkStarHit(idx,s.ten)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
           data-star="${s.ten}" onclick="event.stopPropagation();onStarClick(${idx},'${nameEsc}')"><span class="sao-name">${displayStarName(s.ten)}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${picker}</span>`;
       };
-      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
+      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkStarHit(idx,s.ten)?' ldkk':''))).join('');
       // Cung "vô chính diệu" (không có chính tinh nào) mà vẫn thuộc lưỡng đầu kiến Kị - gạch đỏ tạm ở phụ
       // tinh thay thế, để không mất dấu (không thì cung đó sẽ không có sao nào được gạch cả).
-      const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
+      const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkStarHit(idx,s.ten)?' ldkk':''))).join('');
       const hcSt=hcState[hcMode];
       const phiCls = hcSt.the.has(idx) ? ' phi-source' : (hcSt.dung.has(idx) ? ' phi-dung' : '');
       const quickBadges=['A','B','C','D'].map(L=>
@@ -4834,7 +5236,14 @@ function drawReverseFlights(ctx){
 // Bảng màu riêng cho mũi tên hóa Kị theo từng cung nguồn - phải TƯƠI/NỔI BẬT (không nhạt/pastel như
 // #dcbeff, #fabed4 kiểu cũ, cũng KHÔNG tối/trầm như #4a235a, #873600 - loại tối dễ lẫn với màu đen của mũi
 // tên chuyển Kị). Tránh hẳn tông xanh lá (đã dùng riêng cho hóa Lộc).
-const PHI_KY_PALETTE=['#FFD400','#FF9900','#FF4136','#FF1493','#C71585','#9932CC','#7B2FF7','#4B0FDB','#1E90FF','#00BFFF','#00CED1','#FF6F61'];
+// NGỌC PHẢN HỒI (2026-08-19 13:53 & 18:45): 2 cung Thể/Dụng đứng GẦN NHAU trên lá số hay bị gán màu mũi
+// tên na ná tông (VD Mệnh đỏ-cam & Phúc hồng-tím kế bên đều thuộc dải "nóng", khó phân biệt) vì bảng màu cũ
+// xếp theo dải cầu vồng tuần tự (vàng->cam->đỏ->hồng->tím->xanh) - 2 cung idx sát nhau (kề số) rơi vào 2 màu
+// LÂN CẬN trên dải, cùng tông. Đổi sang cấp màu bằng "góc vàng" (golden angle ~137.508°/bước quanh vòng màu
+// HSL) - mỗi bước idx kế tiếp nhảy hue rất xa (~137° hoặc bù 223°), nên bất kỳ 2 cung nào gần nhau (kề số
+// hoặc cách 2-3 số) đều luôn rơi vào tông màu khác hẳn nhau, không cần biết trước cặp Thể/Dụng nào sẽ được
+// chọn. Vẫn giữ 12 màu (đủ cho 12 cung), độ bão hòa/độ sáng tương đương bảng cũ (rõ trên nền trắng/đen).
+const PHI_KY_PALETTE=['#DD0E0E','#0EDD4A','#870EDD','#DDC30E','#0EBADD','#DD0E7E','#42DD0E','#170EDD','#DD530E','#0EDD8F','#CC0EDD','#B1DD0E'];
 function phiKyColorForCung(idx){ return PHI_KY_PALETTE[idx%PHI_KY_PALETTE.length]; }
 // Kết cấu xuyến liên = tổng các đường phi hóa của cung Thể + từng cung Dụng đã chọn (cộng dồn, không loại trừ nhau).
 // letterOverride: dùng khi bấm nhanh A/B/C/D lúc hover 1 cung (mục "quick"), thay vì suy ra từ tab Hung/Cát.
@@ -4911,6 +5320,15 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
   let revisitedOnce = false;
   const MAX_STEPS=20;
   while(steps.length<MAX_STEPS){
+    // FIX 2026-08-14 "không còn lực để CK lại từ chính root sau khi đã quay về" (Ngọc xác nhận trực tiếp):
+    // Can của root (startIdx) CHỈ được phóng ĐÚNG 1 LẦN DUY NHẤT - ở bước hóa Kị GỐC (step1, i=0). Nếu chuỗi
+    // sau đó khép vòng quay VỀ LẠI đúng root (prev.to===startIdx, tức cạnh "quay về Mấu chốt" vừa được vẽ ở
+    // vòng lặp TRƯỚC), thì DỪNG HẲN tại đây - KHÔNG được bay tiếp lần nữa bằng flyFrom(root) (dù root vẫn
+    // đang mang niên D/tự hóa gì đó, vì Can đó ĐÃ dùng xong ở step1 rồi, không "sạc lại" chỉ vì bị ghé qua
+    // lần nữa). Case xác nhận: Niên D Tọa Tật(Key) —CK→ Tử(trùng lặp) —CK→ Sự —CK→ Tật(về Key, +1K) => DỪNG
+    // ở đây, KHÔNG vẽ thêm "—CK→ Tử" lần 2 (trước đây bị vẽ thừa vì mustContinueKy(prev) vẫn thấy Tật mang
+    // niên D nên tưởng còn lực, trong khi lực đó đã được tính đủ vào +1 "về Key" rồi).
+    if(prev.to===startIdx) break;
     // Trùng lặp phi hóa (chỉ kết cấu Kị): bước chuyển Kị vừa thêm (prev) dùng đúng Can của 1 cung Thể/Dụng
     // KHÁC đang được chọn (prev.from) - tức là cơ chế y hệt cung đó tự bay Kị gốc của chính nó, nên Kị ở đó
     // vẫn còn dư năng lượng, BẮT BUỘC tiếp tục chuyển Kị thêm 1 bước, không cần xét niên/tự hóa.
@@ -4935,7 +5353,16 @@ function computeSingleChain(startIdx,letterOverride,singleStepOnly,realAnchorSet
     // mustContinueKy(prev,firstLetter) (đã bao gồm niên lẫn tự hóa) thay vì chỉ kiểm tra niên. Chỉ cho phép
     // quay về root ĐÚNG 1 LẦN như vậy (returnedToRootOnce) - tránh vòng lặp dài vô nghĩa nếu vô tình lặp lại
     // điều kiện này nhiều lần.
-    const prevIsIndependentSource = mustContinueKy(prev,firstLetter);
+    // FIX 2026-08-14 "trùng lặp phi hóa cũng là nguồn năng lượng độc lập cho cạnh quay về root/revisit"
+    // (Ngọc xác nhận trực tiếp): trước đây prevIsIndependentSource CHỈ xét mustContinueKy (niên/tự hóa tại
+    // step.to), bỏ sót hẳn trường hợp bước vừa rồi (prev) sở dĩ được phép tiếp tục chuyển Kị là NHỜ chính
+    // trungLap (Can của 1 cung Thể/Dụng thật KHÁC root đang được tái dùng) - khiến cạnh NGAY SAU ĐÓ, nếu vô
+    // tình bay thẳng về lại root hoặc trùng 1 điểm đã đi qua, bị chặn đứng oan dù trungLap đã đủ tư cách là
+    // 1 nguồn năng lượng độc lập y hệt niên/tự hóa. Case xác nhận: Tật (triệu nhân) hóa Kị → Tử (Thể/Dụng,
+    // trùng lặp) —CK→ Sự —CK→ Tật (niên D, ĐÚNG PHẢI vẽ tiếp) - cạnh Sự→Tật bị chặn sai vì trungLap không
+    // được tính vào prevIsIndependentSource, dù chính trungLap (Tử) mới là lý do toàn chuỗi được phép chạy
+    // tới đây. Giữ nguyên mustContinueKy cho các nguồn khác (niên/tự hóa) - chỉ bổ sung thêm trungLap.
+    const prevIsIndependentSource = trungLap || mustContinueKy(prev,firstLetter);
     if(next.to===startIdx){
       if(!prevIsIndependentSource || returnedToRootOnce) break;
       returnedToRootOnce = true;
@@ -5835,6 +6262,7 @@ document.addEventListener('click',(e)=>{
   if(wbPop && !wbPop.hidden && !wbPop.contains(e.target) && e.target.id!=='wbColorSwatchBtn') wbPop.hidden=true;
   const wbFsPop=document.getElementById('wbFontSizePopup');
   if(wbFsPop && !wbFsPop.hidden && !wbFsPop.contains(e.target) && e.target.id!=='wbToolText') wbFsPop.hidden=true;
+
   const topicPop=document.getElementById('topicPopup');
   // Dùng composedPath() thay vì topicPop.contains(e.target): bấm 1 chủ đề sẽ gọi renderTopicPopup() làm mới
   // innerHTML NGAY trong lúc bubble, khiến e.target (nút cũ) bị gỡ khỏi DOM trước khi tới listener này ở
@@ -6080,9 +6508,13 @@ function drawTuHoaArrows(ctx){
     const basePt=isHorizontal? {x:midX,y:Math.min(anchor.y,end.y)-14} : {x:Math.max(anchor.x,end.x)+14,y:midY};
     // Luôn xếp các ký tự THEO HÀNG NGANG (sát nhau trên trục X), kể cả khi mũi tên chĩa theo chiều dọc -
     // chữ Latin đọc trái sang phải, xếp dọc sẽ khó đọc.
+    // FIX 2026-08-20 (đồng bộ atcDrawTuHoaArrows): mũi tên dọc (isHorizontal=false) lệch trục X so với đường
+    // thẳng (basePt.x=đường+14) nhưng cụm chữ lại CĂN GIỮA quanh basePt.x - cụm ≥3 chữ thì chữ đầu bị kéo
+    // lùi về sát đường thẳng (chỉ còn ~3px), đè lên mũi tên. Mũi tên ngang không dính lỗi vì trục lệch (Y)
+    // khác trục dàn hàng (X). Sửa: mũi tên dọc dàn cụm chữ VỀ 1 PHÍA (xa dần khỏi đường), không căn giữa.
     const spacing=11, totalW=(group.length-1)*spacing;
     group.forEach((a,i)=>{
-      const off=i*spacing-totalW/2;
+      const off = isHorizontal ? (i*spacing-totalW/2) : (i*spacing);
       drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter),16);
     });
   });
@@ -6206,7 +6638,9 @@ function updateArrowHoverUnderline(x,y){
   if(!starEl) return;
   const cell=starEl.closest('.cung');
   const idx=cell?parseInt(cell.dataset.idx,10):-1;
-  const isLdkk=luongDauKienKyCungSet('hung').has(idx);
+  const ldkkInfo=luongDauKienKyStarSet('hung');
+  const starTen=starEl.dataset.star;
+  const isLdkk=ldkkInfo.hasAnyStarInfo.has(idx) ? ldkkInfo.starSet.has(idx+':'+starTen) : ldkkInfo.cungSet.has(idx);
   starEl.classList.add(isLdkk?'arrow-hover-ldkk':'arrow-hover');
 }
 function clearArrowHoverUnderline(){
@@ -6983,13 +7417,21 @@ function updateCenterAgeInfo(){
     el.textContent=`Tuổi: ${currentAge(c)}`;
   }
 }
+// FIX 2026-08-20: cả cụm hàm renderDaiVanChuc/renderLuuNienChuc/renderLuuNguyetChuc/clear* bên dưới TRƯỚC
+// ĐÂY dùng document.querySelector('.dv-chuc[data-idx=...]') KHÔNG SCOPE (không giới hạn trong #banWrap) -
+// trong khi tab "An Thủ Công" (#atcPreviewGrid) VẪN có sẵn các phần tử CÙNG CLASS .dv-chuc/.ln-chuc y hệt
+// (tlsRenderGrid). Vì #panelGio (An Thủ Công) nằm TRƯỚC #panelForm (Nhập Thông Tin) trong DOM, querySelector
+// không-scope luôn vớ nhầm phần tử ẩn bên An Thủ Công thay vì đúng ô đang hiển thị ở tab Nhập Thông Tin -
+// chữ "MỆNH ĐV/LN" bị ghi vào chỗ vô hình, tab Nhập Thông Tin chỉ còn thấy viền màu tô nền (dv-menh-bg/
+// hl-luunien vẫn đúng vì các dòng đó CÓ scope `#banWrap`) mà KHÔNG thấy chữ. Sửa: scope thêm `#banWrap` vào
+// mọi querySelector(All) của các hàm này, khớp đúng cách các dòng classList.toggle bên cạnh đã làm.
 function clearDaiVanChuc(){
-  document.querySelectorAll('.dv-chuc').forEach(el=>{ el.textContent=''; });
+  document.querySelectorAll('#banWrap .dv-chuc').forEach(el=>{ el.textContent=''; });
   document.querySelectorAll('#banWrap .cung').forEach(el=>el.classList.remove('dv-menh-bg'));
 }
 function renderDaiVanChuc(dvCungIdx){
   for(let idx=0;idx<12;idx++){
-    const el=document.querySelector(`.dv-chuc[data-idx="${idx}"]`);
+    const el=document.querySelector(`#banWrap .dv-chuc[data-idx="${idx}"]`);
     const off=(idx-dvCungIdx+12)%12;
     const label = off===0? 'MỆNH ĐV' : SHORT_CHUC[off].toUpperCase()+' ĐV';
     if(el) el.textContent=label;
@@ -7037,22 +7479,22 @@ function onLuuNienAgeClick(event, age){
   pickLuuNien(year);
 }
 function clearLuuNienChuc(){
-  document.querySelectorAll('.ln-chuc').forEach(el=>{ el.textContent=''; });
+  document.querySelectorAll('#banWrap .ln-chuc').forEach(el=>{ el.textContent=''; });
 }
 function renderLuuNienChuc(lnCungIdx){
   for(let idx=0;idx<12;idx++){
-    const el=document.querySelector(`.ln-chuc[data-idx="${idx}"]`);
+    const el=document.querySelector(`#banWrap .ln-chuc[data-idx="${idx}"]`);
     const off=(idx-lnCungIdx+12)%12;
     const label = off===0? 'MỆNH LN' : SHORT_CHUC[off].toUpperCase()+' LN';
     if(el) el.textContent=label;
   }
 }
 function clearLuuNguyetChuc(){
-  document.querySelectorAll('.lg-chuc').forEach(el=>{ el.textContent=''; });
+  document.querySelectorAll('#banWrap .lg-chuc').forEach(el=>{ el.textContent=''; });
 }
 function renderLuuNguyetChuc(lgCungIdx){
   for(let idx=0;idx<12;idx++){
-    const el=document.querySelector(`.lg-chuc[data-idx="${idx}"]`);
+    const el=document.querySelector(`#banWrap .lg-chuc[data-idx="${idx}"]`);
     const off=(idx-lgCungIdx+12)%12;
     const label = (off===0?'MỆNH':SHORT_CHUC[off].toUpperCase())+' T'+selectedLuuNguyetMonth;
     if(el) el.textContent=label;
@@ -7277,6 +7719,12 @@ function computeKetCauStructuresRaw(mode){
   function computeSuppressed(anchorList){
     const anchorSetForThis=new Set(anchorList);
     const suppressed=new Set();
+    // FIX 2026-08-15 (Ngọc xác nhận trực tiếp, case "Phúc TK Điền ghi dư"): ghi thêm CẠNH CHÍNH XÁC (đích +
+    // sao) đã "tiêu thụ" mỗi cung bị suppressed, để phân biệt "Can của M bị 1 anchor KHÁC mượn để bay ĐÚNG
+    // TỚI CÙNG 1 nơi M cũng tự bay tới" (cùng 1 cạnh vật lý, chỉ nên kể 1 lần) với "M bị mượn Can nhưng bay
+    // tiếp sang hướng KHÁC hẳn" (2 cạnh khác nhau, không liên quan). Không đổi hành vi cũ (suppressed vẫn y
+    // hệt), chỉ bổ sung dữ liệu để dùng ở landsOnThisSpine bên dưới.
+    const suppressedEdge=new Map();
     // Trùng lặp phi hóa đòi hỏi các cung Thể/Dụng phải LIÊN TỤC (không cách quãng) tính từ chính triệu nhân
     // cung (idx) trở đi - hễ gặp 1 cung KHÔNG thuộc Thể/Dụng xen giữa thì chuỗi trùng lặp bị đứt ngay tại đó,
     // các cung Thể/Dụng xuất hiện SAU điểm đứt (dù có) cũng KHÔNG còn tính là trùng lặp/bị tiêu thụ nữa.
@@ -7286,10 +7734,13 @@ function computeKetCauStructuresRaw(mode){
         const fromCung=ch.steps[i-1].to;
         const fromSelected = fromCung===idx || anchorSetForThis.has(fromCung);
         if(!fromSelected) break; // chuỗi trùng lặp liên tục đứt tại đây - dừng, không xét tiếp các bước sau
-        if(fromCung!==idx) suppressed.add(fromCung);
+        if(fromCung!==idx){
+          suppressed.add(fromCung);
+          if(!suppressedEdge.has(fromCung)) suppressedEdge.set(fromCung, {to:ch.steps[i].to, star:ch.steps[i].star});
+        }
       }
     });
-    return {anchorSetForThis, suppressed};
+    return {anchorSetForThis, suppressed, suppressedEdge};
   }
   function pointsFor(idx, anchorSetForThis){
     const ch=chainFor(idx); if(!ch) return [];
@@ -7394,7 +7845,7 @@ function computeKetCauStructuresRaw(mode){
   // Thành viên khác chạm thẳng vào mạch chính (spine của root) thì gắn nhánh trực tiếp; nếu chỉ chạm vào 1
   // thành viên KHÁC (không phải root) thì nhánh đó gắn "ăn theo" điểm gắn của thành viên kia (nhánh 2 cấp,
   // vd Thiên Di → Tật Ách → nhập vào mạch chính tại Điền Trạch).
-  function evalRoot(root, members, anchorSetForThis, suppressed, realAnchorSet, applyBomLuc=true){
+  function evalRoot(root, members, anchorSetForThis, suppressed, realAnchorSet, applyBomLuc=true, suppressedEdge=null){
     const ch=chainFor(root); if(!ch) return null;
     let steps=ch.steps;
     if(applyBomLuc){
@@ -7503,6 +7954,11 @@ function computeKetCauStructuresRaw(mode){
     // (c.data.saoCung[root] có sao nào mang niên D qua c.thMap không), độc lập hoàn toàn với UI/nienIdx.
     // Đây CHÍNH XÁC là cách `detectBonusTags`/`pointBonus` đang dùng để chấm niên D cho MỌI cung khác - giờ
     // áp dụng thêm cho chính root.
+    // REVERT 2026-08-14: đã thử đảo ưu tiên "vị trí số 2 > niên D tại root" nhưng Ngọc xác nhận lại CHÍNH
+    // XÁC ngược lại - niên D tại root LUÔN ưu tiên làm mấu chốt (thiết kế gốc 2026-08-10 là ĐÚNG, không đổi
+    // gì). Case chốt cuối cùng (Ngọc xác nhận trực tiếp 2026-08-14): niên D tọa Tật (root) —CK→ Tử (trùng
+    // lặp, KHÔNG phải mấu chốt) —CK→ Sự —CK→ Tật (VỀ LẠI đúng root=mấu chốt, +1K) => Tổng = 2K (1 gốc niên D
+    // + 1 quay về mấu chốt). Giữ nguyên rootNienMauChot vô điều kiện như code gốc.
     const rootNienMauChot = letter==='D' && !rootSelfLoop && !!nienTagFor(root,null);
     if(rootNienMauChot) nienCap.used=true; // chặn đường niên D thông thường double-count đúng sự kiện này
     // rootNienTag chỉ set khi rootSelfLoop && "gặp niên" - LUÔN kèm total+=1 thật (xem "if(rootSelfLoop &&
@@ -7514,7 +7970,17 @@ function computeKetCauStructuresRaw(mode){
     const rootTag = rootSelfLoop
       ? (rootNienTag && rootNienSameStar ? `<span class="kk-red">${rootNienTag} (+1${lettAbbr})</span> - ${steps[0].star} + tự hóa ${letter} xuất (+1${lettAbbr})` : `tự hóa ${letterName} xuất - ${steps[0].star} (+1${lettAbbr})`)
       : (isNienRoot && !rootNienMauChot ? `niên ${mode==='cat'?'A':'D'} (+1${lettAbbr})` : `hóa ${letterName} (+1${lettAbbr})`);
-    let spine = `<b>${label(root)}</b> (${rootTag})`;
+    // FIX 2026-08-14 "ghi rõ Niên D Tọa <root>" (Ngọc xác nhận trực tiếp - yêu cầu đổi cách ghi để tránh
+    // hiểu nhầm logic): khi mấu chốt do NIÊN D TẠI ROOT (rootNienMauChot), không ghi "Tật (hóa Kị (+1K))"
+    // nữa (dễ hiểu lầm là root tự hóa Kị bình thường, che mất lý do THẬT là niên D) - đổi hẳn thành tiền tố
+    // "Niên D Tọa <root>" đứng TRƯỚC tên cung, đúng văn phong anh yêu cầu ("Niên D Tọa Tật CK Tử..."). Không
+    // đụng rootTag (vẫn giữ nguyên cho các trường hợp KHÁC rootNienMauChot, vd tự hóa/niên A bên Lộc).
+    // FIX 2026-08-14 "ghi tắt Cung Mấu chốt = (Key), tô đỏ" (Ngọc xác nhận trực tiếp): thay vì gọi dài dòng
+    // "Cung Mấu chốt", từ nay ghi tắt "(Key)" tô đỏ NGAY tại điểm cung đó được xác lập làm mấu chốt; và khi
+    // quay về ghi "về Key (+1K)" / "về cung đối của Key (+1K)" thay vì "về cung mấu chốt". Áp dụng dù mấu
+    // chốt là chính root (rootNienMauChot) hay 1 cung khác xác lập ở "vị trí số 2" (i=0).
+    const KEY_TAG = `<span class="kk-red">(Key)</span>`;
+    let spine = rootNienMauChot ? `Niên ${letter} Tọa <b>${label(root)}</b> ${KEY_TAG}` : `<b>${label(root)}</b> (${rootTag})`;
     // Nhãn "trùng lặp" thuộc về CHÍNH cung vừa đáp (step.to), không phải cung kế tiếp - đây là cung mà Can
     // của nó sắp bị bước SAU tái dùng để chuyển Kị tiếp. Nếu Di, Tật, Điền đều thuộc tập Thể/Dụng đã chọn,
     // MỖI cung trong số đó (trừ cung cuối không còn bước kế) đều được gắn "trùng lặp" riêng, không chỉ gắn
@@ -7535,10 +8001,21 @@ function computeKetCauStructuresRaw(mode){
     // total bên dưới forEach). Ví dụ: Mệnh HK Phúc (trùng lặp, Phúc=Mấu chốt) → Phúc CK→ Tật → Tật CK→ Tài
     // (đối cung của Phúc Đức) → +1 Kị, tổng 3 Kị thay vì 2.
     // Khởi tạo mauChotIdx=root NGAY nếu rootNienMauChot (niên D tọa root) - xem giải thích ở khai báo
-    // rootNienMauChot phía trên. Giới hạn: nếu 1 kết cấu vừa có "niên D tại root" vừa có "Cung A HK Cung B" ở
-    // i=0 (2 mấu chốt khác cung), tạm chỉ tính mấu chốt do niên (chưa hỗ trợ nhiều Cung Mấu chốt cùng lúc
-    // trong 1 kết cấu - case hiếm, Ngọc chưa yêu cầu, để dành nếu gặp thực tế).
-    let mauChotIdx = rootNienMauChot ? root : null;
+    // rootNienMauChot phía trên. NGOÀI RA: nếu KHÔNG rootNienMauChot, mấu chốt còn có thể xác lập ngay từ
+    // bước hóa Kị GỐC (i=0, "vị trí số 2") nếu nó đáp thẳng vào 1 cung Thể/Dụng khác - tính TRƯỚC vòng lặp
+    // (không cần đợi forEach) để có thể tìm hitStep và gắn "+1" NGAY TRONG dòng chảy chính thay vì tách
+    // thành 1 dòng riêng phía dưới (dễ đọc nhầm là 2 sự kiện tách biệt trong khi thực ra là 1 - FIX 2026-08-14
+    // theo đúng yêu cầu Ngọc: "sửa lại cách ghi kết cấu để tránh logic bị hiểu sai").
+    let mauChotIdx = rootNienMauChot ? root
+      : (letter==='D' && steps.length>1 && steps[0] && steps[0].to!==root && realAnchorSet.has(steps[0].to) ? steps[0].to : null);
+    // Tìm SẴN bước nào (nếu có) sẽ khép vòng về đúng Cung Mấu chốt/đối cung của nó - để gắn nhãn "+1" NGAY
+    // TẠI bước đó trong lúc render forEach bên dưới, thay vì phải in 1 dòng "⤷ quay về..." tách rời sau cùng.
+    let mauChotHitStep = null, mauChotHitIsDoi = false;
+    if(mauChotIdx!=null){
+      const doiMauChot=(mauChotIdx+6)%12;
+      mauChotHitStep = steps.find((s,i)=>i>0 && (s.to===mauChotIdx || s.to===doiMauChot)) || null;
+      if(mauChotHitStep) mauChotHitIsDoi = mauChotHitStep.to===doiMauChot;
+    }
     // Cung THẬT SỰ thuộc Thể/Dụng (realAnchorSet) nằm ngay TRÊN mạch chính của root (kể cả khi bị đánh dấu
     // "trùng lặp"/suppressed, tức bị 1 bước chuyển Kị "tiêu thụ" làm nguồn Can tái dùng) - vẫn phải được coi
     // là 1 thành viên THẬT SỰ của kết cấu này (xem realMembersOfKetCau), vì nó chính là 1 phần nội dung của
@@ -7566,9 +8043,7 @@ function computeKetCauStructuresRaw(mode){
       // nên không được ghi nhãn "(trùng lặp)" (dễ hiểu lầm là 1 cung Thể/Dụng thật sự).
       const isSelectedHere = step.to===root || realAnchorSet.has(step.to);
       const isTrungLapCung = letter==='D' && hasNextStep && step.to!==root && stillConsecutive && realAnchorSet.has(step.to);
-      // "Cung Mấu chốt" (xem giải thích ở khai báo mauChotIdx) - CHỈ ghi nhận đúng tại i===0. Không ghi đè
-      // nếu đã có mauChotIdx từ trước (vd rootNienMauChot) - xem giải thích giới hạn ở khai báo mauChotIdx.
-      if(i===0 && isTrungLapCung && mauChotIdx==null) mauChotIdx=step.to;
+      // mauChotIdx đã được tính SẴN trước vòng lặp (xem khai báo phía trên) - không cần gán lại ở đây nữa.
       if(step.to!==root && realAnchorSet.has(step.to)) spineRealMembers.add(step.to);
       if(!isSelectedHere) stillConsecutive=false;
       // Niên A/D và "tự hóa Lộc" ở đây LUÔN là 1 lần cộng MỚI, THẬT SỰ (bonus.tags chỉ chứa các nhãn này khi
@@ -7576,6 +8051,13 @@ function computeKetCauStructuresRaw(mode){
       // có thể chỉ là nhắc lại suông) - tô đỏ + ghi rõ +1 luôn an toàn, không sợ hiển thị sai thành cộng dư.
       const otherTags=bonus.tags.filter(t=>t!=='KXĐC').map(t=>(t==='niên D'||t==='niên A'||t==='tự hóa Lộc')?`<span class="kk-red">${t} (+1${lettAbbr})</span>`:t);
       if(isTrungLapCung) otherTags.unshift('trùng lặp');
+      // FIX 2026-08-14 "(Key)": cung được xác lập làm Mấu chốt tại "vị trí số 2" (i=0, KHÔNG phải root - root
+      // đã tự gắn (Key) riêng ở đầu spine qua rootNienMauChot) - gắn tag (Key) tô đỏ NGAY tại điểm này.
+      if(i===0 && mauChotIdx!=null && mauChotIdx!==root && step.to===mauChotIdx) otherTags.push(KEY_TAG);
+      // FIX 2026-08-14: đúng bước khép vòng về Cung Mấu chốt (đã xác định SẴN ở mauChotHitStep trước vòng
+      // lặp) - gắn "+1" NGAY TẠI ĐÂY, cùng dòng chảy chính, thay vì 1 dòng "⤷ quay về..." tách riêng phía
+      // dưới. Ghi tắt "về Key"/"về cung đối của Key" thay vì "về cung mấu chốt" (Ngọc yêu cầu 2026-08-14).
+      if(step===mauChotHitStep){ total+=1; otherTags.push(`<span class="kk-red">${mauChotHitIsDoi?'về cung đối của Key':'về Key'} (+1${lettAbbr})</span>`); }
       // Luôn kèm tên sao đích trong ngoặc (yêu cầu người dùng) - để nhìn ra ngay đồng/khác tinh diệu giữa các
       // điểm chạm mà không cần dò lại dữ liệu gốc. Đặt lên ĐẦU danh sách (trước cả "trùng lặp"/"niên...").
       otherTags.unshift(step.star);
@@ -7604,33 +8086,22 @@ function computeKetCauStructuresRaw(mode){
       }
       else if(bonus.tags.includes('KXĐC')) spine += `<br>↓ <span class="kk-red">KXĐC${letter==='D'?` (+1${lettAbbr})`:''}</span><br>→ ${targetHtml}`;
       else if(isMidSpineSelfLoop) spine += `: tự hóa ${step.letter} xuất${tagStr}`;
-      else if(i===0) spine += (isNienRoot ? ` —CK→ ` : ` → `) + targetHtml;
+      else if(i===0) spine += (isNienRoot || rootNienMauChot ? ` —CK→ ` : ` → `) + targetHtml;
       else spine += ` —CK→ ${targetHtml}`;
     });
-    // FIX 2026-08-08 "Cung Mấu chốt" (tiếp): sau khi đã đi hết mạch chính, kiểm tra xem có bước CK nào SAU
-    // i=0 quay lại đúng Cung Mấu chốt hoặc cung ĐốI DIỆN của nó không - nếu có, +1 Kị (nguồn Kị mới độc lập,
-    // không phải trùng lặp) và ghi rõ 1 dòng riêng để hiển thị. Chỉ tính 1 lần dù có nhiều bước cùng chạm lại.
-    let mauChotBonusLine=null;
-    if(mauChotIdx!=null){
-      const doiMauChot=(mauChotIdx+6)%12;
-      const hitStep=steps.find((s,i)=>i>0 && (s.to===mauChotIdx || s.to===doiMauChot));
-      if(hitStep){
-        total+=1;
-        const isDoi=hitStep.to===doiMauChot;
-        // Ghi rõ lý do Mấu chốt là do Niên D tọa root (rootNienMauChot) hay do trùng lặp phi hóa thường -
-        // giúp đọc dòng chảy không hiểu nhầm là "niên D thông thường" (đã bị nienCap chặn, không cộng ở
-        // đây nữa - toàn bộ +1 này giờ đi qua đúng 1 đường Mấu chốt duy nhất, không đếm đúp).
-        const mauChotReason = rootNienMauChot && mauChotIdx===root ? `, do niên ${letter} tọa` : '';
-        mauChotBonusLine=`<li class="hoa-sub hoa-plus hoa-red">⤷ quay về ${isDoi?'đối cung của ':''}Cung Mấu chốt (${label(mauChotIdx)}${mauChotReason}) tại ${label(hitStep.to)} [+1${lettAbbr}]</li>`;
-      }
-    }
+    // FIX 2026-08-14 (revert): thử fallback "root tự làm mấu chốt" ở tầng evalRoot() nhưng sau đó xác định
+    // root cause THẬT SỰ nằm ở tầng dựng chuỗi computeSingleChain() (xem FIX 2026-08-14 "trùng lặp phi hóa
+    // cũng là nguồn năng lượng độc lập" ở đó) - khi root ĐÚNG (Thể là triệu nhân) thì bước hóa Kị GỐC (i=0)
+    // đã tự nhiên đáp thẳng vào 1 cung Thể/Dụng khác, kích hoạt ĐÚNG nhánh mauChotIdx gốc (i===0) có sẵn từ
+    // 2026-08-08, không cần fallback riêng này nữa. Bỏ hẳn để tránh 2 nguồn logic chồng chéo/dễ đếm đúp.
+    // FIX 2026-08-14: "quay về Cung Mấu chốt +1" giờ đã gắn NGAY TRONG dòng chảy chính (spine, xem
+    // mauChotHitStep ở forEach phía trên) - không còn dòng "⤷ quay về..." tách riêng nữa.
     // KHÔNG còn ghi ngoặc tổng dồn "[X]" ở cuối dòng mạch chính nữa (yêu cầu người dùng: ngoặc tổng dồn đặt
     // cuối dòng dễ hiểu lầm là thuộc về đúng đoạn chữ NGAY TRƯỚC nó - vd "...—CK→ Thê [2K]" trông như "CK→ Thê"
     // đáng giá 2 Kị, dù thật ra đó chỉ là 1 đoạn chuyển Kị thuần túy không cộng gì thêm, số "2" là DỒN từ 2
     // điểm khác nhau ở ĐẦU dòng) - mỗi điểm cộng điểm giờ đã tự ghi rõ "+1" ngay tại chỗ nó xảy ra (bước hóa
     // GỐC của root, KXĐC, niên...), không cần thêm 1 con số tổng mơ hồ ở cuối nữa.
     const lines=[`<li class="hoa-spine">${spine}</li>`];
-    if(mauChotBonusLine) lines.push(mauChotBonusLine);
     // Niên A/D rơi vào 1 sao KHÁC hẳn sao đang tự hóa xuất tại root (xem rootNienSameStar phía trên) - ghi rõ
     // thành 1 dòng riêng (đã cộng +1 ở trên rồi, dòng này chỉ để hiển thị, không cộng thêm lần nữa). Ghi theo
     // đúng dòng chảy thật (niên → CK → đích) như mọi dòng hội tụ khác, không giải thích dài dòng - steps[1] là
@@ -7648,7 +8119,29 @@ function computeKetCauStructuresRaw(mode){
     const touchInfo={};
     members.forEach(M=>{
       if(M===root) return;
-      if(letter==='D' && suppressed.has(M)){
+      const pts=pointsFor(M, anchorSetForThis);
+      // FIX 2026-08-14 "Tử truy Kị vào đường của Di vẫn phải tính, dù cạnh đó đã bị 1 kết cấu KHÁC (root=
+      // Tật) 'giữ chỗ' trước" (Ngọc xác nhận trực tiếp): `suppressed` là 1 tập hợp DÙNG CHUNG cho MỌI kết cấu
+      // (tính 1 lần, gán "quyền sở hữu" mỗi cạnh cho đúng 1 kết cấu để tránh vẽ trùng mũi tên trên lá số) -
+      // trước đây hễ M nằm trong `suppressed` là BỎ LUÔN, không tính điểm/dòng hội tụ cho kết cấu HIỆN TẠI,
+      // dù M vẫn ĐỘC LẬP đáp thẳng (bước hóa Kị GỐC, i=0 của chính M) vào đúng 1 điểm trên mạch chính của
+      // ROOT đang xét (tức M đang "truy Kị" thật sự vào đường Kị của root này, một sự kiện hội tụ THẬT, chỉ
+      // là cạnh đó tình cờ cũng trùng với 1 đoạn của kết cấu KHÁC). Giờ: chỉ chấp nhận suppress khi M KHÔNG
+      // đáp thẳng vào mạch chính của root hiện tại - nếu CÓ, vẫn phải tính +1/hiện dòng riêng bình thường.
+      const p0ForSuppressCheck = pts[0];
+      // FIX 2026-08-15 (Ngọc xác nhận trực tiếp, case "Phúc TK Điền ghi dư 1 Kị"): landsOnThisSpine chỉ nên
+      // "giải oan" M khi cạnh M tự bay tới (p0ForSuppressCheck) KHÁC HẲN cạnh đã tiêu thụ nó (suppressedEdge)
+      // - nếu 2 cạnh TRÙNG Y HỆT (cùng đích, cùng sao), đó CHÍNH LÀ cạnh mà 1 thành viên KHÁC trong CÙNG kết
+      // cấu này đã "mượn Can" của M để bay tiếp (vd Tật mượn Can Phúc để CK sang Điền) - đã được vẽ đủ trong
+      // dòng riêng của thành viên đó rồi, M không được kể lại y hệt cạnh đó lần 2 (đếm dư 1 Kị oan). Trường
+      // hợp 2026-08-14 gốc (Tử/Di khác kết cấu) vẫn hoạt động bình thường vì cạnh của 1 kết cấu KHÁC hẳn
+      // thường KHÁC đích/sao với cạnh tiêu thụ M ở kết cấu hiện tại.
+      const consumingEdge = suppressedEdge && suppressedEdge.get(M);
+      const sameAsConsumingEdge = !!(consumingEdge && p0ForSuppressCheck
+        && consumingEdge.to===p0ForSuppressCheck.to && consumingEdge.star===p0ForSuppressCheck.star);
+      const landsOnThisSpine = letter==='D' && p0ForSuppressCheck && !p0ForSuppressCheck.isTrungLap
+        && p0ForSuppressCheck.to!==root && spineTargets.has(p0ForSuppressCheck.to) && !sameAsConsumingEdge;
+      if(letter==='D' && suppressed.has(M) && !landsOnThisSpine){
         // M bị tiêu thụ (suppressed) bởi CHUỖI RIÊNG của 1 thành viên KHÁC (không phải root) - vd Mệnh hóa Kị
         // → Huynh Đệ (trùng lặp) → ... - Huynh Đệ vẫn là 1 cung Thể/Dụng THẬT SỰ đang tham gia kết cấu này,
         // chỉ là không được tính công/hội tụ riêng (đã kể trong chuỗi của Mệnh) - nếu không ghi nhận vào
@@ -7658,7 +8151,6 @@ function computeKetCauStructuresRaw(mode){
         if(realAnchorSet.has(M)) spineRealMembers.add(M);
         touchInfo[M]={suppressed:true}; return;
       }
-      const pts=pointsFor(M, anchorSetForThis);
       let found=null;
       if(letter==='A'){
         // Lộc bắt buộc đồng tinh diệu: chỉ tính phần đóng góp RIÊNG của M qua đúng lượt hóa Lộc GỐC của
@@ -7738,10 +8230,20 @@ function computeKetCauStructuresRaw(mode){
         }
       }else{
         let onRootPoint=null;
+        // FIX 2026-08-15 (Ngọc xác nhận trực tiếp): điểm chạm ĐẦU TIÊN (theo thứ tự bước i=0,1,2...) của
+        // chuỗi riêng M lên đúng mạch chính (spineTargets) PHẢI được nhận ngay, DÙ bước đó bị đánh dấu
+        // isTrungLap (đang dùng Can "mượn" của 1 anchor khác) - trước đây `if(p.isTrungLap) continue;` đứng
+        // TRƯỚC check spineTargets nên bỏ qua LUÔN điểm chạm thật đầu tiên đó, để vòng lặp trôi tiếp sang
+        // điểm SAU nó (cũng bị coi trùng lặp do thừa hưởng cờ trungLap liên tục từ pointsFor) - kết quả M bị
+        // gán touch point SAI (xa hơn thật), khiến subSteps của M lặp lại luôn cả đoạn mạch chính đã vẽ rồi
+        // (vd Tật hóa Kị → Phúc (trùng lặp) —CK→ Điền [ĐÃ nằm trên mạch chính, phải dừng ở đây] nhưng do bug
+        // này lại trôi tiếp bị gán chạm tại Tử [i=2, bước SAU Điền trên chính mạch chính], khiến dòng mô tả
+        // của Tật lặp lại y hệt đoạn "Điền → Tử (KXĐC)" mà mạch chính gốc (Di) đã vẽ, đếm dư +1 Kị). Nay ưu
+        // tiên khớp spineTargets trước, chỉ dùng isTrungLap để loại các điểm KHÔNG khớp spine.
         for(const p of pts){
-          if(p.isTrungLap) continue;
           if(p.to===root){ if(!onRootPoint) onRootPoint=p; continue; } // đáp thẳng vào gốc: giữ lại nhưng ưu tiên tìm chỗ khác trước
           if(spineTargets.has(p.to)){ found={p, via:null}; break; }
+          if(p.isTrungLap) continue;
         }
         if(!found){
           for(const p of pts){
@@ -8134,7 +8636,7 @@ function computeKetCauStructuresRaw(mode){
   autoMatchInfo.forEach((same,idx)=>{ if(same) mergeInAuto.add(idx); else separateAuto.add(idx); });
   const effectiveSelected=[...selected, ...mergeInAuto];
 
-  const {anchorSetForThis:mainAnchorSet, suppressed:mainSuppressed}=computeSuppressed(effectiveSelected);
+  const {anchorSetForThis:mainAnchorSet, suppressed:mainSuppressed, suppressedEdge:mainSuppressedEdge}=computeSuppressed(effectiveSelected);
 
   if(letter==='A'){
     // Lộc: MỖI cung Thể/Dụng đã chọn LUÔN là 1 gốc kết cấu độc lập riêng - không gộp nhóm qua "chạm gián
@@ -8144,7 +8646,7 @@ function computeKetCauStructuresRaw(mode){
     // động phát hiện) được kiểm tra "TL" vào TỪNG gốc một cách độc lập trong evalRoot, có thể cùng lúc hiện
     // ở nhiều kết cấu khác nhau.
     selected.forEach(root=>{
-      const res=evalRoot(root, effectiveSelected, mainAnchorSet, mainSuppressed, trueSelectedSet);
+      const res=evalRoot(root, effectiveSelected, mainAnchorSet, mainSuppressed, trueSelectedSet, true, mainSuppressedEdge);
       if(res) structures.push({anchorIdx:res.root, memberIdxs:effectiveSelected, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains, spineRealMembers:res.spineRealMembers});
     });
     // Loại bỏ kết cấu "nhỏ" mà CHÍNH triệu nhân cung của nó đã xuất hiện như 1 thành viên hội tụ TL (truy Lộc)
@@ -8239,7 +8741,7 @@ function computeKetCauStructuresRaw(mode){
       // trước sẽ chọn NHẦM gốc là nhánh phụ ngắn nhưng "ăn ké" nhiều điểm hội tụ.
       let best=null;
       members.forEach(root=>{
-        const res=evalRoot(root, members, mainAnchorSet, mainSuppressed, trueSelectedSet, false);
+        const res=evalRoot(root, members, mainAnchorSet, mainSuppressed, trueSelectedSet, false, mainSuppressedEdge);
         if(!res) return;
         if(!best){ best=res; return; }
         if(res.chainSteps.length>best.chainSteps.length){ best=res; return; }
@@ -8259,7 +8761,7 @@ function computeKetCauStructuresRaw(mode){
       if(best){
         // Gốc đã chọn xong (bằng chuỗi tự nhiên) - giờ mới tính lại ĐẦY ĐỦ cho đúng gốc đó, CÓ bơm lực, để
         // hiển thị kết cấu cuối cùng.
-        const final=evalRoot(best.root, members, mainAnchorSet, mainSuppressed, trueSelectedSet, true) || best;
+        const final=evalRoot(best.root, members, mainAnchorSet, mainSuppressed, trueSelectedSet, true, mainSuppressedEdge) || best;
         // Cung KHÔNG nằm trong tập Thể/Dụng đã chọn thì không liên quan gì tới kết cấu, dù Can của nó có tình
         // cờ phi Kị thẳng vào gốc - không ghi vào kết cấu (trước đây có ghi thêm dạng "đã tính trong nền",
         // gây hiểu nhầm là cung đó cũng thuộc kết cấu).
@@ -8275,8 +8777,8 @@ function computeKetCauStructuresRaw(mode){
   // nhóm Thể/Dụng khác hoàn toàn không dính líu gì tới cung tự hóa Lộc này vào chung 1 kết cấu hiển thị.
   separateAuto.forEach(autoIdx=>{
     const extList=[autoIdx];
-    const {anchorSetForThis:extAnchorSet, suppressed:extSuppressed}=computeSuppressed(extList);
-    const res=evalRoot(autoIdx, extList, extAnchorSet, extSuppressed, new Set(effectiveSelected));
+    const {anchorSetForThis:extAnchorSet, suppressed:extSuppressed, suppressedEdge:extSuppressedEdge}=computeSuppressed(extList);
+    const res=evalRoot(autoIdx, extList, extAnchorSet, extSuppressed, new Set(effectiveSelected), true, extSuppressedEdge);
     if(res) structures.push({anchorIdx:res.root, memberIdxs:extList, total:res.total, lines:res.lines, chainSteps:res.chainSteps, convergences:res.convergences, nienBonusNode:res.nienBonusNode, memberSubChains:res.memberSubChains, spineRealMembers:res.spineRealMembers});
   });
 
@@ -8459,8 +8961,10 @@ function computeKetCauStructuresRaw(mode){
 // Lưỡng đầu kiến Kị dùng để gạch đỏ chính tinh trên lưới 12 cung - xét TRÊN TOÀN BỘ đường đang vẽ (cả
 // chuỗi Thể/Dụng lẫn quick-fly niên Lộc/Kị), không chỉ riêng kết cấu Thể/Dụng chính thức (kết cấu box tính
 // điểm thì vẫn chỉ xét Thể/Dụng - đây chỉ là phần hiển thị trực quan, phạm vi rộng hơn).
+let _ldkkLastStarReasons=new Map();
 function luongDauKienKyCungSet(mode,includeManualArrows=true){
   const set=new Set();
+  _ldkkLastStarReasons=new Map();
   if(mode!=='hung') return set;
   const reasons=new Map();
   const add=(idx,reason)=>{ if(!reasons.has(idx)) reasons.set(idx,[]); reasons.get(idx).push(reason); };
@@ -8480,16 +8984,34 @@ function luongDauKienKyCungSet(mode,includeManualArrows=true){
   // BÌNH THƯỜNG chạy thẳng từ 1 cung sang ĐÚNG đối cung của nó, KHÔNG phải 2 nguồn Kị độc lập gặp nhau) - xem
   // giải thích đầy đủ ở isGenuineLdkkPair/landingReasonsOf trong computeKetCauStructures, cùng quy tắc, áp
   // dụng đồng bộ cho cả phần hiển thị gạch đỏ này lẫn phần tính điểm kết cấu.
-  (hcState[mode].chains||[]).forEach(ch=>ch.steps.forEach(s=>{ if(s.from!==s.to) add(s.to,{kind:'step',from:s.from,to:s.to}); }));
+  (hcState[mode].chains||[]).forEach(ch=>ch.steps.forEach(s=>{ if(s.from!==s.to) add(s.to,{kind:'step',from:s.from,to:s.to,star:s.star}); }));
   // Kết cấu vẽ tay (mũi tên tự do bên tool phải, chỉ có ở lá số đơn - KHÔNG áp dụng cho lá số 2 bên dual vì
   // "shapes" là mảng chung của lá số đơn, không tách theo side) cũng tính là 1 đường Kỵ đáp xuống, để lưỡng
   // đầu kiến Kỵ tự nhận ra được cả khi người dùng tự vẽ kết cấu thay vì dùng Thể/Dụng tự động.
-  if(includeManualArrows) shapes.forEach(sh=>{ if(sh.type==='arrow' && sh.underlineTarget) add(sh.underlineTarget.idx,{kind:'manual'}); });
+  if(includeManualArrows) shapes.forEach(sh=>{ if(sh.type==='arrow' && sh.underlineTarget) add(sh.underlineTarget.idx,{kind:'manual',star:sh.underlineTarget.star}); });
+  // NGỌC CHỐT (2026-08-19): gạch đỏ LĐKK chỉ áp cho ĐÚNG tinh diệu thật sự nhận chuyển Kỵ tới cung đó (lý do
+  // kind 'step'/'manual' có s.star cụ thể) - KHÔNG gạch tràn hết mọi chính tinh trong cung, vì cung có thể có
+  // 2+ chính tinh mà chỉ 1 sao là đích đến của mạch phi Kỵ (VD Sự Nghiệp có Văn Xương + Văn Khúc nhưng Kỵ chỉ
+  // đáp đúng 1 trong 2 sao). Cung 'the'-only (Thể tự thân tọa Kỵ, không có bước chuyển Kỵ nào đáp tới) không
+  // có sao cụ thể để tách - giữ nguyên gạch cả chính tinh của cung đó (không đủ dữ liệu để chọn đúng 1 sao).
+  for(const [idx,arr] of reasons){
+    arr.forEach(r=>{ if(r.star) { if(!_ldkkLastStarReasons.has(idx)) _ldkkLastStarReasons.set(idx,new Set()); _ldkkLastStarReasons.get(idx).add(r.star); } });
+  }
   for(const a of reasons.keys()){
     const b=(a+6)%12;
     if(a<b && reasons.has(b) && isGenuineLdkkPair(reasons,reasons,a,b)){ set.add(a); set.add(b); }
   }
   return set;
+}
+// Set "idx:star" cho ĐÚNG tinh diệu nhận chuyển Kỵ tới trong các cung LĐKK - dùng để gạch đỏ chính xác
+// từng sao thay vì cả cung. Cung 'the'-only (không có star cụ thể trong _ldkkLastStarReasons) trả về KHÔNG
+// có entry star nào - nơi gọi (starSpan) sẽ tự fallback gạch cả chính tinh của cung đó khi thấy vậy.
+function luongDauKienKyStarSet(mode,includeManualArrows=true){
+  const cungSet=luongDauKienKyCungSet(mode,includeManualArrows);
+  const out=new Set();
+  let hasAnyStarInfo=new Set();
+  cungSet.forEach(idx=>{ const stars=_ldkkLastStarReasons.get(idx); if(stars && stars.size){ stars.forEach(star=>out.add(idx+':'+star)); hasAnyStarInfo.add(idx); } });
+  return {cungSet,starSet:out,hasAnyStarInfo};
 }
 function hoaCountLabelText(n,letter){
   if(letter==='A'){
@@ -9077,8 +9599,10 @@ function dualDrawTuHoaArrows(side,ctx,c){
     const nearX=anchor.x+(end.x-anchor.x)*0.32, nearY=anchor.y+(end.y-anchor.y)*0.32;
     const basePt=isHorizontal? {x:nearX,y:Math.min(anchor.y,end.y)-12} : {x:Math.max(anchor.x,end.x)+12,y:nearY};
     const spacing=10, totalW=(group.length-1)*spacing;
+    // FIX 2026-08-20 (đồng bộ atcDrawTuHoaArrows/drawTuHoaArrows): mũi tên dọc thì dàn cụm chữ về 1 phía (xa
+    // dần khỏi đường thẳng) thay vì căn giữa, tránh chữ đầu tiên đè lên mũi tên khi cụm có ≥3 ký tự.
     group.forEach((a,i)=>{
-      const off=i*spacing-totalW/2;
+      const off = isHorizontal ? (i*spacing-totalW/2) : (i*spacing);
       drawLetterWithHalo(ctx,a.letter,basePt.x+off,basePt.y,tuHoaBadgeColor(a.letter),tuGlow.has(a.from+':'+a.letter),11);
     });
   });
@@ -9365,7 +9889,12 @@ function dualUpdateArrowHoverUnderline(side,x,y){
   if(!starEl) return;
   const cell=starEl.closest('.cung');
   const idx=cell?parseInt(cell.dataset.idx,10):-1;
-  const isLdkk=dualInst[side].hcMode==='hung' && withDualContext(side,()=>luongDauKienKyCungSet('hung',false)).has(idx);
+  const starTen=starEl.dataset.star;
+  let isLdkk=false;
+  if(dualInst[side].hcMode==='hung'){
+    const ldkkInfo=withDualContext(side,()=>luongDauKienKyStarSet('hung',false));
+    isLdkk=ldkkInfo.hasAnyStarInfo.has(idx) ? ldkkInfo.starSet.has(idx+':'+starTen) : ldkkInfo.cungSet.has(idx);
+  }
   starEl.classList.add(isLdkk?'arrow-hover-ldkk':'arrow-hover');
 }
 function dualClearArrowHoverUnderline(side){
@@ -9614,7 +10143,9 @@ function dualRenderGrid(side){
   const st=inst.hcState[inst.hcMode];
   const phiTargets=dualPhiHoaTargetSet(side,inst);
   const phiGlow=withDualContext(side,()=>phiHoaGlowSet());
-  const ldkkSet = inst.hcMode==='hung' ? withDualContext(side,()=>luongDauKienKyCungSet('hung',false)) : new Set();
+  const ldkkInfo = inst.hcMode==='hung' ? withDualContext(side,()=>luongDauKienKyStarSet('hung',false)) : {cungSet:new Set(),starSet:new Set(),hasAnyStarInfo:new Set()};
+  const ldkkSet=ldkkInfo.cungSet;
+  const ldkkStarHit=(idx,starTen)=>ldkkInfo.hasAnyStarInfo.has(idx) ? ldkkInfo.starSet.has(idx+':'+starTen) : ldkkSet.has(idx);
   const manualUnderlineSet=dualManualArrowUnderlineTargets(side);
   let h='';
   for(let r=0;r<4;r++){
@@ -9662,12 +10193,12 @@ function dualRenderGrid(side){
           return `<span class="phb phb-${L}${active?' phb-active':''}" onclick="event.stopPropagation();dualPickReverseLetter('${side}',${idx},'${nameEsc}','${L}')">${L}</span>`;
         }).join('')}</span>`:'';
         // Gạch dưới thủ công do vẽ mũi tên tay chạm tới sao này - giữ nguyên tới khi xóa mũi tên đó.
-        const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkSet.has(idx)?' arrow-hover-ldkk':' arrow-hover') : '';
+        const manualHl=manualUnderlineSet.has(idx+':'+s.ten) ? (ldkkStarHit(idx,s.ten)?' arrow-hover-ldkk':' arrow-hover') : '';
         return `<span class="sao ${cls}${phiTargets.has(idx+':'+s.ten)?' phi-target':''}${isTraced(s)?' star-traced':''}${manualHl}"
           data-star="${s.ten}" onclick="event.stopPropagation();dualOnStarClick('${side}',${idx},'${nameEsc}')"><span class="sao-name">${displayStarName(s.ten)}</span>${renderTuHoa(thMap[s.ten],phiGlow.has(idx+':'+s.ten)||isNienGlow(s))}${renderMenhTuHoa(c.menhThMap[s.ten])}${pickerHtml}</span>`;
       };
-      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkSet.has(idx)?' ldkk':''))).join('');
-      const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkSet.has(idx)?' ldkk':''))).join('');
+      const chinhHtml=chinhs.filter(s=>s.ten!=='Thất Sát').map(s=>starSpan(s,'chinh'+(ldkkStarHit(idx,s.ten)?' ldkk':''))).join('');
+      const phuHtml=phus.map(s=>starSpan(s,'phu'+(chinhs.length===0&&ldkkStarHit(idx,s.ten)?' ldkk':''))).join('');
       const phiCls = st.the.has(idx) ? ' phi-source' : (st.dung.has(idx) ? ' phi-dung' : '');
       const quickBadges=['A','B','C','D'].map(L=>
         `<span class="phb phb-${L}${quickHas(st,idx,L)?' phb-active':''}" onclick="event.stopPropagation();dualQuickFlyLetter('${side}',${idx},'${L}')">${L}</span>`
