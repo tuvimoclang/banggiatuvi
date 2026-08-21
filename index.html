@@ -7387,6 +7387,56 @@ function onOff(el,mouseType,touchType,handler,opts){
   });
 })();
 
+// -- Phím mũi tên ‹Trái/Phải› = bấm nút ‹ › của Đại Vận/Lưu Niên/Lưu Nguyệt/Lập Cực đang bật, thay cho phải
+// rê chuột bấm đúng mũi tên nhỏ cạnh nút - áp dụng ĐỒNG BỘ cho MỌI tab có khung lá số (Nhập thông tin/Bảng
+// Vẽ dùng chung 1 lá số, An Thủ Công + Lập Lá Số dùng chung 1 lá số riêng (tls*), 2 Lá Số/PLUS mỗi bên A/B/
+// C/D độc lập). Ưu tiên nhịp NHỎ NHẤT đang bật trước (Lưu Nguyệt > Lưu Niên > Đại Vận > Lập Cực, riêng Lập
+// Cực chỉ có ở tab Nhập thông tin) - giống đúng cách nút ‹ › của từng mục tự chọn ưu tiên khi bấm chồng nhiều
+// mục cùng lúc.
+let dualLastActiveSide={dual:'A', plus:'C'};
+document.addEventListener('mousedown',e=>{
+  const box=e.target.closest && e.target.closest('[id^="dualSideBox_"]');
+  if(!box) return;
+  const side=box.id.replace('dualSideBox_','');
+  if(side==='A'||side==='B') dualLastActiveSide.dual=side;
+  else if(side==='C'||side==='D') dualLastActiveSide.plus=side;
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Escape') return;
+  const tag=(document.activeElement&&document.activeElement.tagName)||'';
+  // Không cướp phím mũi tên/Esc khi đang gõ trong 1 ô nhập liệu/select (vd đang chỉnh số Ngày/Năm sinh, ô
+  // "Năm xem" giữa lá số...) - để trình duyệt xử lý bình thường (di chuyển con trỏ chữ/đổi option/Esc rời
+  // focus khỏi ô).
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+  const isEsc=e.key==='Escape';
+  const dir=e.key==='ArrowLeft'?-1:1;
+  let handled=false;
+  if(activeTopTab==='dual' || activeTopTab==='plus'){
+    const side = activeTopTab==='dual' ? dualLastActiveSide.dual : dualLastActiveSide.plus;
+    const inst=dualInst[side];
+    if(inst && inst.c){
+      if(inst.selectedLuuNguyetMonth!==null){ isEsc?dualToggleLuuNguyet(side):dualStepLuuNguyet(side,dir); handled=true; }
+      else if(inst.selectedLuuNienYear!==null){ isEsc?dualToggleLuuNien(side):dualStepLuuNien(side,dir); handled=true; }
+      else if(inst.selectedDaiVanIdx!==null){ isEsc?dualToggleDaiVan(side):dualStepDaiVan(side,dir); handled=true; }
+    }
+  }else if(activeTopTab==='gio'){
+    if(atcCurChart){
+      if(tlsSelectedLuuNguyetMonth!==null){ isEsc?tlsToggleLuuNguyetActive():tlsStepLuuNguyet(dir); handled=true; }
+      else if(tlsSelectedLuuNienYear!==null){ isEsc?tlsToggleLuuNienActive():tlsStepLuuNien(dir); handled=true; }
+      else if(tlsSelectedDaiVanIdx!==null){ isEsc?tlsToggleDaiVanActive():tlsStepDaiVan(dir); handled=true; }
+    }
+  }else{
+    // "form" (Nhập thông tin) và "whiteboard" (Bảng Vẽ) dùng CHUNG đúng 1 lá số chính (xem switchTopTab).
+    if(chart()){
+      if(selectedLuuNguyetMonth!==null){ isEsc?toggleLuuNguyetActive():stepLuuNguyet(dir); handled=true; }
+      else if(selectedLuuNienYear!==null){ isEsc?toggleLuuNienActive():stepLuuNien(dir); handled=true; }
+      else if(selectedDaiVanIdx!==null){ isEsc?toggleDaiVanActive():stepDaiVan(dir); handled=true; }
+      else if(lapCucAnchor!==null || lapCucPicking){ isEsc?lapCuc():stepLapCuc(dir); handled=true; }
+    }
+  }
+  if(handled) e.preventDefault();
+});
+
 // -- B.VẬN / L.NIÊN / L.NGUYỆT --
 function closeAllNav(){
   selectedDaiVanIdx=null; selectedLuuNienYear=null; selectedLuuNguyetMonth=null;
