@@ -124,20 +124,22 @@ body.theme-dark #panelGio.atc-flat{
   background:linear-gradient(155deg,rgba(20,24,36,.95),rgba(14,17,27,.92));
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
 .atc-layout{display:flex;gap:12px;align-items:flex-start}
-.atc-tools-col{flex:0 0 92px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
+.atc-tools-col{flex:0 0 46px;display:flex;flex-direction:column;gap:5px;margin-top:48px}
 /* Bảng màu/độ dày/cỡ chữ HIỂN THỊ LUÔN gọn ngay dưới hàng công cụ (không dùng popup bay ra như bên "Nhập
    thông tin") - cột atc-tools-col nằm sát mép TRÁI màn hình, trong khi .color-palette-popup gốc định vị
    right:calc(100%+6px) (mở SANG TRÁI, đúng hướng cho toolbar bên "Nhập thông tin" nằm ở sidebar-right) nên
    khi dùng lại y nguyên cho cột bên trái này, popup bị đẩy hẳn ra NGOÀI viewport (mất tích, đúng lỗi Ngọc
    báo "nhích qua bên trái nên mất hiển thị"). Thay bằng khối tĩnh, luôn nằm trong luồng layout bình thường. */
-.atc-inline-tools{display:flex;flex-direction:column;gap:6px;padding:6px;border:1px solid var(--border-lt);border-radius:8px;background:var(--panel)}
-.atc-swatch-grid{display:grid;grid-template-columns:repeat(4,16px);gap:3px;justify-content:center}
-.atc-swatch-opt{width:16px;height:16px;border-radius:4px;border:1px solid var(--border-lt);cursor:pointer;padding:0}
+/* Khối màu/độ dày/cỡ chữ PHẢI vừa khít đúng bề ngang cột công cụ gốc (46px, không được nới rộng ra làm mất
+   chỗ của bộ công cụ bên phải) - bảng màu xếp 2 màu/dòng (thay vì 4/dòng) để không cần rộng hơn 1 icon-btn. */
+.atc-inline-tools{display:flex;flex-direction:column;gap:4px;padding:0;box-sizing:border-box;width:100%}
+.atc-swatch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;justify-content:center}
+.atc-swatch-opt{width:100%;aspect-ratio:1;border-radius:4px;border:1px solid var(--border-lt);cursor:pointer;padding:0;min-width:0}
 .atc-swatch-opt.active{outline:2px solid var(--accent);outline-offset:1px}
-.atc-width-row{display:flex;align-items:center;gap:3px;font-size:.6rem;color:var(--muted)}
-.atc-width-row input[type="range"]{flex:1;min-width:0}
-.atc-width-row .lw-val{width:16px;text-align:right;flex-shrink:0}
-.atc-width-row .lw-icon{flex-shrink:0;font-size:.68rem}
+.atc-width-row{display:flex;flex-direction:column;align-items:stretch;gap:1px;font-size:.56rem;color:var(--muted)}
+.atc-width-row input[type="range"]{width:100%;min-width:0}
+.atc-width-row .lw-val{text-align:center}
+.atc-width-row .lw-icon{text-align:center}
 .atc-chart-col{flex:0 0 780px;max-width:780px}
 .atc-panel-col{flex:1;min-width:320px}
 #atcBanWrap{padding:48px}
@@ -604,7 +606,7 @@ body.plain-bw .mth{background:#fff !important;color:#000 !important;border-color
 body.theme-dark .cung.dv-menh-bg{background:#3a0f1e}
 .center-info{margin-top:2px}
 
-.center-title{font-size:1.12rem;font-weight:500;color:var(--blue);letter-spacing:.5px;margin-bottom:2px}
+.center-title{font-size:1.5rem;font-weight:500;color:var(--blue);letter-spacing:.5px;margin-bottom:2px}
 .center-name{font-size:.88rem;font-weight:700;color:var(--red);text-align:center;margin-bottom:4px}
 .center-line{font-size:.82rem;color:var(--text);line-height:1.5}
 .center-year-row{display:flex;align-items:center;justify-content:center;gap:4px}
@@ -1825,6 +1827,21 @@ function confirmLuuKho() {
   list.unshift(record);
   khoSaveList(list);
   closeLuuKhoModal();
+}
+// Nhãn "Giờ" gọn ở ô thông tin giữa lá số (center-info) - lấy ĐÚNG chữ hiển thị của dòng Giờ sinh bên form
+// lập lá số (vd "Tỵ (9h-11h)"), không tự bịa lại cách viết khác. ti.gioSinh (API trả về) có dạng
+// "Tý thời (10:30)"/"Tý sau 0h thời (00:30)"... - chỉ cần trích giờ:phút trong ngoặc rồi tra đúng theo bảng
+// value->label của <select id="gioSinh"/"tlsGioSinh"> (đã liệt kê y hệt ở đây, tránh phải đọc lại DOM select
+// vì center-info có thể render trước khi form đó tồn tại, vd bên mini lá số "2 Lá Số"/"PLUS").
+const GIO_SINH_LABEL_BY_TIME={
+  '23:30':'Tý trước 0h (23h-24h)','00:30':'Tý sau 0h (0h-1h)','02:30':'Sửu (1h-3h)','04:30':'Dần (3h-5h)',
+  '06:30':'Mão (5h-7h)','08:30':'Thìn (7h-9h)','10:30':'Tỵ (9h-11h)','12:30':'Ngọ (11h-13h)',
+  '14:30':'Mùi (13h-15h)','16:30':'Thân (15h-17h)','18:30':'Dậu (17h-19h)','20:30':'Tuất (19h-21h)',
+  '22:30':'Hợi (21h-23h)',
+};
+function gioSinhDisplayLabel(raw){
+  const m=(raw||'').match(/(\d{2}:\d{2})/);
+  return m ? (GIO_SINH_LABEL_BY_TIME[m[1]]||raw) : (raw||'');
 }
 function khoGioLabel(v) {
   const m = { '23:30':'Tý trước 0h','00:30':'Tý sau 0h','02:30':'Sửu','04:30':'Dần','06:30':'Mão','08:30':'Thìn',
@@ -4671,11 +4688,9 @@ function renderGridRaw(c){
             <div class="center-info" id="centerInfo">
               <div class="center-title">TỬ VI MỘC LANG</div>
               ${ti.hoTen?`<div class="center-name">${toTitleCaseVN(ti.hoTen)}</div>`:''}
-              <div class="center-line">${ti.gioiTinh==='nam'?'Nam':'Nữ'} Mệnh - Dương: ${ti.ngayDuong}</div>
+              <div class="center-line">${ti.gioiTinh==='nam'?'Nam':'Nữ'} - Dương: ${ti.ngayDuong}</div>
               <div class="center-line">Âm: ${ti.ngayAm}</div>
-              <div class="center-line" id="centerAgeInfo">Tuổi: ${currentAge(c)}</div>
-              <div class="center-line">Giờ sinh: ${ti.gioSinh||''}</div>
-              ${ti.thanhPho?`<div class="center-line">Nơi sinh: ${ti.thanhPho} (${ti.muiGio||''})</div>`:''}
+              <div class="center-line">Giờ: ${gioSinhDisplayLabel(ti.gioSinh)}${ti.muiGio?` - ${ti.muiGio}`:''}</div>
               <div class="center-line center-year-row">Năm xem:
                 <input type="number" id="centerYearInput" class="center-year-input"
                   value="${c.birthYear+currentAge(c)-1}"
