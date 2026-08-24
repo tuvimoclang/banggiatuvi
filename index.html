@@ -505,7 +505,8 @@ body.theme-dark .cung.hl-hoaD{box-shadow:inset 0 0 0 2px var(--gold)}
 #atcPreviewGrid .cung.atc-hide-tenCung .dv-chuc,
 #atcPreviewGrid .cung.atc-hide-tenCung .ln-chuc{display:none}
 #atcPreviewGrid .cung.atc-hide-tinhDieu .sao-name{visibility:hidden}
-#atcPreviewGrid .cung.atc-hide-thienCan .cung-cc-top>div:first-child{display:none}
+/* FIX 2026-08-22: Ngọc yêu cầu "Ẩn thiên can" ẩn LUÔN cả Địa Chi (cả góc Can-Chi), không chỉ riêng Can. */
+#atcPreviewGrid .cung.atc-hide-thienCan .cung-cc-top{display:none}
 #atcPreviewGrid .cung.atc-hide-laiNhan .can-hl{background:none!important;color:inherit!important;font-weight:inherit!important;padding:0!important;border-radius:0!important}
 #atcPreviewGrid .cung.atc-hide-soDaiVan .dv{display:none}
 #atcPreviewGrid .cung.atc-hide-luuNien .ln{visibility:hidden}
@@ -1038,6 +1039,9 @@ body.theme-dark .lk-btn-save{background:linear-gradient(135deg,#8a6d1d,#f0c040);
           </button>
           <button class="icon-btn" id="atcToolArrow" title="Vẽ mũi tên" onclick="atcSetDrawTool('arrow')">
             <svg viewBox="0 0 24 24" width="16" height="16"><line x1="5" y1="19" x2="18" y2="6" stroke="currentColor" stroke-width="2"/><polygon points="18,6 11,8 16,11" fill="currentColor"/></svg>
+          </button>
+          <button class="icon-btn" id="atcToolLine" title="Vẽ đường thẳng" onclick="atcSetDrawTool('line')">
+            <svg viewBox="0 0 24 24" width="16" height="16"><line x1="5" y1="19" x2="18" y2="6" stroke="currentColor" stroke-width="2"/></svg>
           </button>
           <button class="icon-btn" id="atcToolText" title="Chèn chữ" onclick="atcSetDrawTool('text')">Aa</button>
         </div>
@@ -3041,6 +3045,7 @@ function atcSetDrawTool(t){
   atcDrawTool = atcDrawTool===t? null : t;
   document.getElementById('atcToolRect').classList.toggle('active',atcDrawTool==='rect');
   document.getElementById('atcToolArrow').classList.toggle('active',atcDrawTool==='arrow');
+  document.getElementById('atcToolLine').classList.toggle('active',atcDrawTool==='line');
   document.getElementById('atcToolText').classList.toggle('active',atcDrawTool==='text');
   document.getElementById('atcBanWrap').classList.toggle('drawing',!!atcDrawTool);
   const fsRow=document.getElementById('atcFontSizeRow');
@@ -3123,7 +3128,7 @@ function atcClearDraw(){
       if(!dragging) return; dragging=false;
       const r=cv.getBoundingClientRect();
       const x=e.clientX-r.left, y=e.clientY-r.top;
-      if(atcDrawTool==='rect'||atcDrawTool==='arrow'){
+      if(atcDrawTool==='rect'||atcDrawTool==='arrow'||atcDrawTool==='line'){
         const lw=atcDrawTool==='arrow'?atcDrawArrowWidth:atcDrawLineWidth;
         atcPushShapeAction({type:atcDrawTool,x1:start.x,y1:start.y,x2:x,y2:y,color:atcDrawColor,lineWidth:lw});
       }
@@ -4004,10 +4009,16 @@ function tlsRenderGrid(){
         if(r===1&&col===1) h+=`<div class="cung center"></div>`;
         continue;
       }
-      if(!c){ h+=`<div class="cung" data-idx="${idx}"><div class="cung-cc-top"><div></div><div>${DC[idx]}</div></div></div>`; continue; }
+      // FIX 2026-08-22 (2): chưa chọn GÌ cả (atcCurChart=null hoàn toàn, không riêng gì thiếu Can) cũng phải
+      // bỏ trống Địa Chi luôn - trước đây fallback này vẫn in cứng DC[idx] (Tý/Ngọ/Mùi...) dù chưa bấm gì.
+      if(!c){ h+=`<div class="cung" data-idx="${idx}"><div class="cung-cc-top"><div></div><div></div></div></div>`; continue; }
       const stars=(c.sc&&c.sc[idx])||(c.sc&&c.sc[String(idx)])||[];
-      const cc=(c.tenCung&&(c.tenCung[idx]||c.tenCung[String(idx)]))||DC[idx];
-      const [canPart,chiPart]=cc.split(' ');
+      // FIX 2026-08-22: Ngọc yêu cầu rõ - CHƯA chọn Can (An Thủ Công) thì ẨN LUÔN Địa Chi (không hiện lẻ
+      // "Tý"/"Ngọ"... khi chưa có Can đi kèm). c.tenCung=null khi chưa chọn Can -> cc rơi về DC[idx] (chỉ
+      // Chi, không khoảng trắng); trước đây cc.split(' ') vô tình gán luôn Chi vào canPart khiến nó vẫn hiện
+      // - giờ chặn thẳng: chưa có Can thì cả canPart lẫn chiPart đều để trống.
+      const ccHasCan = !!(c.tenCung && (c.tenCung[idx]||c.tenCung[String(idx)]));
+      const [canPart,chiPart] = ccHasCan ? (c.tenCung[idx]||c.tenCung[String(idx)]).split(' ') : ['',''];
       const canHtml = (birthCan && canPart===birthCan)? `<span class="can-hl">${canPart}</span>` : (canPart||'');
       const chuc=c.vM!==null&&c.vM!==undefined? cungChucOf(idx,c.vM) : '';
       const iT=idx===c.vT;
@@ -7146,6 +7157,10 @@ function drawShape(ctx,sh){
   ctx.strokeStyle=sh.color; ctx.fillStyle=sh.color; ctx.lineWidth=lw;
   if(sh.type==='rect'){
     ctx.strokeRect(Math.min(sh.x1,sh.x2),Math.min(sh.y1,sh.y2),Math.abs(sh.x2-sh.x1),Math.abs(sh.y2-sh.y1));
+  }else if(sh.type==='line'){
+    // Đường thẳng đơn giản, KHÔNG có đầu mũi tên - khác "arrow" (thon dần + đầu nhọn). Ngọc yêu cầu thêm
+    // công cụ này cạnh nút vẽ mũi tên/hình chữ nhật trong thanh công cụ An Thủ Công.
+    ctx.beginPath(); ctx.moveTo(sh.x1,sh.y1); ctx.lineTo(sh.x2,sh.y2); ctx.stroke();
   }else if(sh.type==='arrow'){
     // Đồng hóa với mũi tên phi hóa Lộc/Kị: thân thon dần từ đuôi (độ dày 0) tới đầu (~1.3mm ở độ dày mặc
     // định 2), không phải đường thẳng đều + tam giác rời như trước. Tỉ lệ theo độ dày đã chọn (lw/2).
@@ -8310,6 +8325,19 @@ function computeKetCauStructuresRaw(mode){
           if(spineTargets.has(p.to)){ found={p, via:null}; break; }
           if(p.isTrungLap) continue;
         }
+        // FIX 2026-08-23 (Ngọc xác nhận trực tiếp, case "Thê ghi sai thành TK→Giao qua via Phúc"): nếu chính
+        // CHUỖI TỰ NHIÊN của M (dùng đúng Can riêng của M, không mượn qua ai) tự nó tiếp tục CK và đáp THẲNG
+        // đúng vào root, đây là bằng chứng RÕ RÀNG NHẤT của 1 sự hội tụ thật (M tự đi hết đường về đúng gốc) -
+        // phải ưu tiên NHẬN NGAY, cao hơn hẳn 2 khối "anchorSetForThis"/"via 1 thành viên khác" phía dưới.
+        // Trước đây ưu tiên ngược lại (thử via người khác TRƯỚC, chỉ fallback về onRootPoint sau CÙNG), nên
+        // hễ đường đi của M tình cờ "đi ngang" qua đúng 1 điểm mà 1 thành viên KHÁC cũng chạm tới (dù thành
+        // viên kia đi hướng hoàn toàn khác, không hề tiếp tục về root), M bị gán nhầm "via" người đó thay vì
+        // ghi nhận đúng con đường CỦA CHÍNH NÓ đã tự đủ lực bay thẳng về root (vd Thê tự HK→ Giao rồi CK→ Phụ
+        // Mẫu=root - đúng ra phải ghi "Thê HK Giao CK Phụ", không phải "Thê —TK→ Giao" qua via Phúc chỉ vì
+        // Phúc CŨNG tình cờ đáp qua Giao ở 1 bước khác của nó).
+        if(!found && onRootPoint) found = spineTargets.has(M)
+          ? {p:onRootPoint, via:null, onRoot:true}
+          : {p:onRootPoint, via:null};
         if(!found){
           for(const p of pts){
             if(p.isTrungLap || p.to===root) continue;
@@ -8331,13 +8359,10 @@ function computeKetCauStructuresRaw(mode){
             for(const N of members){
               if(N===M || N===root || suppressed.has(N)) continue;
               const ptsN=pointsFor(N, anchorSetForThis);
-              if(ptsN.some(q=>!q.isTrungLap && q.to===p.to)){ found={p, via:N}; break outer; }
+              if(ptsN.some(q=>!q.isTrungLap && q.to===p.to)){ found={p, via:N, thirdPoint:true}; break outer; }
             }
           }
         }
-        // Đáp thẳng vào chính gốc: đã tính trong nền "1" nên không cộng thêm, nhưng VẪN là 1 điểm chạm hợp lệ
-        // để gắn nhánh vào đúng gốc (vd Thiên Di phi Kị thẳng vào Tật Ách = gốc).
-        if(!found && onRootPoint) found={p:onRootPoint, via:null, onRoot:true};
       }
       // M chỉ chạm được vào mạch qua 1 cung "via" trung gian, mà chính cung via đó lại CŨNG đang bị trùng
       // lặp/tiêu thụ (suppressed) bởi 1 thành viên khác - nghĩa là đây không phải 1 điểm hội tụ mới thật sự,
@@ -8383,8 +8408,25 @@ function computeKetCauStructuresRaw(mode){
     members.forEach(M=>{
       const info=touchInfo[M];
       if(!info || info.suppressed || info.onRoot || info.via==null) return;
+      // FIX 2026-08-23 (Ngọc xác nhận trực tiếp, case "kết cấu Phúc vẫn phải xuyến liên dù không bấm niên D"):
+      // quy tắc loại trừ phía dưới ("via đang tự hóa Kị gốc đúng tại điểm M chạm - loại bỏ") vốn được thiết
+      // kế cho case "M đáp THẲNG vào chính CUNG via" (via là 1 cung Thể/Dụng, M dùng Can của via để đi tiếp -
+      // xem khối `anchorSetForThis` phía trên) - via lúc đó CHỈ đóng vai trò "trạm trung chuyển", không phải
+      // đích thật của M. NHƯNG với match từ khối "chạm điểm chung thứ 3" (found.thirdPoint===true, M và N là
+      // 2 THÀNH VIÊN Thể/Dụng ĐỘC LẬP, chuỗi CỦA CHÍNH M tự nhiên đáp tới đúng 1 điểm mà chuỗi CỦA CHÍNH N
+      // cũng tự nhiên đáp tới) thì đây KHÔNG phải "M mượn đường qua N" mà là **2 LUỒNG KỊ ĐỘC LẬP CÙNG GẶP
+      // NHAU TẠI 1 ĐIỂM THẬT** (đúng bản chất "xuyến liên"/LĐKK giữa 2 kết cấu con) - PHẢI tính đủ cho CẢ 2
+      // bên, không được loại bỏ bên nào. Trước đây áp dụng chung 1 quy tắc loại trừ cho cả 2 loại match hoàn
+      // toàn khác bản chất nhau, khiến Phúc Đức (hội tụ thật với Thê tại Giao Hữu) bị xóa oan mất +1K, dù bản
+      // thân Phúc là 1 Dụng thật đã chọn tay - không hề phụ thuộc gì vào việc có bấm nút niên D hay không.
+      if(info.thirdPoint) return;
       const viaInfo=touchInfo[info.via];
-      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0){
+      // Hỏi TRỰC TIẾP chuỗi RAW của via (pointsFor(info.via)[0]) xem bước hóa Kị gốc thật sự của nó có đáp
+      // đúng info.p.to hay không - độc lập với touchInfo hiện tại của via đang trỏ tới điểm nào (có thể đã bị
+      // đổi sang 1 điểm khác i>0 nhờ fix ưu tiên onRootPoint phía trên).
+      const viaOwnBase = pointsFor(info.via, anchorSetForThis)[0];
+      const viaBaseHitsHere = !!(viaOwnBase && viaOwnBase.to===info.p.to);
+      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaBaseHitsHere){
         // NGOẠI LỆ: "via bay đi nơi khác không liên quan" (Điền→Phúc Đức, Phúc Đức lại độc lập bay đi chỗ
         // khác - loại bỏ đúng) KHÁC hẳn "via và M cùng tọa Kị chung ĐÚNG 1 cạnh vật lý" (M có 1 bước SAU
         // found.p, dù bị đánh dấu trùng lặp vì dùng Can của via, lại đáp ĐÚNG tới nơi via tự bay tới - tức
@@ -8395,7 +8437,7 @@ function computeKetCauStructuresRaw(mode){
         // thật sự - vd Huynh Đệ hóa Kị chạm niên D ở Thiên Di, mà Thiên Di lại CŨNG là 1 cung Thể/Dụng khác đã
         // chọn - bị xóa oan mất hẳn +2 Kị/dòng mô tả, dù rõ ràng vẫn còn liên kết thật qua đúng via đó).
         const ptsM=pointsFor(M, anchorSetForThis);
-        const sameEdgeReuse = ptsM.some(q=>q.isTrungLap && q.to===viaInfo.p.to);
+        const sameEdgeReuse = ptsM.some(q=>q.isTrungLap && q.to===viaOwnBase.to);
         if(!sameEdgeReuse) touchInfo[M]=null;
       }
     });
@@ -8411,7 +8453,12 @@ function computeKetCauStructuresRaw(mode){
       // Điền đáp thẳng vào Phúc Đức, trong khi Phúc Đức lại ĐỘC LẬP tự hóa Kị đi nơi khác (Phúc không thực
       // tọa Kị) - 2 việc không liên quan nên KHÔNG được gộp Điền vào chung kết cấu qua ngả Phúc Đức này.
       const viaInfo=touchInfo[info.via];
-      if(viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaInfo.p && viaInfo.p.i===0) return null;
+      // Cùng fix 2026-08-23 ở trên: hỏi TRỰC TIẾP chuỗi RAW của via, không dựa vào viaInfo.p.i (có thể đã bị
+      // đổi điểm nhờ fix ưu tiên onRootPoint) để biết via có tự hóa Kị gốc ĐÚNG tại điểm M chạm vào hay không.
+      // KHÔNG áp dụng loại trừ này cho match "thirdPoint" (2 luồng Kị độc lập cùng gặp nhau tại 1 điểm thật -
+      // xem giải thích đầy đủ ở khối members.forEach phía trên) - vẫn cho phép resolve theo via bình thường.
+      const viaOwnBase0 = pointsFor(info.via, anchorSetForThis)[0];
+      if(!info.thirdPoint && viaInfo && !viaInfo.suppressed && !viaInfo.onRoot && viaOwnBase0 && viaOwnBase0.to===info.p.to) return null;
       guard.add(info.via);
       return resolveSpineIndex(info.via, guard);
     }
@@ -8555,6 +8602,12 @@ function computeKetCauStructuresRaw(mode){
       // chứ không phải TL/TK (truy Lộc/Kị, vốn dành cho 1 cung THẬT SỰ tự phi riêng "chạy tới góp lực") - dù
       // vẫn tính đủ điểm hội tụ như bình thường (đây là 1 nguồn ĐỘC LẬP, không phải trùng lặp/dư thừa).
       const isNienMember = M===nienIdx;
+      // M CHÍNH LÀ cung mang niên D đang trùng đúng 1 Dụng/Thể thật đã chọn tay (nienOverlapIdx) - và bản
+      // thân M đã tự hội tụ được vào kết cấu qua đường BÌNH THƯỜNG (touchInfo hợp lệ, y hệt Điền/Thê) - phải
+      // ghi nhãn "Niên D tọa <cung> (trùng lặp) —CK→ ..." giống hệt định dạng khối niên D độc lập phía dưới
+      // (rebuild 2026-08-23, Ngọc xác nhận trực tiếp) THAY VÌ dòng "⤷ <cung>" chung chung như 1 thành viên
+      // bình thường - để không mất dấu "đây chính là niên D" khi anh có bấm nút N.Kỵ tham gia.
+      const isNienOverlapMember = M===nienOverlapIdx;
       if(isSelfLoopHere){
         // "+1L" khi genuine (xem nhánh else if(...isSelfLoopHere && letter==='A') phía trên - CHỈ kết cấu Lộc,
         // và CHỈ khi không phải info.onRoot vì lúc đó đã tính trong nền "1" của root rồi).
@@ -8566,20 +8619,30 @@ function computeKetCauStructuresRaw(mode){
         // bước hội tụ GỐC (i=0) để không còn phải dồn vào 1 ngoặc tổng mơ hồ ở cuối dòng (yêu cầu người dùng).
         // info.onRoot thì KHÔNG có "+1" này (đáp thẳng vào gốc, đã tính trong nền "1" của root rồi).
         const baseCreditTag = !info.onRoot ? ` (+1${lettAbbr})` : '';
-        subSteps.forEach((s,i)=>{
-          const tags=subTags[i];
-          const tagStr = tags.length ? ` (${tags.join(', ')})` : '';
-          // Chính tinh/tag TRƯỚC tên cung (xem giải thích ở targetHtml của mạch chính phía trên).
-          const targetHtml = tags.length ? `(${tags.join(', ')}) ${label(s.to)}` : label(s.to);
-          // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
-          // thích tương tự ở mạch chính phía trên.
-          if(i>0 && s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
-          else if(subKXDC[i]) flow += `<br>↓ <span class="kk-red">KXĐC${subKXDCNew[i]?` (+1${lettAbbr})`:''}</span><br>→ ${targetHtml}`;
-          else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}${baseCreditTag}` : ` → ${targetHtml}${baseCreditTag}`;
-          else flow += ` —CK→ ${targetHtml}`;
-        });
+        if(isNienOverlapMember){
+          // Định dạng đơn giản, GIỐNG HỆT khối niên D độc lập ở cuối evalRoot: mọi bước đều "—CK→", "(+1K)"
+          // ghi 1 lần duy nhất ở CUỐI dòng (không rải theo từng bước như member thường) - đúng yêu cầu Ngọc:
+          // "Niên D tọa Phúc (trùng lặp) —CK→ Tật —CK→ Giao (+1K)".
+          subSteps.forEach(s=>{ flow += ` —CK→ ${label(s.to)}`; });
+          if(!info.onRoot) flow += ` (+1${lettAbbr})`;
+        }else{
+          subSteps.forEach((s,i)=>{
+            const tags=subTags[i];
+            const tagStr = tags.length ? ` (${tags.join(', ')})` : '';
+            // Chính tinh/tag TRƯỚC tên cung (xem giải thích ở targetHtml của mạch chính phía trên).
+            const targetHtml = tags.length ? `(${tags.join(', ')}) ${label(s.to)}` : label(s.to);
+            // Tự hóa xuất TẠI CHỖ ngay GIỮA đường đi riêng của M (không phải ngay từ đầu, i>0) - xem giải
+            // thích tương tự ở mạch chính phía trên.
+            if(i>0 && s.from===s.to) flow += `: tự hóa ${s.letter} xuất${tagStr}`;
+            else if(subKXDC[i]) flow += `<br>↓ <span class="kk-red">KXĐC${subKXDCNew[i]?` (+1${lettAbbr})`:''}</span><br>→ ${targetHtml}`;
+            else if(i===0) flow += (subSteps.length===1) ? ` —${isNienMember?'CK':convTag}→ ${targetHtml}${baseCreditTag}` : ` → ${targetHtml}${baseCreditTag}`;
+            else flow += ` —CK→ ${targetHtml}`;
+          });
+        }
       }
-      const memberLabel = isNienMember ? `niên ${mode==='cat'?'A':'D'}` : label(M);
+      const memberLabel = isNienMember ? `niên ${mode==='cat'?'A':'D'}`
+        : isNienOverlapMember ? `Niên ${mode==='cat'?'A':'D'} tọa <b>${label(M)}</b> (trùng lặp)`
+        : label(M);
       // Đoạn "bơm lực" (nếu M chính là nguồn bomLucFrom của 1/nhiều bước trên mạch chính, xem bombSegments) -
       // gộp NGAY vào bullet của M ở đây, không còn tách ra ghi rời trên mạch chính nữa (yêu cầu người dùng:
       // 1 thành viên bơm lực chỉ nên ghi 1 lần, gộp chung 1 chỗ thay vì rải ra 2 nơi khác nhau).
@@ -8597,7 +8660,7 @@ function computeKetCauStructuresRaw(mode){
         let redClass='', flowOut=flow;
         if(!isSelfLoopHere && subSteps.length===1){
           redClass=' hoa-red';
-          if(!isNienMember){
+          if(!isNienMember && !isNienOverlapMember){
             const spineIdxHere=spineIndexOf.get(subSteps[0].to);
             // Điểm i=0 khi root tự hóa xuất (rootSelfLoop) KHÔNG hề được xử lý qua pointBonus ở mạch chính (bị
             // "return" sớm ngay đầu steps.forEach, xem "if(i===0 && rootSelfLoop) return;") - dù ngôi sao
@@ -8650,14 +8713,39 @@ function computeKetCauStructuresRaw(mode){
       if(root===nienOverlapIdx){
         nienOverlapIsOwnBaseFlight = !rootSelfLoop;
       }else{
+        // FIX 2026-08-23 (Ngọc xác nhận trực tiếp, case "Phúc vẫn xuyến liên = 5K dù không bấm niên D"): cung
+        // mang niên D (ở đây Phúc Đức) LÀ 1 Dụng thật - nếu chuỗi HK/CK tự nhiên của chính nó ĐÃ tự hội tụ
+        // được vào kết cấu qua đường bình thường (touchInfo[nienOverlapIdx] không suppressed, bất kể qua ngả
+        // nào: đáp thẳng root, đáp qua 1 anchor, hay "chạm điểm chung thứ 3"/thirdPoint với 1 thành viên
+        // khác) thì đó CHÍNH LÀ cùng 1 sự kiện Kị mà niên D đang mô tả lại - không được cộng thêm 1 Kị NỮA ở
+        // khối niên D bên dưới (tránh đếm đúp: trước đây chỉ loại trừ đúng 1 case hẹp "info.via==null &&
+        // info.p.i===0", bỏ sót mọi case hội tụ khác - cụ thể case Phúc hội tụ qua via=Thê/thirdPoint).
         const info = touchInfo[nienOverlapIdx];
-        nienOverlapIsOwnBaseFlight = !!(info && !info.suppressed && !info.onRoot && info.via==null
-          && info.p && info.p.i===0 && info.p.to!==nienOverlapIdx);
+        nienOverlapIsOwnBaseFlight = !!(info && !info.suppressed);
       }
     }
     if(nienOverlapIdx!=null && (root===nienOverlapIdx || members.includes(nienOverlapIdx)) && !nienCap.used && !nienOverlapIsOwnBaseFlight){
       total+=1; nienCap.used=true;
-      lines.push(`<li class="hoa-sub hoa-plus hoa-red">⤷ <b>${label(nienOverlapIdx)}</b>: niên ${mode==='cat'?'A':'D'} trùng đúng cung này (dùng chung mũi tên, tính thêm 1 ${letterName})</li>`);
+      // FIX 2026-08-23 (Ngọc xác nhận trực tiếp): dòng cũ "niên D trùng đúng cung này (dùng chung mũi tên,
+      // tính thêm 1 Kị)" vô nghĩa - không cho biết niên D thực sự đi đâu. Niên A/D cũng là 1 "cung Thể/Dụng
+      // ảo" (xem 2.2d), và bản thân cung mang niên (ở đây là 1 Dụng thật, vd Phúc Đức) cũng là Thể/Dụng nên tự
+      // nó luôn "trùng lặp" (dùng Can riêng phi ra, y hệt mọi cung Thể/Dụng khác) - phải ghi rõ toàn bộ chuỗi
+      // HK/CK tự nhiên của chính cung đó, đúng định dạng đã dùng cho header root khi rootNienMauChot (spine =
+      // "Niên D Tọa <root> (Key)"): "Niên D tọa <cung> (trùng lặp) —CK→ <bước 1> —CK→ <bước 2> ... (+1K)".
+      const overlapCh=chainFor(nienOverlapIdx);
+      let overlapHtml = `Niên ${mode==='cat'?'A':'D'} tọa <b>${label(nienOverlapIdx)}</b> (trùng lặp)`;
+      if(overlapCh && overlapCh.steps.length){
+        overlapCh.steps.forEach(s=>{ overlapHtml += ` —CK→ ${label(s.to)}`; });
+        // FIX 2026-08-23 (Ngọc xác nhận trực tiếp, case "lọc Kị vẽ mất đường HK/CK của Phúc"): dòng chữ mô tả
+        // đã đúng và total đã cộng đủ +1K, NHƯNG chuỗi HK/CK thật của cung mang niên (vd Phúc Đức → Tật Ách →
+        // Giao Hữu) trước đây KHÔNG hề được đưa vào `memberSubChains` - mảng DUY NHẤT mà tab vẽ mũi tên trên
+        // lá số (`visiblePhiHoaChains`/cô lập kết cấu) dùng để biết cần vẽ những cạnh nào. Khối nienOverlap
+        // này tách biệt hẳn với `members.forEach` phía trên (nơi thường tự đẩy `memberSubChains.push(...)`
+        // cho mọi thành viên hội tụ) nên bị bỏ sót - kết quả: đếm đúng số Kị nhưng KHÔNG vẽ đường, y hệt lỗi
+        // "lọc Kị xóa mất đường CK của Phúc" Ngọc báo. Phải tự đẩy thêm ở đây.
+        memberSubChains.push({idx:nienOverlapIdx, steps:overlapCh.steps});
+      }
+      lines.push(`<li class="hoa-sub hoa-plus hoa-red">⤷ ${overlapHtml} (+1${lettAbbr})</li>`);
     }
     return {root, total, lines, chainSteps:steps, convergences, nienBonusNode, memberSubChains, spineRealMembers:[...spineRealMembers]};
   }
