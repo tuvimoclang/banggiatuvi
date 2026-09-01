@@ -7952,6 +7952,14 @@ function computeKetCauStructuresRaw(mode){
           if(nat && !steps.some(s=>s.to===nat.to && s.star===nat.star) && nat.to!==root){
             // FIX 2026-08-10: CK bên Hung (letter==='D') dùng màu riêng theo cung root, không còn đen.
             nat.color = letter==='D' ? phiKyColorForCung(root) : hoaArrowColor('D'); // cần cho vẽ mũi tên khi cô lập kết cấu (visiblePhiHoaChains dùng lại đúng steps này)
+            // FIX 2026-08-30 (Ngọc xác nhận trực tiếp, case "Mệnh HL Tài CK Huynh, rồi Phúc TL Huynh CK Cự
+            // Môn(niên A) CK Thái Âm(Tật)"): nếu bước NGAY TRƯỚC (lastStep) đã bị "bơm lực" bởi 1 thành viên
+            // M (lastStep.bomLucFrom!=null - tức mạch chính THẬT SỰ đã hết lực tự nhiên tại đây, chỉ đi tiếp
+            // được nhờ "mượn" Can của M), thì bước "tự nhiên tiếp theo" (nat) này KẾ THỪA hẳn dòng chảy của M
+            // - KHÔNG được coi là thuộc mạch chính nữa. Trước đây thiếu dòng này khiến bước nat bị in thẳng
+            // vào spine ngay sau tên cung VỪA RỒI, tạo cảm giác sai "mạch chính tự nối tiếp" dù thực chất đó
+            // là phần đuôi của nhánh M (xem bombSegments/flowOut ở members.forEach phía dưới).
+            if(lastStep.bomLucFrom!=null) nat.bomLucFrom=lastStep.bomLucFrom;
             steps.push(nat);
             continue;
           }
